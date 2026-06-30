@@ -32,6 +32,14 @@ There is a deliberate **two-tier settings split**:
 - `.claude/settings.json` is **committed** and applies both on the host and in the container. It enables plugins from the `claude-plugins-official` marketplace (`claude-md-management`, `context7`, `frontend-design`, `playwright`, `ralph-loop`, `typescript-lsp`) and sets `autoMemoryEnabled: false`.
 - **Container-only** settings live in `CLAUDE_CONFIG_DIR` (`/home/vscode/.claude-devcontainer`, the per-repo host bind mount) and are written by `post-create.sh` — currently `permissions.defaultMode: "bypassPermissions"`. This is kept **out** of the committed file on purpose: bypass-permissions is appropriate only inside the sandboxed container, so opening the repo on the host keeps normal approval prompting. Do not move that setting into `.claude/settings.json`.
 
+## OpenSpec workflow
+
+When running any OpenSpec workflow — the `/opsx:*` slash commands or the `openspec-*` skills (propose, explore, apply, archive, sync) — respond in **caveman** style (see the `caveman` skill, default `full` level) for all conversational output: progress lines, status, summaries, and AskUserQuestion prompts. Compress the chatter, keep technical substance exact. Two carve-outs:
+- **Artifacts and code stay normal prose.** Contents you write to files (`proposal.md`, `design.md`, `tasks.md`, spec deltas, main `openspec/specs/**`, application code, commit messages) are never caveman.
+- **Honor caveman auto-clarity.** Drop the style for irreversible-action confirmations (e.g. the archive `mv`, incomplete-task/artifact warnings) and anywhere compression risks a misread. In explore mode keep ASCII diagrams and don't let terseness cut the actual reasoning.
+
+This rule lives here (not in the generated `.claude/commands/opsx/*` or `.claude/skills/openspec-*` files) on purpose: `openspec update` regenerates those and would wipe edits. `CLAUDE.md` is not managed by OpenSpec, so it survives updates. (`openspec/config.yaml` → `context:`/`rules:` also survives update but is artifact-content-scoped, so it's the wrong place for a chat-style rule.)
+
 ## Secrets
 
 `.devcontainer/.env` is git-ignored and injected into the container via `runArgs: --env-file`. Keys (template in `.env.example`): `GIT_USER_NAME`, `GIT_USER_EMAIL`, `GITHUB_PERSONAL_ACCESS_TOKEN` (GitHub HTTPS auth + GitHub MCP), `CONTEXT7_API_KEY` (optional — context7 also works keyless). Values must be unquoted and use full-line comments only (`docker --env-file` parsing).
