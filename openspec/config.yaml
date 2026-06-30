@@ -1,5 +1,11 @@
 schema: spec-driven
 
+context: |
+  All OpenSpec artifact documentation (proposal.md, design.md, tasks.md, spec
+  deltas, and the main openspec/specs/** files) must be written in Hungarian.
+  Keep technical terms, code, identifiers, API names, CLI commands, file paths,
+  and commit-type keywords (feat/fix/...) verbatim — do not translate them.
+
 # Project context (optional)
 # This is shown to AI when creating artifacts.
 # Add your tech stack, conventions, style guides, domain knowledge, etc.
