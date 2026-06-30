@@ -1,0 +1,7 @@
+{
+  "name": "@pte/agentic-development",
+  "version": "1.0.0",
+  "description": "Shared agentic development process for PTE projects",
+  "private": true,
+  "scripts": {}
+}
