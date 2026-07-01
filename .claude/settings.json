@@ -1,13 +1,4 @@
 {
-  "autoMemoryEnabled": false,
-  "extraKnownMarketplaces": {
-    "claude-plugins-official": {
-      "source": {
-        "source": "github",
-        "repo": "anthropics/claude-plugins-official"
-      }
-    }
-  },
   "enabledPlugins": {
     "atlassian@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
@@ -16,5 +7,14 @@
     "playwright@claude-plugins-official": true,
     "ralph-loop@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true
-  }
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    }
+  },
+  "autoMemoryEnabled": false
 }
