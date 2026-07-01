@@ -6,7 +6,7 @@ Project resolved earlier in the run: `cloudId = 11111111-2222-3333-4444-55555555
 
 ## Input — the artifacts
 
-`openspec/backlog/epics/elofizetes-cikkhozzaferes.md` (trace `EPIC-elofizetes-cikkhozzaferes`) and one story under it:
+`openspec/backlog/epics/EPIC-elofizetes-cikkhozzaferes.md` (trace `EPIC-elofizetes-cikkhozzaferes`) and one story under it:
 
 `openspec/backlog/stories/elofizetes-cikkhozzaferes/elofizetesi-szint-szerinti-cikkhozzaferes.md`
 

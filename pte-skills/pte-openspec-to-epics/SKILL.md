@@ -80,7 +80,7 @@ Copy this checklist and tick each item — the verify step is exhaustive, not a 
 
 5. **Author each Epic** with the full anatomy above: Hungarian content, the `Ha … akkor … mérve …` hypothesis, acceptance criteria derived from the Scenarios, and the *Forrás-spec hivatkozás* map table with **verbatim** Requirement and Scenario titles. Completion: every anatomy section is present and the map table covers every story.
 
-6. **Write the files** to the output directory (default `openspec/backlog/epics/`, configurable — see *Output location* in `CONVENTIONS.md`), one file per epic, filename slugged from the epic title. Diff before overwriting — never clobber hand-edited content. Completion: each epic exists as its own file under the output dir.
+6. **Write the files** to the output directory (default `openspec/backlog/epics/`, configurable — see *Output location* in `CONVENTIONS.md`), one file per epic, named `EPIC-<epic-slug>.md` (the `EPIC-` prefix gives searchability parity with the `STORY-…` cards; the bare `<epic-slug>` still names the story directory). Diff before overwriting — never clobber hand-edited content. Completion: each epic exists as its own file under the output dir.
 
 7. **Verify exhaustively.** Every source Requirement and Scenario is accounted for (covered by a story or explicitly out of scope); no Epic exceeds ~10 stories (split if it does); every story has a unique `STORY-…` ID and acceptance criteria; every map-table title matches the spec verbatim. Report any Requirement or Scenario you could not place cleanly rather than guessing.
 

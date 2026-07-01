@@ -39,7 +39,7 @@ Resolve which spec to read:
 
 The generated backlog lives **under the OpenSpec tree**, co-located with the specs it traces from — the canonical default (configurable) is:
 
-- **Epics** → `openspec/backlog/epics/<epic-slug>.md`
+- **Epics** → `openspec/backlog/epics/EPIC-<epic-slug>.md` — the filename carries the `EPIC-` prefix for searchability parity with the `STORY-…` cards. The `<epic-slug>` used to pair the story directory is the filename **minus** its `EPIC-` prefix.
 - **Story cards** → `openspec/backlog/stories/<epic-slug>/<story-slug>.md`
 - **Epic-less story cards** (no parent epic) → `openspec/backlog/stories/<capability-slug>/<story-slug>.md` (namespaced on the capability instead of an epic).
 

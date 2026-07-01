@@ -4,7 +4,7 @@ One end-to-end transformation showing the non-obvious moves: taking a single sto
 
 ## Input — one story from the epic
 
-From `openspec/backlog/epics/elofizetes-cikkhozzaferes.md` (produced by `pte-openspec-to-epics`):
+From `openspec/backlog/epics/EPIC-elofizetes-cikkhozzaferes.md` (produced by `pte-openspec-to-epics`):
 
 ```markdown
 ## User story-k

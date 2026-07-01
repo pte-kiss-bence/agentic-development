@@ -33,7 +33,7 @@ A rendszer SHALL lehetővé tegye az előfizetés indítását és lemondását.
 
 ## Output — Agile Epic file
 
-`openspec/backlog/epics/elofizetes-cikkhozzaferes.md`
+`openspec/backlog/epics/EPIC-elofizetes-cikkhozzaferes.md`
 
 ```markdown
 # Cím
