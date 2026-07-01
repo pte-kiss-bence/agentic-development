@@ -42,7 +42,7 @@ Each epic file carries these sections, in order:
 - **Magas szintű elfogadási kritériumok** — derived from the Requirements' `#### Scenario` blocks.
 - **User story-k** — 5–15 stories. Each starts with its `STORY-…` ID, then `Mint [szerep], szeretnék [cél], hogy [érték]`, with acceptance criteria mapped from the matching `#### Scenario` `WHEN`/`THEN`.
 - **Függőségek és kockázatok**.
-- **Forrás-spec hivatkozás** — a markdown table, the contract `pte-openspec-bdd-tests` consumes. One row per story, titles **verbatim**:
+- **Forrás-spec hivatkozás** — a markdown table, the contract the downstream skills consume: `pte-openspec-to-stories` carries each row into its story card, and `pte-openspec-bdd-tests` reads that row to tag the card's embedded Gherkin. One row per story, titles **verbatim**:
 
   | Story ID | Epic ID | Forrás `### Requirement` | Lefedett `#### Scenario`-k |
   |----------|---------|--------------------------|----------------------------|

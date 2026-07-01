@@ -1,6 +1,6 @@
 # Worked example: OpenSpec spec → Agile Epic
 
-One end-to-end transformation showing the non-obvious moves: grouping Requirements into a single lean epic, writing the hypothesis, cutting one Requirement into two vertical-slice stories, assigning requirement-anchored trace IDs (with an aspect-slug on the split), and emitting the traceability map that `pte-openspec-bdd-tests` consumes.
+One end-to-end transformation showing the non-obvious moves: grouping Requirements into a single lean epic, writing the hypothesis, cutting one Requirement into two vertical-slice stories, assigning requirement-anchored trace IDs (with an aspect-slug on the split), and emitting the traceability map the downstream skills consume.
 
 ## Input — OpenSpec spec
 
@@ -100,4 +100,4 @@ Olvasó, szerkesztőség, számlázás.
 - **Hypothesis** — `Ha … akkor … mérve …` ties the epic to a measurable outcome, not a task list.
 - **Vertical-slice split** — "Előfizetés kezelése" cuts into *indítás* and *lemondás*: two slices by user value, each independently shippable — not a "backend" / "frontend" layer split.
 - **Requirement-anchored IDs** — `STORY-<epic-slug>-<requirement-slug>` stays stable if stories are reordered. Where one Requirement splits, the `-<aspect-slug>` (`inditas` / `lemondas`) disambiguates without a positional number.
-- **Traceability map** — the `Forrás-spec hivatkozás` table keeps the `#### Scenario` titles **verbatim**. That is the contract: `pte-openspec-bdd-tests` reads it, tags each Gherkin `Scenario` with its `@STORY-…` by matching the title, and still sources the step text from the spec.
+- **Traceability map** — the `Forrás-spec hivatkozás` table keeps the `#### Scenario` titles **verbatim**. That is the contract: `pte-openspec-to-stories` carries each row into its story card, then `pte-openspec-bdd-tests` reads that row, tags the card's embedded Gherkin `Scenario` with its `@STORY-…` by matching the title, and still sources the step text from the spec.

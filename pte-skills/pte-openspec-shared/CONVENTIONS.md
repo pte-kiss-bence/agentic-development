@@ -1,6 +1,6 @@
 # pte-openspec-* pipeline — shared conventions
 
-Single source of truth for the rules every `pte-openspec-*` skill obeys, so a change to a shared rule is a one-place edit. The pipeline: `openspec` explore/propose → **pte-openspec-to-epics** → **pte-openspec-to-stories** → **pte-openspec-bdd-tests**. Each skill links here instead of restating these rules.
+Single source of truth for the rules every `pte-openspec-*` skill obeys, so a change to a shared rule is a one-place edit. The pipeline is **linear** — `openspec` explore/propose → **pte-openspec-to-epics** (→ `epics/`) → **pte-openspec-to-stories** (→ `stories/`) → **pte-openspec-bdd-tests** (embeds Gherkin into the story cards). Two artifact kinds only: the **epic** carries its stories in its description; the **story card** carries its own BDD test(s) in its description. There is no separate `features/` tree. Each skill links here instead of restating these rules.
 
 ## Output language
 
@@ -34,4 +34,4 @@ Resolve which spec to read:
 
 ## Writing output files
 
-Diff before overwriting — never clobber hand-edited content. One artifact per file, under the skill's configured output directory.
+Diff before overwriting — never clobber hand-edited content. `pte-openspec-to-epics` and `pte-openspec-to-stories` write one artifact per file under their output directory. `pte-openspec-bdd-tests` writes nothing new — it edits the existing story cards in place, filling only their `BDD teszt` section and leaving every other section untouched.

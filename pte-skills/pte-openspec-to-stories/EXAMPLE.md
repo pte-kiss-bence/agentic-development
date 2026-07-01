@@ -62,6 +62,9 @@ külön történet.
   Amikor bejelentkezik,
   Akkor a rendszer megjeleníti a fizetős cikket is.
 
+## BDD teszt
+_(kitölti a `pte-openspec-bdd-tests`)_
+
 ## INVEST-ellenőrzés
 Independent ✓ · Negotiable ✓ · Valuable ✓ · Estimable ✓ · Small ✓ · Testable ✓
 — önállóan szállítható; a mérhető kimenet a megjelenített cikkek köre.
@@ -95,5 +98,6 @@ _(story point — refinementen becsülve)_
 - **Epic is the input, not the spec** — the story set and IDs already exist; this skill only expands. The `STORY-…`/`EPIC-…` IDs and the `Mint …` line are reused **verbatim** — this skill mints nothing (see `CONVENTIONS.md`).
 - **Acceptance criteria traced 1:1** — each Scenario's `WHEN` becomes `Amikor`, its `THEN` bullets become `Akkor` + `És`. The first Scenario's two `THEN`s (megjeleníti / elrejti) map to `Akkor` + `És` — no outcome dropped, none added.
 - **Supplied `Amennyiben`** — the spec states the trigger (`bejelentkezik`) and outcome but not the precondition (which subscription level), so the card supplies it as `Amennyiben` — the same gap `pte-openspec-bdd-tests` fills for `Given`.
+- **`BDD teszt` left as a placeholder** — this skill writes no Gherkin; it authors the empty `BDD teszt` section that `pte-openspec-bdd-tests` fills in place from the same Scenarios. The story card is the smallest unit and the home of its own BDD test.
 - **Placeholders, not guesses** — priority, estimate, DoR and DoD are refinement inputs; the skill leaves them for the team rather than inventing values.
-- **Trace row reprinted verbatim** — the card carries the epic's map row unchanged, so the epic, this card, and the `.feature` file all key off the same `STORY-…` ID.
+- **Trace row reprinted verbatim** — the card carries the epic's map row unchanged, so the epic, this card, and the Gherkin embedded in the card all key off the same `STORY-…` ID.

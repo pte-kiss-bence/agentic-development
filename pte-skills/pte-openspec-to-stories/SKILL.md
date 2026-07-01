@@ -7,6 +7,8 @@ An Agile epic from `pte-openspec-to-epics` already lists its stories — each a 
 
 `refinement-ready` is the governing word: a card is what a team can pull into planning — a clear user-value statement, testable acceptance criteria, an INVEST check, and the placeholders (priority, estimate, Definition of Ready/Done) a team fills during refinement. It never invents behaviour: acceptance criteria are expanded 1:1 from the `#### Scenario`s the epic's map assigns to the story, traced back to the spec.
 
+The story card is the pipeline's **smallest unit and the home of its own BDD test(s)**: the card carries a `BDD teszt` section that `pte-openspec-bdd-tests` fills in place with declarative Gherkin. This skill authors that section as an explicit placeholder — it does **not** write Gherkin itself.
+
 Shared pipeline conventions — output language, trace-ID grammar, the *Forrás-spec hivatkozás* map contract, source-spec resolution, and diff-don't-clobber — live in [`../pte-openspec-shared/CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md); read it before writing. A complete worked transformation is in [`EXAMPLE.md`](EXAMPLE.md).
 
 ## Role in the pipeline
@@ -33,6 +35,12 @@ Each card carries these sections, in order (Hungarian headings — use as-is):
 - **User story** — `Mint [szerep], szeretnék [cél], hogy [érték]`, **reused verbatim** from the epic; only sharpen the wording if the epic's line is a placeholder, and note when you do.
 - **Kontextus** — one or two sentences: the value slice this story delivers, carried from the epic — never a technical layer.
 - **Elfogadási kritériumok** — `Amennyiben` / `Amikor` / `Akkor` (`És` for extra outcomes), expanded **1:1** from the `#### Scenario`s the epic map assigns to this story. Supply the `Amennyiben` precondition the `WHEN` assumes (the spec states trigger + outcome, not the precondition). Never invent a criterion, and never pull one from a Scenario the map did not assign.
+- **BDD teszt** — a placeholder for the declarative Gherkin that `pte-openspec-bdd-tests` fills in place from the same `#### Scenario`s. Author it as a marker only — do **not** write Gherkin here:
+
+  ```markdown
+  ## BDD teszt
+  _(kitölti a `pte-openspec-bdd-tests`)_
+  ```
 - **INVEST-ellenőrzés** — one line confirming Independent, Negotiable, Valuable, Estimable, Small, Testable; flag any letter it fails.
 - **Készenléti feltétel (DoR)** / **Elkészültségi feltétel (DoD)** — placeholders for the team.
 - **Prioritás** — placeholder.
@@ -65,7 +73,7 @@ Copy this checklist and tick each item — the verify step is exhaustive, not a 
 
 3. **Trace acceptance criteria to the spec.** For each story, open the source `### Requirement` / `#### Scenario`s named in its map row (resolve the spec per `CONVENTIONS.md`) and read their `WHEN`/`THEN` bullets — the behavioural source for the card's AC. Completion: every mapped Scenario's `WHEN`/`THEN` is in hand for its story.
 
-4. **Author one card per story.** Write the full anatomy above: reuse the `STORY-…`/`EPIC-…` IDs and `Mint …` line verbatim, expand each mapped Scenario's `WHEN`/`THEN` into `Amennyiben`/`Amikor`/`Akkor` acceptance criteria (supplying the precondition), add the INVEST check, and leave priority/estimate/DoR/DoD as team placeholders. Completion: every anatomy section present; AC trace 1:1 to the mapped Scenarios; no behaviour invented.
+4. **Author one card per story.** Write the full anatomy above: reuse the `STORY-…`/`EPIC-…` IDs and `Mint …` line verbatim, expand each mapped Scenario's `WHEN`/`THEN` into `Amennyiben`/`Amikor`/`Akkor` acceptance criteria (supplying the precondition), add the INVEST check, the empty `BDD teszt` placeholder, and leave priority/estimate/DoR/DoD as team placeholders. Completion: every anatomy section present (including the `BDD teszt` placeholder); AC trace 1:1 to the mapped Scenarios; no behaviour invented.
 
 5. **Write the files.** Default `stories/<epic-slug>/<story-slug>.md`, one card per file, slugged from the `STORY-…` ID or title. Diff before overwriting — never clobber hand-edited content. Completion: each story exists as its own file under the output dir.
 
