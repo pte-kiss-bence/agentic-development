@@ -40,6 +40,16 @@ When running any OpenSpec workflow — the `/opsx:*` slash commands or the `open
 
 This rule lives here (not in the generated `.claude/commands/opsx/*` or `.claude/skills/openspec-*` files) on purpose: `openspec update` regenerates those and would wipe edits. `CLAUDE.md` is not managed by OpenSpec, so it survives updates. (`openspec/config.yaml` → `context:`/`rules:` also survives update but is artifact-content-scoped, so it's the wrong place for a chat-style rule.)
 
+## prompt-master output
+
+Every prompt produced by the `prompt-master` skill (`/prompt-master`) must be saved to a file under `docs/prompts/<category>/<YYYY-MM-DD>-<slug>.md`:
+- `<category>` — the kind of prompt (e.g. `skills`, `devcontainer`, `docs`).
+- `<YYYY-MM-DD>` — date the prompt was generated.
+- `<slug>` — short kebab-case name of what the prompt builds.
+- The file holds the generated prompt verbatim (the copyable block), with code/identifiers kept as-is.
+
+Save the file in addition to showing the prompt in chat; create the `<category>` directory if missing.
+
 ## Secrets
 
 `.devcontainer/.env` is git-ignored and injected into the container via `runArgs: --env-file`. Keys (template in `.env.example`): `GIT_USER_NAME`, `GIT_USER_EMAIL`, `GITHUB_PERSONAL_ACCESS_TOKEN` (GitHub HTTPS auth + GitHub MCP), `CONTEXT7_API_KEY` (optional — context7 also works keyless). Values must be unquoted and use full-line comments only (`docker --env-file` parsing).
