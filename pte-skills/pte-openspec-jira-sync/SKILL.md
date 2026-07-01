@@ -21,10 +21,12 @@ One owner per field. Push what local owns; pull what Jira owns. Never cross a fi
 
 | Field | Owner | Direction |
 |-------|-------|-----------|
-| Summary (H1 title, minus its ` · TRACE-ID` suffix), Description (the **Jira-visible card body** below the H1, minus the `## Jira szinkron` block **and** the `<!-- pipeline-only -->` block), labels (trace ID), issue type, epic↔story `parent` | **Local** | Local → Jira (push, overwrite) |
-| Status, assignee, sprint, estimate (when the team sets it), comments, Jira key/URL | **Jira** | Jira → Local (pull into the card's `## Jira szinkron` block) |
+| Summary (H1 title, minus its ` · TRACE-ID` suffix), Description (the **Jira-visible card body** below the H1, minus the `## Jira szinkron` block **and** the `<!-- pipeline-only -->` block), labels (trace ID), issue type, epic↔story `parent`, **Story points** (the SP from the card's `## Estimation`) | **Local** | Local → Jira (push, overwrite) |
+| Status, assignee, sprint, comments, Jira key/URL | **Jira** | Jira → Local (pull into the card's `## Jira szinkron` block) |
 
 The consequence that matters: **never** overwrite a locally-owned field from Jira, and **never** overwrite a Jira-owned workflow field from local. Status especially — the team's board owns it; this skill reads it, it does not set it.
+
+**Story points is now local-owned** — a deliberate flip from the old "estimate is Jira-owned" model. The pipeline's `## Estimation` (see *Estimation* in `CONVENTIONS.md`) is the AI-authored **reference base** the team relies on, so the SP flows **Local → Jira** into the structured *Story points* field; it is not pulled back. (The PERT base — `Eβ`/`σ` — rides along inside the Description as part of the card body; only the SP maps to the structured field. The downstream manager multipliers are applied off-Jira and never sync.)
 
 ## Jira mapping
 
@@ -35,6 +37,9 @@ The consequence that matters: **never** overwrite a locally-owned field from Jir
 | `EPIC-…` / `STORY-…` trace ID | label `trace:EPIC-…` / `trace:STORY-…` |
 | card **Cím** (H1 title, minus its ` · TRACE-ID` suffix) | Summary |
 | the **Jira-visible card body below the H1**, minus the `## Jira szinkron` block and the `<!-- pipeline-only -->` block | Description |
+| story card `## Estimation` Story points (the bare SP integer) | the issue's structured **Story points** field |
+
+The Story-points field is a **custom field** whose id varies per project (e.g. `customfield_10016`) and whose name is often localized. Resolve it once via the project's field metadata (`getJiraProjectIssueTypesMetadata` / field list) rather than hardcoding an id; if the project has no Story-points field, skip the structured push and say so (the SP still travels inside the Description as part of `## Estimation`). Only the **story** SP is pushed to the field; an epic's `## Estimation` is a rollup that rides along in its Description only.
 
 The Description push carries the **Jira-visible card body** — the sections below the H1 title, verbatim (epic: Description, Persona, E2E Scenario, Problem / Solution, Cross-cutting Concerns, MVP and Out of Scope, Success metrics, Risks and Dependencies, High Level Acceptance Criteria; story: Description, Context, BDD Test, Risks and Dependencies — the whole visible card, whatever sections it has, not a chosen subset). It **excludes exactly three things**: the H1 title line (that maps to Summary); the `## Jira szinkron` block (a local-only record of Jira-owned state — pushing it back into the issue's own Description would be circular); and the **pipeline-only block** — everything between `<!-- pipeline-only:start -->` and `<!-- pipeline-only:end -->`, markers inclusive (the epic's *User story-k* + *Forrás-spec hivatkozás* map, or an epic-less card's self-carried *Forrás-hivatkozás* row — pipeline-internal, never a Jira field; see `CONVENTIONS.md`). Slice the card from disk by those three boundaries and push that slice; do **not** reconstruct sections from memory — a verbatim file slice avoids transcription drift on re-push.
 
@@ -121,7 +126,7 @@ Copy this checklist and tick each item — the verify step is exhaustive, not a 
 
 4. **Confirm writes.** AskUserQuestion before the first write. Completion: the user has approved (or scoped down) the write set.
 
-5. **Push local-owned fields.** Epics first: create/update each Epic, record its key; if any epic-less story is in the set, resolve/create the standalone collector epic (`trace:EPIC-standalone`) too. Then stories: create/update each Story with `parent` = its epic's Jira key (or the collector's key for epic-less stories), `trace:…` label, Summary from the H1 title (minus its ` · TRACE-ID` suffix), and Description from the **Jira-visible card body** (minus the H1, the `## Jira szinkron` block, and the `<!-- pipeline-only -->` block — see *Jira mapping*). Never touch Jira-owned fields (status/assignee/sprint). Completion: every artifact has a live issue; every story's parent is set.
+5. **Push local-owned fields.** Epics first: create/update each Epic, record its key; if any epic-less story is in the set, resolve/create the standalone collector epic (`trace:EPIC-standalone`) too. Then stories: create/update each Story with `parent` = its epic's Jira key (or the collector's key for epic-less stories), `trace:…` label, Summary from the H1 title (minus its ` · TRACE-ID` suffix), Description from the **Jira-visible card body** (minus the H1, the `## Jira szinkron` block, and the `<!-- pipeline-only -->` block — see *Jira mapping*), and the **Story points** field from the card's `## Estimation` SP (resolve the custom field id first; skip the structured push if the project has no Story-points field). Never touch Jira-owned fields (status/assignee/sprint). Completion: every artifact has a live issue; every story's parent is set; every story's SP pushed (or skipped-with-reason).
 
 6. **Pull Jira-owned fields.** For each issue, read status/assignee/sprint/key/URL and write the `## Jira szinkron` block into its card — replace only that section, diff before overwriting. Completion: every card's block reflects the issue's current Jira-owned state.
 

@@ -5,11 +5,11 @@ Ubiquitous language for the `pte-openspec-*` skill family: the pipeline that tur
 ## Language
 
 **Epic**:
-The largest unit of the backlog. A value-oriented strategic container with English `##` headings and Hungarian body (`Description`, `Persona`, `E2E Scenario`, `Problem / Solution`, `Cross-cutting Concerns`, `MVP and Out of Scope`, `Success metrics`, `Risks and Dependencies`, `High Level Acceptance Criteria`). It carries its stories (*User story-k* section) and the *Forrás-spec hivatkozás* map in a trailing `<!-- pipeline-only -->` block — read by the downstream skills, stripped from Jira on sync. ~3–10 stories; more than ~10 is a signal it should be two or more epics.
+The largest unit of the backlog. A value-oriented strategic container with English `##` headings and Hungarian body (`Description`, `Persona`, `E2E Scenario`, `Problem / Solution`, `Cross-cutting Concerns`, `MVP and Out of Scope`, `Success metrics`, `Risks and Dependencies`, `High Level Acceptance Criteria`, `Estimation` — the last a rollup of its stories' estimates). It carries its stories (*User story-k* section) and the *Forrás-spec hivatkozás* map in a trailing `<!-- pipeline-only -->` block — read by the downstream skills, stripped from Jira on sync. ~3–10 stories; more than ~10 is a signal it should be two or more epics.
 _Avoid_: feature bucket, task list
 
 **Story kártya** (story card):
-The smallest unit of the backlog and the home of its own BDD test(s). One markdown file per `STORY-…`, with a lean schema (`Description`, `Context`, `BDD Test`, `Risks and Dependencies`) whose acceptance criteria **are** the `BDD Test` Gherkin. It carries no trace row of its own (epic-driven: the map lives in the epic; epic-less: self-carried in a `<!-- pipeline-only -->` block).
+The smallest unit of the backlog and the home of its own BDD test(s). One markdown file per `STORY-…`, with a lean schema (`Description`, `Context`, `BDD Test`, `Estimation`, `Risks and Dependencies`) whose acceptance criteria **are** the `BDD Test` Gherkin. It carries no trace row of its own (epic-driven: the map lives in the epic; epic-less: self-carried in a `<!-- pipeline-only -->` block).
 _Avoid_: ticket, task, issue
 
 **BDD Test** (embedded Gherkin):
@@ -19,6 +19,22 @@ _Avoid_: executable test, .feature file, acceptance test (in the runnable sense)
 **INVEST** (mandatory story rule):
 Every story card **must** satisfy INVEST — Independent, Negotiable, Valuable, Estimable, Small, Testable. The lean schema drops the printed *INVEST-ellenőrzés* section but **not** the rule: conformance is a hard gate enforced silently by `pte-openspec-to-stories` (and honored at split time by `pte-openspec-to-epics`). A slice that cannot be made INVEST-conform is re-split, never shipped.
 _Avoid_: "INVEST was dropped" (only the section was; the rule stands)
+
+**Estimation** (`## Estimation` — reference base):
+The story card's estimate and the epic's rollup of them. **AI-authored** and, within the pipeline, **authoritative** (local-owned) — the *reference base* the team relies on. Managers layer their own internal/client **multipliers** on it **downstream**; that multiplier step is **out of pipeline scope** (the skills emit the raw base only). The hours are **not guessed** — they come from a **weighted complexity rubric** (a parametric factor model, not reference-class analogy). The full math (the rubric + its weights/`k`, the PERT formula, the Eβ→SP table, the 6h-ideal-day anchor, the split-warning threshold) is defined once in `pte-openspec-shared/CONVENTIONS.md`.
+_Avoid_: cold-guessed hours, reference-class analogy (we use a tunable weighted rubric), "the team estimates it in Jira" (the AI base is authoritative; Jira's Story-points field is pushed from it), multiplied/client number (never emitted by the skills)
+
+**PERT** (three-point becslés):
+A story's base estimate as three points in **ideal engineer-hours** — `O` (optimista), `M` (valószínű), `P` (pesszimista) — yielding `Eβ = (O + 4M + P)/6` (the reference-base number) and `σ = (P − O)/6` (uncertainty). Lives in the card's `## Estimation`.
+_Avoid_: single-point estimate, calendar time (it is *ideal* focused hours, before multipliers/overhead)
+
+**Story point (SP)** (derived Fibonacci bucket):
+A modified-Fibonacci size (1, 2, 3, 5, 8, 13, 20) **derived deterministically from `Eβ`** by the fixed table in `CONVENTIONS.md` — never guessed independently, so it can't contradict the hours. **Local-owned**: pushed to Jira's structured *Story points* field (Local → Jira), a deliberate flip from the old "estimate is Jira-owned".
+_Avoid_: an independent estimate, a Jira-owned field
+
+**Split-warning** (⚠, advisory):
+A visible `⚠` note on a story whose estimate trips `SP ≥ 13` **or** `σ/Eβ > 0.5` (too big / too uncertain), flagging it as a split candidate. **Flag-only** — the card still ships; INVEST stays the qualitative gate, the estimate only surfaces the objective signal.
+_Avoid_: hard gate, auto-split (it warns, it does not block)
 
 **Planning chain**:
 Stages 1–3 (`pte-openspec-to-epics` → `-to-stories` → `-bdd-tests`). Produces the human-facing backlog on shared trace IDs. Distinct from the build stage; the two do not feed each other.

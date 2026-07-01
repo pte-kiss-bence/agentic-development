@@ -125,6 +125,11 @@ Out of Scope:
 - Minden státuszváltás naplóbejegyzést kap forrással / időponttal / entitással.
 - Token-elfogadás a naplóban token-azonosítóhoz kötött és jelölt.
 
+## Estimation
+_(rollup — a story-k esztimálása után összegezve; hiányzó story-becslésnél: `⚠ nem minden story esztimált`)_
+- **Σ ideális fejlesztői óra (Eβ):** 46 ó (≈ 7,7 ideális nap; 6 ó = 1 nap)
+- **Σ story point:** 26
+
 <!-- pipeline-only:start -->
 ## User story-k
 - `STORY-belso-hozzaferes-m365-szerepkorok`
@@ -163,4 +168,5 @@ Out of Scope:
 - **`## Cross-cutting Concerns` is filled, not rubric text** — the bullets are the real, spec-derived concerns for *this* epic (server-side role separation, unlimited audit retention, adóazonosító exclusion, per-entry provenance, weak-identity token flagging, Hungarian UI). The rubric's menu of possible concern categories is never pasted in; a concern appears only because the spec actually raises it.
 - **One lean epic, three Requirements** — all three Requirements serve a single user value (transparent, accountable internal access), so they group into one epic. Three vertical-slice stories, well under the ~10-story ceiling.
 - **Requirement-anchored trace IDs** — each `STORY-<epic-slug>-<requirement-slug>` is anchored on its primary Requirement, so the ID stays stable when stories are reordered. No positional numbers.
+- **`## Estimation` is a rollup, not an epic-level guess** — the total is the Σ of the child stories' `Eβ` hours and SP (per `CONVENTIONS.md`), so it is filled by the estimation-rollup pass *after* `pte-openspec-to-stories` estimates the cards, not at mint. Until every child is estimated it stays a placeholder / `⚠ nem minden story esztimált` — the epic never invents a number its stories don't support.
 - **User story-k + Forrás-spec map inside the pipeline-only fence** — both sit between `<!-- pipeline-only:start -->` and `<!-- pipeline-only:end -->`, so `pte-openspec-jira-sync` strips the whole region before pushing the Description to Jira, while `pte-openspec-to-stories` and `pte-openspec-bdd-tests` still read the map on disk. The map keeps every `### Requirement` / `#### Scenario` title **verbatim** — that is the cross-skill contract: downstream skills match rows by exact title and source the `WHEN`/`THEN` step text from the spec, never from epic prose.

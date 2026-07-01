@@ -144,7 +144,7 @@ MVP: … Out of Scope: …
 
 The `# Belső hozzáférés …` H1 became the Summary; the entire `<!-- pipeline-only:start -->…<!-- pipeline-only:end -->` region (the `## User story-k` list + the `## Forrás-spec hivatkozás` map) is gone; and there is no `## Jira szinkron` block yet to drop — but on the re-run there will be, and it too stays out of the Description. Slice from the file, verbatim — do not reconstruct from memory.
 
-Then the story, with `parent = INYO-18`. Summary = `M365 belépés és szerepkörök`; label `trace:STORY-belso-hozzaferes-m365-szerepkorok`. The story carries **no** pipeline-only fence (its map lives in the epic), so its Description slice is the whole visible card minus the H1 and (on re-run) the `## Jira szinkron` block — `## Description` + `## Context` + `## BDD Test` (Gherkin and all) + `## Risks and Dependencies`:
+Then the story, with `parent = INYO-18`. Summary = `M365 belépés és szerepkörök`; label `trace:STORY-belso-hozzaferes-m365-szerepkorok`; **Story points = 5**, pushed from `## Estimation` into the structured field. The story carries **no** pipeline-only fence (its map lives in the epic), so its Description slice is the whole visible card minus the H1 and (on re-run) the `## Jira szinkron` block — `## Description` + `## Context` + `## BDD Test` (Gherkin and all) + `## Estimation` + `## Risks and Dependencies`:
 
 ```markdown
 ## Description
@@ -163,11 +163,15 @@ Jellemző: M365 alapú belső hozzáférés és szerepkörök
   …
 ```
 
+## Estimation
+- **PERT (ideális fejlesztői óra):** O 4 / M 8 / P 16 → **Eβ ≈ 9 ó**, σ ≈ 2 ó
+- **Story point:** 5
+
 ## Risks and Dependencies
 - Függőség: Entra ID (M365/OIDC) tenant és szerepkör-hozzárendelés. …
 ```
 
-Note the `Parent epic:` metadata line and the H1 are both dropped: the H1 is the Summary, and the epic↔story link is the Jira `parent` field (`INYO-18`), not body prose. Only locally-owned fields were written. No status was set or transitioned — status is Jira-owned.
+Note the `Parent epic:` metadata line and the H1 are both dropped: the H1 is the Summary, and the epic↔story link is the Jira `parent` field (`INYO-18`), not body prose. The `## Estimation` section rides along **inside** the Description, and its **SP (5)** is *additionally* pushed to the structured **Story points** field (local-owned — resolve the custom field id first). No status was set or transitioned — status is Jira-owned.
 
 ## Pull — Jira-owned state back onto disk
 
@@ -203,7 +207,7 @@ Kész (outcome) — projekt INYO:
 
 ## Why these moves
 
-- **One owner per field** — Summary, Description, `trace:…` label, issue type, and epic↔story `parent` are **local**-owned (pushed, overwrite); status/assignee/sprint/key/URL are **Jira**-owned (pulled into `## Jira szinkron`). A field never crosses against its owner, so a re-run never clobbers either side.
+- **One owner per field** — Summary, Description, `trace:…` label, issue type, epic↔story `parent`, and **Story points** (from `## Estimation`) are **local**-owned (pushed, overwrite); status/assignee/sprint/key/URL are **Jira**-owned (pulled into `## Jira szinkron`). A field never crosses against its owner, so a re-run never clobbers either side. Story points is a deliberate flip from the old Jira-owned estimate — the AI `## Estimation` is the reference base.
 - **The pipeline-only block never reaches Jira** — the Description slice drops the whole `<!-- pipeline-only:start -->…<!-- pipeline-only:end -->` region, so the epic's `## User story-k` list and `## Forrás-spec hivatkozás` map stay on disk for `pte-openspec-to-stories` / `pte-openspec-bdd-tests` while Jira sees only the English-headed prose. Three regions are excluded from every Description push: the **H1** (→ Summary), the **`## Jira szinkron`** block (local record of Jira-owned state — circular to push), and the **pipeline-only** region.
 - **Slice from disk, don't reconstruct** — the pushed Description is a verbatim file slice cut by those three boundaries, not sections retyped from memory; that avoids transcription drift on re-push.
 - **Status is Jira-owned — pulled, never pushed** — `Státusz: Nyitás` came from `getJiraIssue`; no `transitionJiraIssue` is called unless the user explicitly asks. The board owns the workflow state.

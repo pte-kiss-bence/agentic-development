@@ -51,6 +51,7 @@ Section **headings are English** (the new schema — see the golden sample in [`
 - **`## Success metrics`** — measurable success metrics.
 - **`## Risks and Dependencies`** — dependencies + risks (replaces *Függőségek és kockázatok*).
 - **`## High Level Acceptance Criteria`** — derived from the Requirements' `#### Scenario` blocks.
+- **`## Estimation`** — a **rollup** of the epic's child-story estimates: the Σ of their `Eβ` ideal engineer-hours and Σ Story Points, per the *Estimation* section in [`../pte-openspec-shared/CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md). Because the estimate lives on the stories (authored by `pte-openspec-to-stories`, which runs *after* this skill), on first mint this section is a **placeholder** — `_(rollup: minden story esztimálása után)_` — that the **estimation-rollup pass** (below) fills once the child cards exist and are estimated. If any child story lacks an estimate, mark the rollup incomplete (`⚠ nem minden story esztimált`) rather than guessing a total.
 
 Then a **pipeline-only block** — the pipeline's internal contract, **hidden from Jira** (`pte-openspec-jira-sync` strips the whole fenced region before push; see `CONVENTIONS.md`). Wrap it in the fence and keep its Hungarian headings:
 
@@ -78,9 +79,10 @@ Copy this checklist and tick each item — the verify step is exhaustive, not a 
 - [ ] 2. Every Requirement and Scenario enumerated
 - [ ] 3. Requirements grouped into lean Epics; EPIC IDs assigned
 - [ ] 4. Each Epic split into vertical-slice stories (each INVEST-conform); STORY IDs + Scenario coverage assigned
-- [ ] 5. Epic files authored (full Hungarian anatomy + hypothesis + traceability map)
+- [ ] 5. Epic files authored (full Hungarian anatomy + hypothesis + traceability map + ## Estimation rollup placeholder)
 - [ ] 6. Files written to the output dir (diffed, not clobbered)
 - [ ] 7. Every Requirement and Scenario verified accounted for; gaps reported
+- [ ] 8. (rollup pass, when child stories are estimated) ## Estimation filled from Σ child Eβ + Σ SP, or marked incomplete if any child is unestimated
 ```
 
 1. **Resolve the source specs and pick the mode.** A change's delta (`openspec list --json` → pick → `openspec/changes/<id>/specs/**/spec.md`) or a main spec (`openspec/specs/<capability>/spec.md`). If the input is vague, list the options with **AskUserQuestion**. If the user names a store, pass `--store <id>` on `openspec` commands, as the other `openspec-*` skills do. Then resolve **mint vs reconcile** (see *Modes*): scan the epic dir for an epic whose *Forrás-spec hivatkozás* rows trace to this delta's capability — one hit → reconcile; several → **AskUserQuestion**; none → mint. Completion: the exact file set is named and the mode is fixed.
@@ -91,7 +93,7 @@ Copy this checklist and tick each item — the verify step is exhaustive, not a 
 
 4. **Decompose each Epic into vertical-slice stories — INVEST-conform.** Split by user value/journey; assign each story a requirement-anchored `STORY-…` ID and record which `#### Scenario`s it covers. Cut the split so **every story satisfies INVEST** (Independent, Negotiable, Valuable, Estimable, Small, Testable) — the epic owns the split, and `pte-openspec-to-stories` enforces INVEST as a hard gate downstream, so a slice that cannot be made INVEST-conform must be re-cut here, not passed on. Completion (exhaustive): every Scenario is covered by exactly one story (or explicitly out of scope), and every story is INVEST-conform.
 
-5. **Author each Epic** with the full anatomy above: English headings, Hungarian content, the `Ha … akkor … mérve …` hypothesis in *E2E Scenario*, filled *Cross-cutting Concerns*, acceptance criteria derived from the Scenarios, and — inside the `<!-- pipeline-only -->` fence — the *User story-k* list and the *Forrás-spec hivatkozás* map table with **verbatim** Requirement and Scenario titles. Completion: every anatomy section is present and the map table covers every story.
+5. **Author each Epic** with the full anatomy above: English headings, Hungarian content, the `Ha … akkor … mérve …` hypothesis in *E2E Scenario*, filled *Cross-cutting Concerns*, acceptance criteria derived from the Scenarios, the `## Estimation` **rollup placeholder** (`_(rollup: minden story esztimálása után)_` — filled later by the rollup pass, since the per-story estimates don't exist yet), and — inside the `<!-- pipeline-only -->` fence — the *User story-k* list and the *Forrás-spec hivatkozás* map table with **verbatim** Requirement and Scenario titles. Completion: every anatomy section is present (Estimation as a placeholder) and the map table covers every story.
 
 6. **Write the files** to the output directory (default `openspec/backlog/epics/`, configurable — see *Output location* in `CONVENTIONS.md`), one file per epic, named `EPIC-<epic-slug>.md` (the `EPIC-` prefix gives searchability parity with the `STORY-…` cards; the bare `<epic-slug>` still names the story directory). Diff before overwriting — never clobber hand-edited content. Completion: each epic exists as its own file under the output dir.
 
@@ -105,3 +107,11 @@ When step 1 fixed **reconcile**, steps 3–7 fold the delta into the resolved ep
 - **Step 5 (author):** edit the existing epic file — extend *User story-k* and the *Forrás-spec hivatkozás* map (inside the pipeline-only fence) with the new/changed rows, and adjust *MVP and Out of Scope* / *Success metrics* only where the change actually moves them. Leave every untouched section byte-for-byte.
 - **Step 6 (write):** diff-don't-clobber is load-bearing here — you are editing a hand-groomed epic in place, not rewriting it.
 - **Step 7 (verify):** every delta Requirement/Scenario is covered by a story row (new or extended); the `EPIC-…` is unchanged; no `STORY-…` was duplicated for a modified scenario; sections the delta did not touch are unchanged.
+
+### Estimation-rollup pass — filling the epic total once the stories are estimated
+
+The epic's `## Estimation` is a **rollup**, and the per-story estimates it sums are minted *downstream* by `pte-openspec-to-stories` — so it cannot be totalled at mint time. Run this pass on the epic **after** its story cards are authored and estimated (a targeted re-run of this skill, diff-don't-clobber — it touches only the `## Estimation` section):
+
+- **Read every child card.** For the epic, enumerate its `openspec/backlog/stories/<epic-slug>/STORY-…md` cards and read each one's `## Estimation` (`Eβ` hours + SP).
+- **Gate on completeness.** Only total when **every** child story carries an estimate. If any child is missing one, write `⚠ nem minden story esztimált` in the epic's `## Estimation` (naming which stories are unestimated) instead of a total — never guess a number for a missing child.
+- **Sum and write.** When complete, fill `## Estimation` with Σ `Eβ` ideal engineer-hours and Σ SP across the children (per the *Estimation* section in `CONVENTIONS.md`), replacing the placeholder. Leave every other epic section byte-for-byte. Completion: the epic total equals the sum of its children, or is explicitly marked incomplete.

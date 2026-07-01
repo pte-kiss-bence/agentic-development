@@ -1,6 +1,6 @@
 # Worked example: Agile Epic story → refinement-ready story card
 
-Two end-to-end transformations showing the non-obvious moves of the **lean** story-card schema — English `##` headings, Hungarian body. The card has just four visible sections (`## Description` / `## Context` / `## BDD Test` / `## Risks and Dependencies`); the `Mint …` line lives **inside** `## Description` (no separate *User story* heading), and the acceptance criteria are **not** a section here — they are the declarative Gherkin that `pte-openspec-bdd-tests` later fills into the `## BDD Test` placeholder.
+Two end-to-end transformations showing the non-obvious moves of the **lean** story-card schema — English `##` headings, Hungarian body. The card has five visible sections (`## Description` / `## Context` / `## BDD Test` / `## Estimation` / `## Risks and Dependencies`); the `Mint …` line lives **inside** `## Description` (no separate *User story* heading), and the acceptance criteria are **not** a section here — they are the declarative Gherkin that `pte-openspec-bdd-tests` later fills into the `## BDD Test` placeholder.
 
 The two demos cover both modes:
 - **Demo 1 (epic-driven)** — expand one story from an epic's *User story-k* list, reusing its `STORY-…`/`EPIC-…` IDs and `Mint …` line verbatim. The card carries **no** trace row: the map lives in the epic.
@@ -60,6 +60,10 @@ A szerepkör-szeparáció védi a szerkesztő műveleteket (feltöltés, overrid
 
 ## BDD Test
 _(kitölti a `pte-openspec-bdd-tests`)_
+
+## Estimation
+- **PERT (ideális fejlesztői óra):** O 4 / M 8 / P 16 → **Eβ ≈ 9 ó**, σ ≈ 2 ó
+- **Story point:** 5
 
 ## Risks and Dependencies
 - Függőség: Entra ID (M365/OIDC) tenant és szerepkör-hozzárendelés.
@@ -124,6 +128,10 @@ Kis, önálló változtatás az értesítő e-mail kézbesítésen; nincs hozzá
 ## BDD Test
 _(kitölti a `pte-openspec-bdd-tests`)_
 
+## Estimation
+- **PERT (ideális fejlesztői óra):** O 2 / M 4 / P 8 → **Eβ ≈ 4 ó**, σ ≈ 1 ó
+- **Story point:** 2
+
 ## Risks and Dependencies
 - Függőség: az értesítő e-mail kiküldő pipeline, amely a sablonszöveget használja.
 - Kockázat: érvénytelen helyőrző a sablonban → hibás vagy nem kézbesített e-mail.
@@ -147,8 +155,9 @@ _(kitölti a `pte-openspec-bdd-tests`)_
 
 ## Why these moves
 
-- **Lean schema, four visible sections** — a card shows only `## Description`, `## Context`, `## BDD Test`, and `## Risks and Dependencies`. English headings, Hungarian body (per `CONVENTIONS.md`).
+- **Lean schema, five visible sections** — a card shows `## Description`, `## Context`, `## BDD Test`, `## Estimation`, and `## Risks and Dependencies`. English headings, Hungarian body (per `CONVENTIONS.md`).
+- **`## Estimation` is the reference base** — a PERT three-point in ideal engineer-hours (`Eβ`, `σ`) plus the Story Points derived from `Eβ` by the fixed table in `CONVENTIONS.md`. It is AI-authored and authoritative in the pipeline; managers layer their internal/client multipliers on it downstream (out of scope here). A story that trips `SP ≥ 13` or `σ/Eβ > 0.5` gets a `⚠` split-warning but still ships — Demo 1's 5 SP / low σ is well clear of it.
 - **The `Mint …` line lives inside `## Description`** — there is no separate *User story* heading; the user-value statement opens the description, then one or two narrative sentences.
-- **`## BDD Test` is a placeholder, filled later, and IS the acceptance criteria** — this skill writes no Gherkin; `pte-openspec-bdd-tests` fills the placeholder from the mapped `#### Scenario`s, and that Gherkin **is** the story's acceptance criteria. The old *sections* are dropped: *Elfogadási kritériumok* (now the Gherkin), *INVEST-ellenőrzés*, *Készenléti feltétel (DoR)*, *Elkészültségi feltétel (DoD)*, *Prioritás*, *Becslés*.
+- **`## BDD Test` is a placeholder, filled later, and IS the acceptance criteria** — this skill writes no Gherkin; `pte-openspec-bdd-tests` fills the placeholder from the mapped `#### Scenario`s, and that Gherkin **is** the story's acceptance criteria. The old *sections* are dropped: *Elfogadási kritériumok* (now the Gherkin), *INVEST-ellenőrzés*, *Készenléti feltétel (DoR)*, *Elkészültségi feltétel (DoD)*, *Prioritás*. (*Becslés* is **not** dropped — it returns as `## Estimation`, reshaped into the PERT + Story-Points reference base.)
 - **INVEST stays as a rule, not a section** — both cards above satisfy INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable) even though no `INVEST-ellenőrzés` section is printed. Conformance is a hard gate: a story that can't be made INVEST-conform is re-split, not shipped.
 - **Trace lives where the map lives** — an epic-driven card carries **no** trace row (the *Forrás-spec hivatkozás* map stays in the epic); an epic-less card **self-carries** its *Forrás-hivatkozás* row inside a `pipeline-only` fence, since there is no epic to hold it.
