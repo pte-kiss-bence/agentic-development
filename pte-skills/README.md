@@ -54,6 +54,8 @@ The skills' prose (`SKILL.md`) is English; every **generated artifact's content 
 
 > In the diagram `epics/` and `stories/` are shorthand: the real output is **`openspec/backlog/epics/`** and **`openspec/backlog/stories/`** — co-located with the specs, inside the OpenSpec tree (but not OpenSpec-CLI-managed). See *Output location* in [`CONVENTIONS.md`](pte-openspec-shared/CONVENTIONS.md).
 
+> **Optional read-only view** — `pte-openspec-dependency-graph` hangs off the backlog without extending the chain: it reads every card's `## Dependency Edges` block and renders a Mermaid dependency graph to `openspec/backlog/DEPENDENCY_GRAPH.md`. Run it any time after step 2; it authors nothing.
+
 ## Two phases, right-sized to the change
 
 - **Planning chain** (steps 1–3) runs **strictly in order**, each step consuming the previous step's artifact. Its one **back-edge**: the epic's `## Estimation` sums child stories that only exist after step 2, so step 1 emits a placeholder that a deferred `pte-openspec-to-epics` re-run fills.
@@ -74,6 +76,7 @@ pte-skills/
 ├─ pte-openspec-to-stories/        ← SKILL.md + EXAMPLE.md
 ├─ pte-openspec-bdd-tests/         ← SKILL.md + BDD-RULES.md + EXAMPLE.md
 ├─ pte-openspec-jira-sync/         ← SKILL.md + EXAMPLE.md
+├─ pte-openspec-dependency-graph/  ← SKILL.md + EXAMPLE.md (optional read-only view)
 └─ pte-openspec-tdd-apply/SKILL.md ← build stage (no EXAMPLE.md — emits code, not artifacts)
 ```
 

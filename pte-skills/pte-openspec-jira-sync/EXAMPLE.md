@@ -44,6 +44,9 @@ auditált műveletek lefedettségével …
 - M365-tel belépő admin eléri a feltöltés / override / lezárás műveleteket. …
 
 <!-- pipeline-only:start -->
+## Dependency Edges
+- external: Entra ID tenant
+
 ## User Stories
 - `STORY-belso-hozzaferes-m365-szerepkorok`
   Mint belső felhasználó, szeretném M365-tel belépni … csak az admin
@@ -92,10 +95,15 @@ Parent epic: `EPIC-belso-hozzaferes`
 - **3-Points becslés (ideális óra):** O 4 / M 8 / P 16 | **Eβ 9**, σ 2
 - **Becsült munkaóra:** 9 ó (≈ 1,5 ideális nap)
 - **Story Point:** 5
+
+## Dependency Edges
+- blocks: `STORY-belso-hozzaferes-tablazat-nezet`
+- blocks: `STORY-belso-hozzaferes-audit-naplo`
+- external: Entra ID (M365/OIDC) tenant
 <!-- pipeline-only:end -->
 ```
 
-Neither artifact has a `## Jira Sync` block yet — this is the first sync.
+Neither artifact has a `## Jira Sync` block yet — this is the first sync. All three of the epic's stories are in the sync set; after step 5 they hold keys `INYO-23` (m365-szerepkorok), `INYO-24` (tablazat-nezet), `INYO-25` (audit-naplo).
 
 ## Resolve + dry-run plan
 
@@ -213,6 +221,22 @@ Kész (outcome) — projekt INYO:
   STORY-belso-hozzaferes-m365-szerepkorok  INYO-23   updated + pulled (Nyitás), parent INYO-18
 ```
 
+## Dependency links — the 6c step (default on)
+
+With all three stories now keyed, the sync mirrors the `## Dependency Edges` blocks as real Jira issue links. The `m365-szerepkorok` card declares `blocks` on its two siblings; its `external:` Entra ID line has no trace ID, so it is skipped (a Jira link needs two issues).
+
+Resolve the link type first — this Hungarian site localizes it, so `getIssueLinkTypes` returns the *Blocks* family displayed as **"Blokkolja / Blokkolva"**; match it by its stable name, not the display string. Then, reading `INYO-23`'s existing `issuelinks` to stay idempotent, create the two links in the correct direction:
+
+```
+Függőségi linkek (6c) — forrás: STORY-…-m365-szerepkorok ## Dependency Edges:
+  blocks  STORY-…-tablazat-nezet  →  INYO-23 "Blokkolja" INYO-24   (createIssueLink)
+  blocks  STORY-…-audit-naplo     →  INYO-23 "Blokkolja" INYO-25   (createIssueLink)
+  external "Entra ID tenant"       →  kihagyva (nincs Jira-issue)
+Kész: 2 létrehozva, 0 már megvolt, 1 kihagyva (external), 0 drift.
+```
+
+Direction is load-bearing: `blocks: STORY-tablazat-nezet` on the m365 card becomes `INYO-23` **blocks** `INYO-24` (outward), so the board reads it the same way the edge does. Had the `tablazat-nezet` card also carried `depends-on: STORY-…-m365-szerepkorok`, that is the **same** link stated from the other end — the inverse-dedup drops it, so `INYO-24` gets no second, reversed link. On a re-run both links already exist, so 6c creates nothing. If later someone deletes the `blocks: STORY-…-audit-naplo` edge on disk, the `INYO-23 → INYO-25` link is **reported as drift**, never auto-deleted — a human removes it if they mean to.
+
 ## Re-run — the change-summary comment on update
 
 The first sync above **created** the issues, so no summary comment was posted (the issue is its own record). Now say a later edit bumps the story's estimate — `## Estimation` goes from `Story Point: 5` / `Becsült munkaóra: 9 ó` to `8` / `18 ó` — and the run resolves `INYO-23` by its recorded `Jira key`. Because this is an **update** and the pushed fields differ from Jira, the skill posts **one** comment on `INYO-23` (`addCommentToJiraIssue`) after the field push lands:
@@ -235,3 +259,4 @@ If instead nothing had changed — every locally-owned field identical to Jira �
 - **Issue type by untranslatedName, not display name** — a Hungarian project names the Epic type **"Eposz"**; it is resolved by `untranslatedName: "Epic"` / `hierarchyLevel: 1` and the resolved display name is passed to any create. Story stays "Story" (`hierarchyLevel: 0`).
 - **Updates leave an audit comment; creates and no-ops don't** — when a re-sync changes a locally-owned field on an existing issue, one Hungarian change-summary comment (`🔄 Pipeline szinkron — …`, changed fields with old → new) lands on the issue so a team watching the board sees why it moved. It is gated on a real field diff, not on the update path: a no-op re-sync stays silent, and a freshly created issue gets none (it is its own record). Write-only — the skill never reads comments back, so "comments are Jira-owned" still holds.
 - **Matching is idempotent via the trace label** — with no recorded `Jira key` yet, each artifact re-bound to its existing issue (`INYO-18` / `INYO-23`) through its `trace:…` label instead of creating a duplicate. Once the `## Jira Sync` block records the key, the next run matches on that first — the reconcile is a no-op across machines and fresh clones.
+- **Dependency links are local-owned, additive, direction-exact** — the `## Dependency Edges` block is the source (never the `## Risks and Dependencies` prose, never `DEPENDENCY_GRAPH.md`); `blocks`/`depends-on` become *Blocks* links resolved localization-tolerantly ("Blokkolja"), `relates-to` becomes *Relates*, `external` is skipped. Reading existing `issuelinks` first makes 6c idempotent and inverse-deduped; a link with no matching edge is reported as **drift**, never deleted — the board may carry links the backlog doesn't own.

@@ -31,7 +31,11 @@ Planning chain (model-invoked; keys off the shared trace IDs):
 
 Publishing (optional; runs after the planning chain, before or alongside build):
 
-- **`pte-openspec-jira-sync`** — mirrors `openspec/backlog/epics/` and `openspec/backlog/stories/` into a Jira project through the Atlassian MCP. **CONSUMES** the artifacts and their trace IDs (as `trace:…` labels); mints nothing. Runs on a **field-ownership** model — local owns content, Jira owns workflow state — so re-runs are idempotent and never clobber either side. Epic-less stories are parented under a reserved **standalone collector epic** (`trace:EPIC-standalone`) so they are never orphaned. Writes back a `## Jira szinkron` block into each card. Requires the Atlassian MCP to be wired and authenticated.
+- **`pte-openspec-jira-sync`** — mirrors `openspec/backlog/epics/` and `openspec/backlog/stories/` into a Jira project through the Atlassian MCP. **CONSUMES** the artifacts and their trace IDs (as `trace:…` labels); mints nothing. Runs on a **field-ownership** model — local owns content, Jira owns workflow state — so re-runs are idempotent and never clobber either side. Epic-less stories are parented under a reserved **standalone collector epic** (`trace:EPIC-standalone`) so they are never orphaned. From each card's `## Dependency Edges` block it also mirrors the dependencies as real Jira issue links (Blocks / Relates, additive). Writes back a `## Jira szinkron` block into each card. Requires the Atlassian MCP to be wired and authenticated.
+
+Optional read-only view (not a chain step; authors nothing):
+
+- **`pte-openspec-dependency-graph`** — reads every epic's and story card's `## Dependency Edges` block and renders a Mermaid dependency graph to `openspec/backlog/DEPENDENCY_GRAPH.md` (epics as subgraphs, cross-epic edges highlighted, `blocks`/`depends-on` DAG cycle-checked). **CONSUMES** the edges; a **derived view**, safe to run any time after step 2, independent of `bdd-tests` and `jira-sync`.
 
 Build stage (user-invoked; independent of the planning artifacts):
 

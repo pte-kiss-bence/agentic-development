@@ -50,11 +50,13 @@ Section **headings are English** (the new schema — see the golden sample in [`
 - **`## Risks and Dependencies`** — dependencies + risks (replaces *Függőségek és kockázatok*).
 - **`## High Level Acceptance Criteria`** — derived from the Requirements' `#### Scenario` blocks.
 
-Then a **pipeline-only block** — the pipeline's internal contract, **hidden from Jira** (`pte-openspec-jira-sync` strips the whole fenced region before push; see `CONVENTIONS.md`). It holds **`## Estimation`** first, then `## User Stories` and `## Source Spec Reference`. Wrap it in the fence (its headings are English, like the rest):
+Then a **pipeline-only block** — the pipeline's internal contract, **hidden from Jira** (`pte-openspec-jira-sync` strips the whole fenced region before push; see `CONVENTIONS.md`). It holds **`## Estimation`** first, then `## Dependency Edges`, `## User Stories`, and `## Source Spec Reference`. Wrap it in the fence (its headings are English, like the rest):
 
 ````markdown
 <!-- pipeline-only:start -->
 ## Estimation
+…
+## Dependency Edges
 …
 ## User Stories
 …
@@ -65,6 +67,7 @@ Then a **pipeline-only block** — the pipeline's internal contract, **hidden fr
 
 - **`## Estimation`** (pipeline-only) — a **rollup** of the epic's child-story estimates: the Σ of their `Eβ` ideal engineer-hours and Σ Story Points, per the epic-rollup rule in [`../pte-openspec-shared/ESTIMATION.md`](../pte-openspec-shared/ESTIMATION.md). Rendered in the **same two-line shape as a story card** — `- **Becsült munkaóra:** <Σ Eβ> ó (≈ <ideal days> ideális nap)` and `- **Story Point:** <Σ SP>` (bare integer, no `Σ` prefix, no story-count suffix). It sits **inside the fence** so it never reaches the Jira Description, yet `pte-openspec-jira-sync` still pushes its `Σ SP` → *Story points* and `Σ Eβ` → *Original estimate* (`<ΣEβ>h`). Because the estimate lives on the stories (authored by `pte-openspec-to-stories`, which runs *after* this skill), on first mint it is a **placeholder** — `_(rollup: minden story esztimálása után)_` — that the **estimation-rollup pass** (below) fills once the child cards are estimated; if any child lacks an estimate, mark it `⚠ nem minden story esztimált` rather than guessing.
 
+- **`## Dependency Edges`** (pipeline-only) — the epic's **outbound edges**, machine-readable per the [*Dependency Edges* contract in `CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md#the-dependency-edges-block--the-edge-contract): one tagged bullet per edge (`depends-on:`/`blocks:`/`relates-to:` + a backticked `EPIC-…`/`STORY-…`, or `external:` + free text), written from this epic's perspective. **Derive it best-effort** from the `## Risks and Dependencies` narrative you just wrote and the spec's cross-references — every trace ID mentioned as a dependency there becomes a `depends-on`/`relates-to` edge; an outside system becomes `external`. A human refines it. This is the single source of truth for the dependency graph and the Jira links; the `## Risks and Dependencies` prose is never parsed for edges.
 - **`## User Stories`** (pipeline-only) — typically ~3–10 stories. Each starts with its `STORY-…` ID, then `Mint [szerep], szeretnék [cél], hogy [érték]`, with acceptance criteria mapped from the matching `#### Scenario` `WHEN`/`THEN`. Fewer than 3 is fine when the capability is genuinely small — never pad with invented stories.
 - **`## Source Spec Reference`** (pipeline-only) — the traceability table, the contract the downstream skills consume: `pte-openspec-to-stories` and `pte-openspec-bdd-tests` read **this** table (the story cards no longer carry their own trace row) to learn the requirement→story split and each story's `#### Scenario` coverage. One row per story, titles **verbatim**:
 
@@ -80,7 +83,7 @@ Copy this checklist and tick each item — the verify step is exhaustive, not a 
 - [ ] 2. Every Requirement and Scenario enumerated
 - [ ] 3. Requirements grouped into lean Epics; EPIC IDs assigned
 - [ ] 4. Each Epic split into vertical-slice stories (each INVEST-conform); STORY IDs + Scenario coverage assigned
-- [ ] 5. Epic files authored (full Hungarian anatomy + hypothesis + traceability map + ## Estimation rollup placeholder)
+- [ ] 5. Epic files authored (full Hungarian anatomy + hypothesis + traceability map + ## Dependency Edges + ## Estimation rollup placeholder)
 - [ ] 6. Files written to the output dir (diffed, not clobbered)
 - [ ] 7. Every Requirement and Scenario verified accounted for; gaps reported
 - [ ] 8. (rollup pass, when child stories are estimated) ## Estimation filled from Σ child Eβ + Σ SP, or marked incomplete if any child is unestimated
@@ -94,7 +97,7 @@ Copy this checklist and tick each item — the verify step is exhaustive, not a 
 
 4. **Decompose each Epic into vertical-slice stories — INVEST-conform.** Split by user value/journey; assign each story a requirement-anchored `STORY-…` ID and record which `#### Scenario`s it covers. Cut the split so **every story satisfies INVEST** (Independent, Negotiable, Valuable, Estimable, Small, Testable) — the epic owns the split, and `pte-openspec-to-stories` enforces INVEST as a hard gate downstream, so a slice that cannot be made INVEST-conform must be re-cut here, not passed on. Completion (exhaustive): every Scenario is covered by exactly one story (or explicitly out of scope), and every story is INVEST-conform.
 
-5. **Author each Epic** with the full anatomy above: English headings, Hungarian content, the `Ha … akkor … mérve …` hypothesis in *E2E Scenario*, filled *Cross-cutting Concerns*, acceptance criteria derived from the Scenarios, the `## Estimation` **rollup placeholder** (`_(rollup: minden story esztimálása után)_` — filled later by the rollup pass, since the per-story estimates don't exist yet), and — inside the `<!-- pipeline-only -->` fence — the *User Stories* list and the *Source Spec Reference* map table with **verbatim** Requirement and Scenario titles. Completion: every anatomy section is present (Estimation as a placeholder) and the map table covers every story.
+5. **Author each Epic** with the full anatomy above: English headings, Hungarian content, the `Ha … akkor … mérve …` hypothesis in *E2E Scenario*, filled *Cross-cutting Concerns*, acceptance criteria derived from the Scenarios, the `## Estimation` **rollup placeholder** (`_(rollup: minden story esztimálása után)_` — filled later by the rollup pass, since the per-story estimates don't exist yet), and — inside the `<!-- pipeline-only -->` fence — the *Dependency Edges* block (derived from the *Risks and Dependencies* narrative + spec cross-references), the *User Stories* list, and the *Source Spec Reference* map table with **verbatim** Requirement and Scenario titles. Completion: every anatomy section is present (Estimation as a placeholder), the *Dependency Edges* block is authored, and the map table covers every story.
 
 6. **Write the files** to the output directory (default `openspec/backlog/epics/`, configurable — see *Output location* in `CONVENTIONS.md`), one file per epic, named `EPIC-<epic-slug>.md` (the `EPIC-` prefix gives searchability parity with the `STORY-…` cards; the bare `<epic-slug>` still names the story directory). Diff before overwriting — never clobber hand-edited content. Completion: each epic exists as its own file under the output dir.
 
@@ -105,7 +108,7 @@ Copy this checklist and tick each item — the verify step is exhaustive, not a 
 When step 1 fixed **reconcile**, steps 3–7 fold the delta into the resolved epic instead of minting a new one:
 
 - **Step 3–4 (grouping/decomposition):** the epic already exists, so don't re-group. Scope the work to the delta only — for each **added** Requirement/Scenario, mint a new `STORY-…` under the existing `EPIC-…` (verbatim); for each **modified** Scenario, find the story that already covers it and extend that row's coverage rather than minting a duplicate; for a **removed** Scenario, drop it from its story's map row (and the story itself if it empties). If the delta pushes the epic past ~10 stories, flag a split rather than silently overflowing.
-- **Step 5 (author):** edit the existing epic file — extend *User Stories* and the *Source Spec Reference* map (inside the pipeline-only fence) with the new/changed rows, and adjust *MVP and Out of Scope* / *Success metrics* only where the change actually moves them. Leave every untouched section byte-for-byte.
+- **Step 5 (author):** edit the existing epic file — extend *User Stories*, the *Source Spec Reference* map, and the *Dependency Edges* block (inside the pipeline-only fence) with the new/changed rows and edges, and adjust *MVP and Out of Scope* / *Success metrics* only where the change actually moves them. Leave every untouched section byte-for-byte.
 - **Step 6 (write):** diff-don't-clobber is load-bearing here — you are editing a hand-groomed epic in place, not rewriting it.
 - **Step 7 (verify):** every delta Requirement/Scenario is covered by a story row (new or extended); the `EPIC-…` is unchanged; no `STORY-…` was duplicated for a modified scenario; sections the delta did not touch are unchanged.
 

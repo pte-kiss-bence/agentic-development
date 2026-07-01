@@ -53,6 +53,8 @@ This rule lives here (not in the generated `.claude/commands/opsx/*` or `.claude
 
 Offer, don't auto-run, and don't force the whole chain onto small work: the propose stays the single entry point and audit trail, but the planning chain is the scaling tool, applied only when there's something to scale. This rule lives here for the same wipe-on-`openspec update` reason as the caveman rule.
 
+**Optional dependency-graph view.** Once epics and stories exist (after `pte-openspec-to-stories`), you may offer `pte-openspec-dependency-graph` — a **read-only** skill that renders the cards' `## Dependency Edges` into `openspec/backlog/DEPENDENCY_GRAPH.md`. It is not a chain step and authors nothing; offer it when a dependency overview would help (a larger backlog, or to sanity-check for `blocks`/`depends-on` cycles), never force it.
+
 ## prompt-master output
 
 Every prompt produced by the `prompt-master` skill (`/prompt-master`) must be saved to a file under `docs/prompts/<category>/<YYYY-MM-DD>-<slug>.md`:

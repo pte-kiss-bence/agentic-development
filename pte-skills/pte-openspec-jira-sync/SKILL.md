@@ -22,6 +22,7 @@ One owner per field. Push what local owns; pull what Jira owns. Never cross a fi
 | Field | Owner | Direction |
 |-------|-------|-----------|
 | Summary (H1 title, minus its ` · TRACE-ID` suffix), Description (the **Jira-visible card body** below the H1, minus the `## Jira Sync` block **and** the `<!-- pipeline-only -->` block), labels (trace ID), issue type, epic↔story `parent`, **Story points** (the SP from the card's `## Estimation`), **Original estimate** (the `Becsült munkaóra` = `Eβ` ideal hours) | **Local** | Local → Jira (push, overwrite) |
+| **Dependency issue links** (the Blocks / Relates links built from the card's `## Dependency Edges` block) | **Local** | Local → Jira (push, **additive** — created, never deleted; see *Dependency issue links*) |
 | Status, assignee, sprint, comments, Jira key/URL | **Jira** | Jira → Local (pull into the card's `## Jira Sync` block) |
 
 The consequence that matters: **never** overwrite a locally-owned field from Jira, and **never** overwrite a Jira-owned workflow field from local. Status especially — the team's board owns it; this skill reads it, it does not set it.
@@ -105,6 +106,22 @@ By default the only Jira key written into a card is its own, in the `## Jira Syn
 - After editing the cards, **re-push** each affected Description so Jira mirrors the linked body.
 - **Caveat to state first:** this writes Jira keys into the source cards, coupling the backlog to one Jira instance. Idempotency still holds — the trace IDs stay verbatim, so matching (label + recorded key) is unaffected — but offer it, don't assume it.
 
+## Dependency issue links (default on)
+
+With every issue key assigned (step 5), mirror the backlog's dependencies as **real Jira issue links**. The source is each card's **`## Dependency Edges`** block — the single source of truth per the [edge contract in `CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md#the-dependency-edges-block--the-edge-contract). Never read edges from the `## Risks and Dependencies` prose, and never from `DEPENDENCY_GRAPH.md` (that is a derived view). This runs **by default**, gated by the run's existing write-confirmation (step 4) — it is **not** a separate opt-in like the cross-reference backlinks.
+
+- **Link-type mapping**, resolved via `getIssueLinkTypes` (localization-tolerant):
+  - `blocks: \`Y\`` on X → X **blocks** Y (the *Blocks* link type, outward from X).
+  - `depends-on: \`Z\`` on X → Z **blocks** X (the same *Blocks* type, reversed direction).
+  - `relates-to: \`W\`` → the *Relates* link type (symmetric).
+  - `external: …` → **skipped** — no Jira issue exists for an external node.
+- **Resolve the link type by its canonical name, not its display name** — a Hungarian site localizes them (*Blokkolja* / *Kapcsolódik*). Match on `getIssueLinkTypes`' stable/English name; if the project renamed or removed the type and it can't be resolved unambiguously, **AskUserQuestion** which link type to use (the same pattern as the localized issue-type resolution).
+- **Direction is load-bearing.** Create each *Blocks* link with the correct inward/outward end so the board reads "X blocks Y" exactly as the edge does — a reversed link is worse than a missing one.
+- **Idempotent + inverse-dedup.** Before creating, read the issue's existing `issuelinks` (`getJiraIssue`): never duplicate a link already present, and treat X-blocks-Y and Y-is-blocked-by-X as **one** link created once (the edge contract already deduped the inverse pair; hold that here too). A re-run creates nothing new.
+- **Dangling target → warn and skip.** An edge whose target has no issue in the backlog (or no resolvable key) is warned and skipped — never link against a guessed key.
+- **Additive + drift-report — never delete.** If a Jira dependency-link no longer matches any local edge (an edge removed on disk, or a link a team added by hand), **report it as drift** in the outcome and leave removal to a human. This keeps "never clobber the other side's work" intact — a team may link issues the backlog doesn't know about.
+- Create with `createIssueLink`; report per issue how many links were **created / already-present / skipped (external or dangling) / drift**.
+
 ## cloudId and project resolution
 
 - Every Jira tool call needs a `cloudId`. Call `getAccessibleAtlassianResources` first (then `getVisibleJiraProjects` as needed) and thread the id through every call.
@@ -149,6 +166,7 @@ Copy this checklist and tick each item — the verify step is exhaustive, not a 
 - [ ] 5b. On each *updated* issue with a real field diff: one Hungarian change-summary comment posted (create path skipped; no-op re-sync posts nothing)
 - [ ] 6. Jira-owned fields pulled into each card's ## Jira Sync block (diffed, not clobbered)
 - [ ] 6b. (opt-in) Cross-reference backlinks written into card bodies; affected Descriptions re-pushed
+- [ ] 6c. Dependency issue links created from each card's ## Dependency Edges (Blocks/Relates); idempotent + inverse-deduped; external/dangling skipped; drift reported
 - [ ] 7. Every artifact reconciled 1:1 (no duplicate issues, no orphan stories); outcome rows reported
 ```
 
@@ -168,4 +186,6 @@ Copy this checklist and tick each item — the verify step is exhaustive, not a 
 
 6b. **Cross-reference backlinks (opt-in).** Only when the user asks for it: with every key now assigned, linkify the body cross-references per *Cross-reference backlinks* above (idempotent, exact format, skip the H1/gherkin-tags/Jira-Sync block), then re-push each affected Description. Completion: every card's body cross-reference carries its `([<KEY>](url))` link and Jira mirrors it.
 
-7. **Verify exhaustively.** Every epic and story maps to exactly one issue (no duplicates from a missed match); every story's `parent` resolves to its epic's issue; every card carries a `## Jira Sync` block with a real key; no locally-owned field was pulled from Jira and no Jira-owned field was pushed from local. Report any artifact you could not reconcile cleanly rather than guessing.
+6c. **Dependency issue links (default on).** With every key assigned, read each card's `## Dependency Edges` block and create the Jira links per *Dependency issue links* above: `blocks`/`depends-on` → the *Blocks* link type (correct direction), `relates-to` → *Relates*, `external` skipped. Resolve the link type localization-tolerantly; read existing `issuelinks` first so it is idempotent and inverse-deduped; skip dangling targets; report additive drift (never delete). Completion: every non-external, non-dangling edge has exactly one live Jira link, and any link with no matching edge is reported as drift.
+
+7. **Verify exhaustively.** Every epic and story maps to exactly one issue (no duplicates from a missed match); every story's `parent` resolves to its epic's issue; every card carries a `## Jira Sync` block with a real key; every non-external, non-dangling `## Dependency Edges` edge has exactly one Jira link in the correct direction (no duplicate/reversed link), and any drift link is reported not deleted; no locally-owned field was pulled from Jira and no Jira-owned field was pushed from local. Report any artifact you could not reconcile cleanly rather than guessing.

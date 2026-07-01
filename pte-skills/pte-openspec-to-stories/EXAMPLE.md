@@ -71,6 +71,11 @@ Parent epic: `EPIC-belso-hozzaferes`
 - **3-Points becslés (ideális óra):** O 4 / M 8 / P 16 | **Eβ 9**, σ 2
 - **Becsült munkaóra:** 9 ó (≈ 1,5 ideális nap)
 - **Story Point:** 5
+
+## Dependency Edges
+- blocks: `STORY-belso-hozzaferes-tablazat-nezet`
+- blocks: `STORY-belso-hozzaferes-audit-naplo`
+- external: Entra ID (M365/OIDC) tenant
 <!-- pipeline-only:end -->
 ```
 
@@ -141,6 +146,9 @@ Parent epic: _(nincs — epic nélküli story)_
 - **Becsült munkaóra:** 4 ó (≈ 0,7 ideális nap)
 - **Story Point:** 2
 
+## Dependency Edges
+- external: értesítő e-mail kiküldő pipeline
+
 ## Source Reference
 | Story ID | Epic ID | Source `### Requirement` | Covered `#### Scenario`s |
 |----------|---------|--------------------------|----------------------------|
@@ -165,3 +173,4 @@ Parent epic: _(nincs — epic nélküli story)_
 - **`## BDD Test` is a placeholder, filled later, and IS the acceptance criteria** — this skill writes no Gherkin; `pte-openspec-bdd-tests` fills the placeholder from the mapped `#### Scenario`s, and that Gherkin **is** the story's acceptance criteria. The old *sections* are dropped: *Elfogadási kritériumok* (now the Gherkin), *INVEST-ellenőrzés*, *Készenléti feltétel (DoR)*, *Elkészültségi feltétel (DoD)*, *Prioritás*. (*Becslés* is **not** dropped — it returns as `## Estimation`, reshaped into the PERT + Story-Points reference base.)
 - **INVEST stays as a rule, not a section** — both cards above satisfy INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable) even though no `INVEST-ellenőrzés` section is printed. Conformance is a hard gate: a story that can't be made INVEST-conform is re-split, not shipped.
 - **Trace lives where the map lives** — an epic-driven card carries **no** trace row (the *Source Spec Reference* map stays in the epic); an epic-less card **self-carries** its *Source Reference* row inside a `pipeline-only` fence, since there is no epic to hold it.
+- **`## Dependency Edges` inside the fence** — Demo 1's foundation story declares `blocks` on its two sibling stories (they build on the role check) plus an `external:` Entra ID node; Demo 2 has only an `external:` on the mail pipeline. Both sit in the pipeline-only fence beside `## Estimation`, so Jira never sees the text — yet `pte-openspec-dependency-graph` draws them and `pte-openspec-jira-sync` mirrors the trace-ID edges as Jira *Blocks* links. The `## Risks and Dependencies` prose stays human narrative, unparsed.
