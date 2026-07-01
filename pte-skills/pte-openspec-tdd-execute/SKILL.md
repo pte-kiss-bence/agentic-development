@@ -1,5 +1,5 @@
 ---
-name: pte-openspec-tdd-apply
+name: pte-openspec-tdd-execute
 description: Build stage — implement an OpenSpec change test-first, each task through a red-green TDD loop. Invoke by name when the change is ready to build.
 disable-model-invocation: true
 ---

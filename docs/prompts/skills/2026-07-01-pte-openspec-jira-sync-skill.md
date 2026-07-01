@@ -15,7 +15,7 @@ Author a new Claude Code skill named `pte-openspec-jira-sync`, and wire up the A
   1. `pte-openspec-to-epics` → `epics/<epic-slug>.md` (mints `EPIC-…` / `STORY-…` trace IDs + a "Forrás-spec hivatkozás" traceability table)
   2. `pte-openspec-to-stories` → `stories/<epic-slug>/<story-slug>.md` (story cards; `STORY-…` + `EPIC-…` IDs in the header, acceptance criteria, a BDD test section)
   3. `pte-openspec-bdd-tests` → fills each story card's `## BDD teszt` section in place with a fenced ```gherkin block tagged `@EPIC-…` `@STORY-…`
-  4. (build) `pte-openspec-tdd-apply` — independent, does not touch this chain
+  4. (build) `pte-openspec-tdd-execute` — independent, does not touch this chain
 - All artifact CONTENT is Hungarian; code identifiers (EPIC-…, STORY-…, filenames, API names) stay verbatim and are never translated. Keep the new skill's artifact content Hungarian too, matching its siblings.
 - No Atlassian/Jira MCP is wired anywhere in the repo yet.
 - Sibling skill layout: a directory under `pte-skills/`, containing `SKILL.md` (YAML frontmatter: `name`, `description`) + an `EXAMPLE.md` with a worked end-to-end example. `pte-openspec/SKILL.md` is the chain's router.

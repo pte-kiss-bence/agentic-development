@@ -5,7 +5,7 @@ description: Generate declarative BDD test scenarios (Gherkin/Cucumber) and embe
 
 An OpenSpec spec already carries behaviour: each `### Requirement` holds `#### Scenario` blocks of `WHEN`/`THEN` bullets. That is BDD in embryo. This skill turns it into **declarative** Gherkin and writes it **into the story cards** — each card owns its own BDD test(s), so the story is a self-contained, testable unit. The Gherkin is **living documentation** — human-readable, not executable in this pipeline; a **later, separate phase implements it as a Playwright E2E test**. It stays stable when the implementation changes, never leaking UI or procedural detail (the UI/Playwright detail lives in that future E2E layer, never in the Gherkin).
 
-This is the **last step of the planning chain** (`epics` → `stories` → **bdd-tests**; the build stage `pte-openspec-tdd-apply` is a separate phase). It produces no separate `.feature` tree and no step-definition files: it fills the `BDD Test` section that `pte-openspec-to-stories` left as a placeholder in each card, and touches nothing else.
+This is the **last step of the planning chain** (`epics` → `stories` → **bdd-tests**; the build stage `pte-openspec-tdd-execute` is a separate phase). It produces no separate `.feature` tree and no step-definition files: it fills the `BDD Test` section that `pte-openspec-to-stories` left as a placeholder in each card, and touches nothing else.
 
 `declarative` is the governing word: every generated step describes _what_ the system does, not _how_ a user clicks it. The full rule set and anti-patterns live in [`BDD-RULES.md`](BDD-RULES.md) — load it before writing any step. A complete worked transformation is in [`EXAMPLE.md`](EXAMPLE.md).
 

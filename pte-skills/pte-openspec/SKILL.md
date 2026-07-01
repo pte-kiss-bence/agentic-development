@@ -39,6 +39,6 @@ Optional read-only view (not a chain step; authors nothing):
 
 Build stage (user-invoked; independent of the planning artifacts):
 
-4. **`pte-openspec-tdd-apply`** — implements the change's tasks test-first: per task a red-green loop (via `tdd`) before the checkbox flips. **CONSUMES** the OpenSpec change's `tasks` (through `openspec-apply-change`), **not** the trace IDs and **not** the epics/stories/Gherkin. **User-invoked** — it does not fire autonomously; run it by name once the change is ready to build.
+4. **`pte-openspec-tdd-execute`** — implements the change's tasks test-first: per task a red-green loop (via `tdd`) before the checkbox flips. **CONSUMES** the OpenSpec change's `tasks` (through `openspec-apply-change`), **not** the trace IDs and **not** the epics/stories/Gherkin. **User-invoked** — it does not fire autonomously; run it by name once the change is ready to build.
 
 The planning chain's steps key off the same trace IDs, so an epic, its story cards, and the Gherkin embedded in each card line up one-to-one. The build stage turns the change's tasks into tested code and does not touch the planning artifacts — the two phases meet only at the spec.

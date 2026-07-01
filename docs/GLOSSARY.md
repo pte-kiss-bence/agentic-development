@@ -11,7 +11,7 @@ Hungarian terms (`Forrás-spec hivatkozás`, `User story-k`, `Jira szinkron`, `E
 ## The two phases
 
 - **planning chain** — steps 1–3 (`pte-openspec-to-epics` → `-to-stories` → `-bdd-tests`), run **strictly in order**, each consuming the artifact the previous produced. Turns a spec into a groomed, testable backlog. Map: [`pte-openspec/SKILL.md`](../pte-skills/pte-openspec/SKILL.md).
-- **build stage** — step 4 (`pte-openspec-tdd-apply`), a **separate phase** off the same spec that implements the change's tasks test-first. It does **not** consume the planning artifacts; the two phases meet only at the spec.
+- **build stage** — step 4 (`pte-openspec-tdd-execute`), a **separate phase** off the same spec that implements the change's tasks test-first. It does **not** consume the planning artifacts; the two phases meet only at the spec.
 - **back-edge** — the one exception to the chain's forward-only flow: an epic's `## Estimation` sums child-story estimates that don't exist until step 2, so step 1 emits a placeholder that a **deferred `pte-openspec-to-epics` re-run** fills (the *estimation rollup*). See [`ESTIMATION.md` → Epic rollup](../pte-skills/pte-openspec-shared/ESTIMATION.md).
 
 ## The two artifact kinds

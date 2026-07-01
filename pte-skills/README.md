@@ -46,7 +46,7 @@ The skills' prose (`SKILL.md`) is English; every **generated artifact's content 
         ┌─── BUILD (separate branch, independent) ────────────┘
         ▼   CONSUMES: change tasks (not the trace IDs, not epics/stories)
    ┌──────────────────────────────┐
-   │  4. pte-openspec-tdd-apply    │  build stage: implements the
+   │  4. pte-openspec-tdd-execute    │  build stage: implements the
    │   (red-green tdd per task,    │  change's tasks test-first
    │    on openspec-apply-change)  │  (user-invoked)
    └──────────────────────────────┘
@@ -77,7 +77,7 @@ pte-skills/
 ├─ pte-openspec-bdd-tests/         ← SKILL.md + BDD-RULES.md + EXAMPLE.md
 ├─ pte-openspec-jira-sync/         ← SKILL.md + EXAMPLE.md
 ├─ pte-openspec-dependency-graph/  ← SKILL.md + EXAMPLE.md (optional read-only view)
-└─ pte-openspec-tdd-apply/SKILL.md ← build stage (no EXAMPLE.md — emits code, not artifacts)
+└─ pte-openspec-tdd-execute/SKILL.md ← build stage (no EXAMPLE.md — emits code, not artifacts)
 ```
 
 Generated artifacts live **outside this folder**, inside the OpenSpec tree beside the specs:
@@ -91,5 +91,5 @@ openspec/
    └─ stories/       ← <epic-slug>/STORY-<epic-slug>-<requirement-slug>.md (embedded BDD tests)
 ```
 
-Each **artifact-producing** skill ships an `EXAMPLE.md` (full worked transformation); `pte-openspec-tdd-apply` emits code, so it has none. `pte-openspec-bdd-tests` adds `BDD-RULES.md` (the declarative-Gherkin rule set), loaded before it writes.
+Each **artifact-producing** skill ships an `EXAMPLE.md` (full worked transformation); `pte-openspec-tdd-execute` emits code, so it has none. `pte-openspec-bdd-tests` adds `BDD-RULES.md` (the declarative-Gherkin rule set), loaded before it writes.
 </content>

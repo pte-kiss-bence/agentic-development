@@ -7,7 +7,7 @@ Four right-sized paths, converging on one tail (`to-stories → bdd-tests → td
 - **Full feature** → `pte-openspec-to-epics` in **mint** mode (greenfield: a new capability with no epic yet), then the whole chain.
 - **Change into an existing epic** (the common case, since a change request modifies existing behaviour) → `pte-openspec-to-epics` in **reconcile** mode: resolve the epic whose *Forrás-spec hivatkozás* rows trace to the delta's capability, reuse its `EPIC-…` verbatim, mint a new `STORY-…` for each added requirement, extend an existing story's coverage for a modified scenario, and leave everything untouched byte-for-byte (diff-don't-clobber).
 - **Small standalone change** (a story, no epic) → skip `to-epics`; `pte-openspec-to-stories` runs in **epic-less** mode, authoring the card(s) straight from the delta and minting its own capability-namespaced `STORY-<capability-slug>-…` (stable, not provisional), with the parent `EPIC-…` line left empty.
-- **Tweak / bug** → skip planning entirely, straight to `pte-openspec-tdd-apply` (test-first; for a bug, run `diagnosing-bugs` first when the root cause isn't obvious).
+- **Tweak / bug** → skip planning entirely, straight to `pte-openspec-tdd-execute` (test-first; for a bug, run `diagnosing-bugs` first when the root cause isn't obvious).
 
 Two decisions worth recording explicitly:
 

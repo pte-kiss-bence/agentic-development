@@ -11,7 +11,7 @@ The pipeline is **agent-orchestrated, not human-orchestrated.** `CLAUDE.md` pins
 So the two user-invoked skills are the two that a **human** deliberately triggers:
 
 - **`pte-openspec` (router)** — read by a person getting their bearings; it is a map, not a step the agent runs. Nothing autonomous needs to reach it (the orchestration lives in `CLAUDE.md`, which is always in context), so it pays no context load.
-- **`pte-openspec-tdd-apply` (build stage)** — user-invoked on purpose: building is a phase a human decides to start, not one the agent should launch on its own (see the router and [ADR 0001](0001-pte-openspec-two-phase-pipeline.md)).
+- **`pte-openspec-tdd-execute` (build stage)** — user-invoked on purpose: building is a phase a human decides to start, not one the agent should launch on its own (see the router and [ADR 0001](0001-pte-openspec-two-phase-pipeline.md)).
 
 ## The cost we accept
 

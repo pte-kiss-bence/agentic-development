@@ -57,7 +57,7 @@ The single reserved Jira Epic (`trace:EPIC-standalone`, e.g. *Önálló változt
 _Avoid_: misc bucket, catch-all epic (it is a Jira-parent-of-record only)
 
 **Build stage**:
-Stage 4 (`pte-openspec-tdd-apply`). Implements the OpenSpec change's **tasks** test-first via red-green TDD. Reads the tasks, not the planning artifacts, and does not key on trace IDs.
+Stage 4 (`pte-openspec-tdd-execute`). Implements the OpenSpec change's **tasks** test-first via red-green TDD. Reads the tasks, not the planning artifacts, and does not key on trace IDs.
 _Avoid_: implementation phase, apply step
 
 **Trace ID**:

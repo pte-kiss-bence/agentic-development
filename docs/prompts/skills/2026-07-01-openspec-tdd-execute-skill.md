@@ -9,7 +9,7 @@ Author a new skill for THIS repo (`@pte/agentic-development`) using the `writing
 </context>
 
 <task>
-Create `.claude/skills/pte-openspec-tdd-apply/SKILL.md` (add disclosed reference files only if a branch genuinely needs them). The skill orchestrates: take an OpenSpec change, and for EACH task run a red-green TDD loop before marking it done.
+Create `.claude/skills/pte-openspec-tdd-execute/SKILL.md` (add disclosed reference files only if a branch genuinely needs them). The skill orchestrates: take an OpenSpec change, and for EACH task run a red-green TDD loop before marking it done.
 </task>
 
 <research>
@@ -34,13 +34,13 @@ Behavior the skill must encode:
 </writing_great_skills_principles>
 
 <constraints>
-- Only create/edit files under `.claude/skills/pte-openspec-tdd-apply/`. Do not modify `tdd`, `openspec-apply-change`, other skills, or `CLAUDE.md`.
+- Only create/edit files under `.claude/skills/pte-openspec-tdd-execute/`. Do not modify `tdd`, `openspec-apply-change`, other skills, or `CLAUDE.md`.
 - Keep the skill body in English to match existing `pte-openspec-*` skills (the Hungarian-docs rule applies to generated artifacts, not skill definitions).
 - Do not add features beyond what is listed. Do not scaffold tests, a runner, or example projects.
 </constraints>
 
 <done_when>
-- `.claude/skills/pte-openspec-tdd-apply/SKILL.md` exists with valid frontmatter (`name`, `description`) and a stated invocation choice.
+- `.claude/skills/pte-openspec-tdd-execute/SKILL.md` exists with valid frontmatter (`name`, `description`) and a stated invocation choice.
 - The skill enforces per-task vertical red-green and explicitly forbids horizontal slicing.
 - It references `tdd` and `openspec-apply-change` instead of duplicating them.
 - Every step has a checkable completion criterion and stop/pause conditions are listed.
