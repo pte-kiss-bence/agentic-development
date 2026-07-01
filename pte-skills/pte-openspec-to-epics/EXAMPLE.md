@@ -1,161 +1,166 @@
 # Worked example: OpenSpec spec → Agile Epic
 
-One end-to-end transformation showing the non-obvious moves: grouping Requirements into a single lean epic, writing the hypothesis, cutting one Requirement into two vertical-slice stories, assigning requirement-anchored trace IDs (with an aspect-slug on the split), and emitting the traceability map the downstream skills consume.
+One end-to-end transformation showing the non-obvious moves under the **new epic schema**: grouping a capability's Requirements into a single lean epic, writing the measurable hypothesis into `## E2E Scenario`, filling `## Cross-cutting Concerns` with real spec-derived concerns (not the rubric), assigning requirement-anchored trace IDs, and parking the *User story-k* list plus the traceability map inside the pipeline-only fence so `pte-openspec-jira-sync` hides them from Jira while the downstream skills still read them.
+
+The pedagogical shape is unchanged: a short `## Input` spec excerpt, the `## Output` epic file, then a `## Why these moves` notes section. Section **headings inside the epic are English** (new schema); the **body stays Hungarian** (per `CONVENTIONS.md`); the pipeline-only headings and every `### Requirement` / `#### Scenario` title stay **verbatim**.
 
 ## Input — OpenSpec spec
 
-`openspec/specs/cikk-hozzaferes/spec.md`
+`openspec/changes/aok-osszesito-mvp/specs/belso-hozzaferes/spec.md`
 
 ```markdown
-### Requirement: Előfizetési szint szerinti cikkhozzáférés
-A rendszer SHALL az előfizetés szintje szerint engedélyezze a cikkekhez való hozzáférést.
+### Requirement: M365 alapú belső hozzáférés és szerepkörök
+A rendszer SHALL a belső kört (admin, HR/vezetők) M365-tel (Entra ID / OIDC) hitelesítse, és `admin` illetve `reader` szerepkör szerint engedélyezze a műveleteket.
 
-#### Scenario: Ingyenes előfizető csak ingyenes cikket lát
-- **WHEN** ingyenes előfizetésű felhasználó bejelentkezik
-- **THEN** a rendszer megjeleníti az ingyenes cikket
-- **THEN** a rendszer elrejti a fizetős cikket
+#### Scenario: Admin szerkeszthet
+- **WHEN** `admin` szerepkörű felhasználó M365-tel belép
+- **THEN** a rendszer engedélyezi a feltöltés, override és lezárás műveleteket
 
-#### Scenario: Fizető előfizető a fizetős cikket is látja
-- **WHEN** fizetős előfizetésű felhasználó bejelentkezik
-- **THEN** a rendszer megjeleníti a fizetős cikket is
+#### Scenario: Reader csak olvas
+- **WHEN** `reader` szerepkörű felhasználó szerkesztő műveletet kísérel meg
+- **THEN** a rendszer szerver oldalon megtagadja a műveletet
+- **THEN** a rendszer nem módosítja az adatot
 
-### Requirement: Előfizetés kezelése
-A rendszer SHALL lehetővé tegye az előfizetés indítását és lemondását.
+### Requirement: Szűrhető, aggregálható táblázat-nézet
+A rendszer SHALL az időszak adatait szűrhető, aggregálható táblázatként jelenítse meg, nyers adóazonosító nélkül.
 
-#### Scenario: Előfizetés indítása
-- **WHEN** a felhasználó fizetős előfizetést indít
-- **THEN** a rendszer aktiválja a fizetős hozzáférést
+#### Scenario: Szűrés átcsúszott tételekre
+- **WHEN** a belső felhasználó az átcsúszott tételekre szűr
+- **THEN** a rendszer csak a szűrésnek megfelelő sorokat mutatja
+- **THEN** a rendszer megjeleníti az aggregált összesítést
 
-#### Scenario: Előfizetés lemondása
-- **WHEN** a felhasználó lemondja az előfizetését
-- **THEN** a rendszer a periódus végén visszaállítja az ingyenes szintet
+#### Scenario: Nyers adóazonosító elrejtése
+- **WHEN** a belső felhasználó a táblázat-nézetet vagy annak exportját megnyitja
+- **THEN** a rendszer nem jelenít meg nyers adóazonosítót egyetlen sorban vagy exportban sem
+
+### Requirement: Teljes audit napló
+A rendszer SHALL minden lényegi műveletet naplózzon (ki, mi, mikor), és az audit adatot korlátlanul megőrizze.
+
+#### Scenario: Státuszváltás naplózása
+- **WHEN** egy tétel vagy időszak státusza megváltozik
+- **THEN** a rendszer naplóbejegyzést ír forrással, időponttal és érintett entitással
+
+#### Scenario: Token-elfogadás jelölése
+- **WHEN** egy tétel token-alapú elfogadással kap jóváhagyást
+- **THEN** a rendszer a naplóbejegyzést a token-azonosítóhoz köti
+- **THEN** a rendszer a bejegyzést gyenge azonosításúként jelöli
 ```
 
 ## Output — Agile Epic file
 
-`openspec/backlog/epics/EPIC-elofizetes-cikkhozzaferes.md`
+`openspec/backlog/epics/EPIC-belso-hozzaferes.md`
 
 ```markdown
-# Cím
-Előfizetés-alapú cikkhozzáférés — `EPIC-elofizetes-cikkhozzaferes`
+# Belső hozzáférés — M365 auth, táblázat, audit · EPIC-belso-hozzaferes
 
-## Háttér és kontextus
-Az olvasók előfizetési szintje dönti el, mely cikkeket érhetik el. A szint
-indítható és lemondható, a hozzáférés ehhez igazodik.
+## Description
+A belső kör (admin és HR/vezetők) M365-tel (Entra ID / OIDC) lép be. Két
+szerepkör van: `admin` (szerkeszt: feltöltés, override, lezárás) és `reader`
+(csak olvas). A belső felhasználók táblázatként látják az időszak adatait,
+szűrhetik és aggregálhatják. Minden lényegi művelet naplózódik (ki, mi, mikor),
+és az audit adat korlátlanul megmarad.
 
-## Probléma / lehetőség
-Ma nincs szinthez kötött hozzáférés-szabályozás; a fizetős tartalom nem
-védett, és nincs önkiszolgáló előfizetés-kezelés.
+## Persona
+- Admin (Laci) — `admin` szerepkör, szerkeszt.
+- HR / vezetők — `reader` szerepkör, olvas és szűr.
+- Adatvédelmi felelős — korlátlan megőrzés jogalapja, adóazonosító-kizárás.
 
-## Hipotézis
-Ha az előfizetési szinthez kötjük a cikkhozzáférést és önkiszolgáló
-előfizetés-kezelést adunk, akkor a fizető olvasók aránya nő a regisztrált
-olvasók körében, mérve a havi fizetős konverzióval.
+## E2E Scenario
+Ha a belső felhasználók M365-tel, szerepkör szerint lépnek be, az adatot
+szűrhető/aggregálható táblázatban látják, és minden művelet auditált, akkor
+átláthatóvá és visszakövethetővé válik a folyamat az ÁOK vezetése és
+adminisztrációja számára, mérve az auditált műveletek lefedettségével és a
+szűréssel megválaszolt lekérdezések arányával.
 
-## Hatókör és nem-célok
-- Hatókör: szint szerinti hozzáférés, előfizetés indítása, lemondása.
-- Nem-cél: fizetési szolgáltató integrációja, árképzés, próbaidőszak.
+## Problem / Solution
+P: A mai folyamat nem visszakövethető, és a szűrhető, aggregálható adat helyett
+papírlista áll rendelkezésre.
+S: Egy M365-alapú, szerepkörös belépés + táblázat-nézet + teljes audit napló
+átláthatóvá és elszámoltathatóvá teszi a folyamatot: a vezetők szűrve látják az
+adatot, minden státuszváltás pedig visszakereshető — a token-alapú elfogadás
+korlátját (gyenge azonosítás) a napló egyértelműen jelöli.
 
-## Érintettek
-Olvasó, szerkesztőség, számlázás.
+## Cross-cutting Concerns
+- Biztonság: szerepkör-szeparáció szerver oldalon kikényszerítve — a `reader`
+  nem végezhet szerkesztő műveletet, a megtagadás nem UI-szintű.
+- Auditálhatóság: minden lényegi művelet naplózott, az audit adat korlátlanul
+  megőrzött.
+- Adatkezelés / GDPR: nyers adóazonosító kizárása minden táblázat-nézetből és
+  exportból; a korlátlan audit-megőrzés jogalapja tisztázandó.
+- Naplózás: minden naplóbejegyzés hordozza a forrást, az időpontot és az
+  érintett entitást.
+- Identitás: a token-alapú elfogadás gyenge azonosítása a naplóban explicit
+  jelölt (token-azonosítóhoz kötve).
+- Lokalizáció: a felület és a táblázat-nézet magyar nyelvű.
 
-## Sikermutatók
-- Fizetős konverzió (havi) ≥ X%.
-- Jogosulatlan fizetős-cikk hozzáférés = 0.
+## MVP and Out of Scope
+MVP:
+- Entra ID (M365 / OIDC) hitelesítés a belső körnek.
+- `admin` és `reader` szerepkör; a `reader` nem végezhet szerkesztő műveletet.
+- Táblázat-nézet szűréssel és aggregációval, nyers adóazonosító nélkül.
+- Teljes audit napló minden lényegi műveletről, korlátlan megőrzéssel.
 
-## Magas szintű elfogadási kritériumok
-- A megjelenített cikkek köre mindig az aktuális előfizetési szintet tükrözi.
-- Indítás után azonnal, lemondás után a periódus végén vált a szint.
+Out of Scope:
+- Oktatók / tárgyfelelősök M365-belépése.
+- Elosztott szerkesztés.
+- Dashboard / statisztikák.
+- Automatikus törlő / anonimizáló mechanizmus.
 
+## Success metrics
+- Reader-ből indított szerkesztő műveletek 100%-ban megtagadva.
+- Lényegi műveletek 100%-a auditált.
+- Nyers adóazonosító 0 táblázat-nézetben / exportban.
+
+## Risks and Dependencies
+- Függőség: Entra ID tenant + szerepkör-hozzárendelés.
+- Függőség: naplózandó események forrásai (`EPIC-excel-ingest`,
+  `EPIC-targyfelelos-elfogadas`, `EPIC-idoszak-lezaras`).
+- Kockázat (GDPR): korlátlan audit-megőrzés jogalapja.
+- Kockázat: token-elfogadás gyenge azonosítása jelölendő.
+
+## High Level Acceptance Criteria
+- M365-tel belépő admin eléri a feltöltés / override / lezárás műveleteket.
+- Reader szerkesztő művelete megtagadva, adatmódosítás nélkül.
+- Táblázat-nézet szűrhető és aggregálható, nyers adóazonosító nélkül.
+- Minden státuszváltás naplóbejegyzést kap forrással / időponttal / entitással.
+- Token-elfogadás a naplóban token-azonosítóhoz kötött és jelölt.
+
+<!-- pipeline-only:start -->
 ## User story-k
-- `STORY-elofizetes-cikkhozzaferes-elofizetesi-szint-szerinti-cikkhozzaferes`
-  Mint olvasó, szeretném a szintemnek megfelelő cikkeket látni, hogy csak a
-  jogosult tartalomhoz férjek hozzá.
-  - Ingyenes előfizető az ingyenes cikket látja, a fizetőset nem.
-  - Fizető előfizető a fizetős cikket is látja.
-- `STORY-elofizetes-cikkhozzaferes-elofizetes-kezelese-inditas`
-  Mint olvasó, szeretnék fizetős előfizetést indítani, hogy elérjem a fizetős
-  cikkeket.
-  - Indítás után a fizetős hozzáférés aktív.
-- `STORY-elofizetes-cikkhozzaferes-elofizetes-kezelese-lemondas`
-  Mint olvasó, szeretném lemondani az előfizetésem, hogy ne fizessek tovább.
-  - Lemondás után a periódus végén visszaáll az ingyenes szint.
-
-## Függőségek és kockázatok
-- Függ a hitelesítéstől (bejelentkezett felhasználó).
-- Kockázat: a lemondás időzítése (azonnali vs. periódus végi) félreérthető.
+- `STORY-belso-hozzaferes-m365-szerepkorok`
+  Mint belső felhasználó, szeretném M365-tel belépni és a szerepkörömnek
+  megfelelő jogot kapni, hogy csak az admin szerkeszthessen, a reader pedig
+  biztonságosan csak olvasson.
+  - Admin M365-belépés után eléri a feltöltés / override / lezárás műveleteket.
+  - Reader szerkesztő művelete szerver oldalon megtagadva, adatmódosítás nélkül.
+- `STORY-belso-hozzaferes-tablazat-nezet`
+  Mint HR/vezető, szeretném az időszak adatait szűrhető, aggregálható
+  táblázatban látni nyers adóazonosító nélkül, hogy gyorsan megválaszoljam a
+  lekérdezéseket adatvédelmi kockázat nélkül.
+  - Átcsúszott tételekre szűrve csak a megfelelő sorok és az aggregált
+    összesítés jelenik meg.
+  - Nyers adóazonosító sem a nézetben, sem az exportban nem jelenik meg.
+- `STORY-belso-hozzaferes-audit-naplo`
+  Mint adatvédelmi felelős, szeretném minden lényegi művelet auditált naplóját,
+  hogy a folyamat visszakövethető és elszámoltatható legyen.
+  - Státuszváltás naplóbejegyzést kap forrással, időponttal és entitással.
+  - Token-elfogadás a token-azonosítóhoz kötve, gyenge azonosításúként jelölve.
 
 ## Forrás-spec hivatkozás
 
 | Story ID | Epic ID | Forrás `### Requirement` | Lefedett `#### Scenario`-k |
 |----------|---------|--------------------------|----------------------------|
-| `STORY-elofizetes-cikkhozzaferes-elofizetesi-szint-szerinti-cikkhozzaferes` | `EPIC-elofizetes-cikkhozzaferes` | Előfizetési szint szerinti cikkhozzáférés | Ingyenes előfizető csak ingyenes cikket lát; Fizető előfizető a fizetős cikket is látja |
-| `STORY-elofizetes-cikkhozzaferes-elofizetes-kezelese-inditas` | `EPIC-elofizetes-cikkhozzaferes` | Előfizetés kezelése | Előfizetés indítása |
-| `STORY-elofizetes-cikkhozzaferes-elofizetes-kezelese-lemondas` | `EPIC-elofizetes-cikkhozzaferes` | Előfizetés kezelése | Előfizetés lemondása |
+| STORY-belso-hozzaferes-m365-szerepkorok | EPIC-belso-hozzaferes | M365 alapú belső hozzáférés és szerepkörök | Admin szerkeszthet; Reader csak olvas |
+| STORY-belso-hozzaferes-tablazat-nezet | EPIC-belso-hozzaferes | Szűrhető, aggregálható táblázat-nézet | Szűrés átcsúszott tételekre; Nyers adóazonosító elrejtése |
+| STORY-belso-hozzaferes-audit-naplo | EPIC-belso-hozzaferes | Teljes audit napló | Státuszváltás naplózása; Token-elfogadás jelölése |
+<!-- pipeline-only:end -->
 ```
 
-## Why each move
+## Why these moves
 
-- **One lean epic, two Requirements** — both Requirements serve a single user value (subscription-based access), so they group into one epic rather than one-epic-per-Requirement. Well under the ~10-story ceiling.
-- **Hypothesis** — `Ha … akkor … mérve …` ties the epic to a measurable outcome, not a task list.
-- **Vertical-slice split** — "Előfizetés kezelése" cuts into *indítás* and *lemondás*: two slices by user value, each independently shippable — not a "backend" / "frontend" layer split.
-- **Requirement-anchored IDs** — `STORY-<epic-slug>-<requirement-slug>` stays stable if stories are reordered. Where one Requirement splits, the `-<aspect-slug>` (`inditas` / `lemondas`) disambiguates without a positional number.
-- **Traceability map** — the `Forrás-spec hivatkozás` table keeps the `#### Scenario` titles **verbatim**. That is the contract: `pte-openspec-to-stories` carries each row into its story card, then `pte-openspec-bdd-tests` reads that row, tags the card's embedded Gherkin `Scenario` with its `@STORY-…` by matching the title, and still sources the step text from the spec.
-
----
-
-## Reconcile example: change delta → existing epic
-
-A follow-up change request extends the same capability. The epic above already exists, so this skill runs in **reconcile** mode: it resolves that epic, reuses `EPIC-elofizetes-cikkhozzaferes` **verbatim**, and folds the delta in — it does **not** mint a new epic.
-
-### Input — the change delta
-
-`openspec/changes/cikk-elonezet/specs/cikk-hozzaferes/spec.md`
-
-```markdown
-## ADDED Requirements
-
-### Requirement: Fizetős cikk előnézete
-A rendszer SHALL az ingyenes előfizetőnek rövid előnézetet mutasson a fizetős cikkből.
-
-#### Scenario: Ingyenes előfizető előnézetet lát
-- **WHEN** ingyenes előfizetésű felhasználó fizetős cikket nyit meg
-- **THEN** a rendszer megjeleníti a cikk első bekezdését előnézetként
-- **THEN** a rendszer előfizetésre ösztönző felhívást mutat
-
-## MODIFIED Requirements
-
-### Requirement: Előfizetési szint szerinti cikkhozzáférés
-A rendszer SHALL az előfizetés szintje szerint engedélyezze a cikkekhez való hozzáférést.
-
-#### Scenario: Ingyenes előfizető csak ingyenes cikket lát
-- **WHEN** ingyenes előfizetésű felhasználó bejelentkezik
-- **THEN** a rendszer megjeleníti az ingyenes cikket
-- **THEN** a rendszer a fizetős cikket előnézettel jelzi
-```
-
-### Resolve the mode
-
-Scan `openspec/backlog/epics/` for an epic whose *Forrás-spec hivatkozás* rows trace to `cikk-hozzaferes` → one hit, `EPIC-elofizetes-cikkhozzaferes` → **reconcile** it (no `AskUserQuestion` needed; a single candidate).
-
-### Output — the epic, edited in place
-
-- **New story** for the ADDED requirement, minted under the existing epic:
-  `STORY-elofizetes-cikkhozzaferes-fizetos-cikk-elonezete` — *Mint ingyenes olvasó, szeretnék előnézetet látni a fizetős cikkből, hogy eldönthessem, előfizetek-e.*
-- **Extended coverage** for the MODIFIED scenario: `Ingyenes előfizető csak ingyenes cikket lát` already belongs to `STORY-…-elofizetesi-szint-szerinti-cikkhozzaferes`; its map row + acceptance criteria pick up the changed `THEN` (előnézettel jelzi) — **no new story minted for it**.
-- Everything else (hypothesis, scope, the *indítás* / *lemondás* stories) stays byte-for-byte.
-
-The *Forrás-spec hivatkozás* map gains exactly one row; one existing row is touched:
-
-| Story ID | Epic ID | Forrás `### Requirement` | Lefedett `#### Scenario`-k |
-|----------|---------|--------------------------|----------------------------|
-| `STORY-elofizetes-cikkhozzaferes-elofizetesi-szint-szerinti-cikkhozzaferes` | `EPIC-elofizetes-cikkhozzaferes` | Előfizetési szint szerinti cikkhozzáférés | Ingyenes előfizető csak ingyenes cikket lát *(módosított)*; Fizető előfizető a fizetős cikket is látja |
-| `STORY-elofizetes-cikkhozzaferes-fizetos-cikk-elonezete` *(új)* | `EPIC-elofizetes-cikkhozzaferes` | Fizetős cikk előnézete | Ingyenes előfizető előnézetet lát |
-
-### Why each move
-
-- **EPIC reused verbatim** — reconcile never re-mints an epic ID; the epic file is edited, not regenerated.
-- **ADDED → new `STORY-…`** — a new requirement gets a new requirement-anchored story under the same epic.
-- **MODIFIED → extend, don't duplicate** — the scenario already maps to a story, so its coverage/AC update in place; minting a second story for it would duplicate the same behaviour.
-- **Diff-don't-clobber is load-bearing** — untouched stories and sections are left exactly as the team groomed them; only the delta's footprint changes.
-- **Where mint would be wrong here** — the capability already has an epic; minting a second would fork the backlog and split the trace IDs. Reconcile keeps one epic as the home of the capability.
+- **English headings, Hungarian body** — every `##` section above the fence uses the new schema's English heading (`Description`, `Persona`, `E2E Scenario`, `Problem / Solution`, `Cross-cutting Concerns`, `MVP and Out of Scope`, `Success metrics`, `Risks and Dependencies`, `High Level Acceptance Criteria`), while the prose under each stays Hungarian. The only Hungarian headings are the pipeline-only ones (`User story-k`, `Forrás-spec hivatkozás`), which never reach Jira.
+- **`## E2E Scenario` absorbs the old Hipotézis** — it carries the measurable hypothesis in the `Ha [X], akkor [Y] a [Z] csoportnak, mérve [W]-vel` shape and keeps the `mérve …` clause, so the epic still ties to a measurable outcome rather than a task list.
+- **`## Cross-cutting Concerns` is filled, not rubric text** — the bullets are the real, spec-derived concerns for *this* epic (server-side role separation, unlimited audit retention, adóazonosító exclusion, per-entry provenance, weak-identity token flagging, Hungarian UI). The rubric's menu of possible concern categories is never pasted in; a concern appears only because the spec actually raises it.
+- **One lean epic, three Requirements** — all three Requirements serve a single user value (transparent, accountable internal access), so they group into one epic. Three vertical-slice stories, well under the ~10-story ceiling.
+- **Requirement-anchored trace IDs** — each `STORY-<epic-slug>-<requirement-slug>` is anchored on its primary Requirement, so the ID stays stable when stories are reordered. No positional numbers.
+- **User story-k + Forrás-spec map inside the pipeline-only fence** — both sit between `<!-- pipeline-only:start -->` and `<!-- pipeline-only:end -->`, so `pte-openspec-jira-sync` strips the whole region before pushing the Description to Jira, while `pte-openspec-to-stories` and `pte-openspec-bdd-tests` still read the map on disk. The map keeps every `### Requirement` / `#### Scenario` title **verbatim** — that is the cross-skill contract: downstream skills match rows by exact title and source the `WHEN`/`THEN` step text from the spec, never from epic prose.

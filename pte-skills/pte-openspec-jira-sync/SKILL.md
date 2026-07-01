@@ -21,7 +21,7 @@ One owner per field. Push what local owns; pull what Jira owns. Never cross a fi
 
 | Field | Owner | Direction |
 |-------|-------|-----------|
-| Summary (H1 title, minus its ` · TRACE-ID` suffix), Description (the **full card body** below the H1, minus the `## Jira szinkron` block), labels (trace ID), issue type, epic↔story `parent` | **Local** | Local → Jira (push, overwrite) |
+| Summary (H1 title, minus its ` · TRACE-ID` suffix), Description (the **Jira-visible card body** below the H1, minus the `## Jira szinkron` block **and** the `<!-- pipeline-only -->` block), labels (trace ID), issue type, epic↔story `parent` | **Local** | Local → Jira (push, overwrite) |
 | Status, assignee, sprint, estimate (when the team sets it), comments, Jira key/URL | **Jira** | Jira → Local (pull into the card's `## Jira szinkron` block) |
 
 The consequence that matters: **never** overwrite a locally-owned field from Jira, and **never** overwrite a Jira-owned workflow field from local. Status especially — the team's board owns it; this skill reads it, it does not set it.
@@ -34,9 +34,9 @@ The consequence that matters: **never** overwrite a locally-owned field from Jir
 | `openspec/backlog/stories/<epic-slug>/STORY-<epic-slug>-<requirement-slug>.md` | issue type **Story**, `parent` = the epic's Jira key |
 | `EPIC-…` / `STORY-…` trace ID | label `trace:EPIC-…` / `trace:STORY-…` |
 | card **Cím** (H1 title, minus its ` · TRACE-ID` suffix) | Summary |
-| the **full card body below the H1**, minus the `## Jira szinkron` block | Description |
+| the **Jira-visible card body below the H1**, minus the `## Jira szinkron` block and the `<!-- pipeline-only -->` block | Description |
 
-The Description push carries the **full card body** — every section below the H1 title, verbatim (User story, Kontextus, Elfogadási kritériumok, BDD teszt, INVEST-ellenőrzés, DoR/DoD, Prioritás, Becslés, Függőségek és kockázatok, Forrás-hivatkozás — the whole card, whatever sections it has, not a chosen subset). It **excludes exactly two things**: the H1 title line (that maps to Summary), and the `## Jira szinkron` block (a local-only record of Jira-owned state — pushing it back into the issue's own Description would be circular). Slice the card from disk by those two boundaries and push that slice; do **not** reconstruct sections from memory — a verbatim file slice avoids transcription drift on re-push.
+The Description push carries the **Jira-visible card body** — the sections below the H1 title, verbatim (epic: Description, Persona, E2E Scenario, Problem / Solution, Cross-cutting Concerns, MVP and Out of Scope, Success metrics, Risks and Dependencies, High Level Acceptance Criteria; story: Description, Context, BDD Test, Risks and Dependencies — the whole visible card, whatever sections it has, not a chosen subset). It **excludes exactly three things**: the H1 title line (that maps to Summary); the `## Jira szinkron` block (a local-only record of Jira-owned state — pushing it back into the issue's own Description would be circular); and the **pipeline-only block** — everything between `<!-- pipeline-only:start -->` and `<!-- pipeline-only:end -->`, markers inclusive (the epic's *User story-k* + *Forrás-spec hivatkozás* map, or an epic-less card's self-carried *Forrás-hivatkozás* row — pipeline-internal, never a Jira field; see `CONVENTIONS.md`). Slice the card from disk by those three boundaries and push that slice; do **not** reconstruct sections from memory — a verbatim file slice avoids transcription drift on re-push.
 
 Because a story's `parent` needs its epic's Jira key, **process epics before stories**: resolve/create every epic first, record its key, then create stories against it.
 
@@ -69,12 +69,12 @@ This block is the durable record of match (1) and carries the Jira-owned status 
 
 ## Cross-reference backlinks (opt-in)
 
-By default the only Jira key written into a card is its own, in the `## Jira szinkron` block. When the user wants the **cross-references inside the body** to carry live Jira links too, run this as a final enrichment pass **after every key is assigned**. Link **every** `EPIC-…`/`STORY-…` a card mentions, **in any section** — do not work from an allow-list of sections (that is how references get missed). Covered spots include, but are **not limited to**: the `**Epic:**` metadata line, an epic's `### STORY-…` headings, *Hatókör és nem-célok* "lásd …" pointers, *Hipotézis*/*Kontextus*/*Sikermutatók* prose, *Függőségek és kockázatok* bullets, and every trace-ID cell in the *Forrás-hivatkozás* table. A reference counts whether or not it is wrapped in backticks (`` `EPIC-x` `` and plain `EPIC-x` both get the link).
+By default the only Jira key written into a card is its own, in the `## Jira szinkron` block. When the user wants the **cross-references inside the body** to carry live Jira links too, run this as a final enrichment pass **after every key is assigned**. Link **every** `EPIC-…`/`STORY-…` a card mentions in a **Jira-visible** section — do not work from an allow-list of sections (that is how references get missed). Covered spots include, but are **not limited to**: the `**Epic:**` metadata line, *MVP and Out of Scope* "lásd …" pointers, *E2E Scenario*/*Description*/*Context*/*Success metrics* prose, and *Risks and Dependencies* bullets. A reference counts whether or not it is wrapped in backticks (`` `EPIC-x` `` and plain `EPIC-x` both get the link). Do **not** linkify inside the pipeline-only block — it is stripped from the Jira Description, so its trace IDs (the *Forrás-spec hivatkozás* / *Forrás-hivatkozás* map) stay bare for the downstream skills to match on.
 
 - **Format:** keep the trace-ID text (and its backticks, if any) and append ` ([<KEY>](<browse-url>))` right after it — e.g. `` `EPIC-idoszak-lezaras` ([INYO-21](https://<site>.atlassian.net/browse/INYO-21)) `` or `EPIC-idoszak-lezaras ([INYO-21](https://<site>.atlassian.net/browse/INYO-21))`.
 - **Coverage check:** after linking, scan every card for any `EPIC-…`/`STORY-…` **not** followed by a `([INYO-…])` link (allowing an optional closing backtick between them); the only hits left should be the exempt cases below. Also verify each link's key matches the trace ID's real issue and the URL is `…/browse/<key>` — a wrong-target link is worse than a missing one.
 - **Idempotent:** skip any reference that already carries a link; never double-link. A re-run is a no-op.
-- **Never linkify (the only exemptions):** the card's own trace ID in the H1 title and in the `- **Story ID:**` metadata line (self-identity, already in `## Jira szinkron`); the `@EPIC-…`/`@STORY-…` tags and any IDs inside the ```gherkin block (Cucumber tags / test text); anything in the `## Jira szinkron` block.
+- **Never linkify (the only exemptions):** the card's own trace ID in the H1 title (self-identity, already in `## Jira szinkron`); the `@EPIC-…`/`@STORY-…` tags and any IDs inside the ```gherkin block (Cucumber tags / test text); anything in the `## Jira szinkron` block; and anything inside the `<!-- pipeline-only -->` block (stripped from Jira, matched on bare IDs).
 - After editing the cards, **re-push** each affected Description so Jira mirrors the linked body.
 - **Caveat to state first:** this writes Jira keys into the source cards, coupling the backlog to one Jira instance. Idempotency still holds — the trace IDs stay verbatim, so matching (label + recorded key) is unaffected — but offer it, don't assume it.
 
@@ -92,7 +92,7 @@ By default the only Jira key written into a card is its own, in the `## Jira szi
 
 - **JQL `labels` has no `LIKE`/wildcard.** To find existing trace-labelled issues, enumerate the exact labels in one `labels IN ("trace:EPIC-…","trace:STORY-…", …)` set (or one query per label). `labels LIKE "trace:*"` is rejected by JQL.
 - **Large MCP responses overflow context.** `getVisibleJiraProjects` on a busy site can exceed the tool-result limit and be spilled to a file. Parse it from that file (jq/python) or narrow it with `searchString` — don't read the whole blob inline.
-- **Re-push Descriptions from the file, not from memory.** When updating an existing issue's Description, read the card and push a verbatim slice (body minus H1 minus `## Jira szinkron`); reconstructing the body by hand risks transcription typos and a needless corrective round-trip.
+- **Re-push Descriptions from the file, not from memory.** When updating an existing issue's Description, read the card and push a verbatim slice (body minus H1, minus `## Jira szinkron`, minus the `<!-- pipeline-only -->` block); reconstructing the body by hand risks transcription typos and a needless corrective round-trip.
 
 ## Run safety
 
@@ -121,7 +121,7 @@ Copy this checklist and tick each item — the verify step is exhaustive, not a 
 
 4. **Confirm writes.** AskUserQuestion before the first write. Completion: the user has approved (or scoped down) the write set.
 
-5. **Push local-owned fields.** Epics first: create/update each Epic, record its key; if any epic-less story is in the set, resolve/create the standalone collector epic (`trace:EPIC-standalone`) too. Then stories: create/update each Story with `parent` = its epic's Jira key (or the collector's key for epic-less stories), `trace:…` label, Summary from the H1 title (minus its ` · TRACE-ID` suffix), and Description from the **full card body** (minus the H1 and the `## Jira szinkron` block — see *Jira mapping*). Never touch Jira-owned fields (status/assignee/sprint). Completion: every artifact has a live issue; every story's parent is set.
+5. **Push local-owned fields.** Epics first: create/update each Epic, record its key; if any epic-less story is in the set, resolve/create the standalone collector epic (`trace:EPIC-standalone`) too. Then stories: create/update each Story with `parent` = its epic's Jira key (or the collector's key for epic-less stories), `trace:…` label, Summary from the H1 title (minus its ` · TRACE-ID` suffix), and Description from the **Jira-visible card body** (minus the H1, the `## Jira szinkron` block, and the `<!-- pipeline-only -->` block — see *Jira mapping*). Never touch Jira-owned fields (status/assignee/sprint). Completion: every artifact has a live issue; every story's parent is set.
 
 6. **Pull Jira-owned fields.** For each issue, read status/assignee/sprint/key/URL and write the `## Jira szinkron` block into its card — replace only that section, diff before overwriting. Completion: every card's block reflects the issue's current Jira-owned state.
 

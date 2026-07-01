@@ -6,7 +6,21 @@ The chain is **right-sized to the change**, not always run whole: a full feature
 
 ## Output language
 
-Every generated **artifact's content is written in Hungarian**, matching `openspec/config.yaml`'s artifact convention. Keep verbatim — do **not** translate: code, identifiers, API names, CLI commands, file paths, `### Requirement` names, `#### Scenario` titles, `EPIC-…`/`STORY-…` trace IDs/slugs, and commit-type keywords (`feat`/`fix`/...). Section headings prescribed by a skill's anatomy are already Hungarian; use them as-is. The skills themselves (`SKILL.md` prose) stay in English — only the files they emit are Hungarian.
+Every generated **artifact's content is written in Hungarian**, matching `openspec/config.yaml`'s artifact convention. Keep verbatim — do **not** translate: code, identifiers, API names, CLI commands, file paths, `### Requirement` names, `#### Scenario` titles, `EPIC-…`/`STORY-…` trace IDs/slugs, and commit-type keywords (`feat`/`fix`/...). The skills themselves (`SKILL.md` prose) stay in English — only the files they emit are Hungarian.
+
+**Section headings are English; body is Hungarian.** The epic and story-card anatomies use **English `##` headings** (epic: `Description`, `Persona`, `E2E Scenario`, `Problem / Solution`, `Cross-cutting Concerns`, `MVP and Out of Scope`, `Success metrics`, `Risks and Dependencies`, `High Level Acceptance Criteria`; story: `Description`, `Context`, `BDD Test`, `Risks and Dependencies`) — use them verbatim. The only **Hungarian** headings left are the pipeline-internal ones that never reach Jira: everything inside a **pipeline-only** block (`User story-k`, `Forrás-spec hivatkozás`, `Forrás-hivatkozás`) and the `pte-openspec-jira-sync`-owned `Jira szinkron` block.
+
+## Pipeline-only (hidden-from-Jira) blocks
+
+Some content the pipeline needs — the epic's *Forrás-spec hivatkozás* map and *User story-k* list, an epic-less card's self-carried *Forrás-hivatkozás* row — must **not** reach Jira. Wrap it in a single fenced region so `pte-openspec-jira-sync` can strip it by one boundary:
+
+```markdown
+<!-- pipeline-only:start -->
+…pipeline-internal sections…
+<!-- pipeline-only:end -->
+```
+
+The fence lives at the **end of the file** (after the last Jira-visible section). `pte-openspec-jira-sync` removes the whole region — markers inclusive — from the body it pushes as the Jira Description; the block stays on disk for the downstream skills. Everything outside the fence is Jira-visible.
 
 ## Trace-ID grammar and ownership
 
@@ -49,4 +63,4 @@ Both artifact kinds are filed under their own trace ID, so the filename **is** t
 
 ## Writing output files
 
-Diff before overwriting — never clobber hand-edited content. `pte-openspec-to-epics` and `pte-openspec-to-stories` write one artifact per file under `openspec/backlog/` (see *Output location*). `pte-openspec-bdd-tests` writes nothing new — it edits the existing story cards in place, filling only their `BDD teszt` section and leaving every other section untouched. `pte-openspec-jira-sync` likewise edits epics and cards in place, writing only their `## Jira szinkron` block (Jira-owned fields pulled back from the board), and additionally mirrors the artifacts to Jira.
+Diff before overwriting — never clobber hand-edited content. `pte-openspec-to-epics` and `pte-openspec-to-stories` write one artifact per file under `openspec/backlog/` (see *Output location*). `pte-openspec-bdd-tests` writes nothing new — it edits the existing story cards in place, filling only their `BDD Test` section and leaving every other section untouched. `pte-openspec-jira-sync` likewise edits epics and cards in place, writing only their `## Jira szinkron` block (Jira-owned fields pulled back from the board), and additionally mirrors the artifacts to Jira.

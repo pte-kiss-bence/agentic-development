@@ -12,13 +12,13 @@ An OpenSpec spec is detailed behaviour: each `### Requirement` holds `#### Scena
 This skill runs in one of two modes; pick by whether the change's capability already has an epic on disk. A **change request modifies existing behaviour**, so reconcile is the common case for changes; mint is for genuinely new capabilities.
 
 - **Mint (greenfield)** — the spec/delta describes a capability with **no existing epic**. Mint new epic(s) from scratch, per the anatomy and steps below. This is the original behaviour.
-- **Reconcile (update)** — a **change's delta spec** whose capability **already has an epic**. Do **not** mint a new epic: resolve the existing epic, reuse its `EPIC-…` verbatim, and fold the delta into it — mint new `STORY-…` rows for the delta's *added* requirements/scenarios, **extend an existing story's** *Forrás-spec hivatkozás* coverage when a *modified* scenario already belongs to one (never mint a duplicate for it), and touch *Hatókör és nem-célok* only if the change moves the boundary. Everything the delta does not touch stays byte-for-byte (diff-don't-clobber).
+- **Reconcile (update)** — a **change's delta spec** whose capability **already has an epic**. Do **not** mint a new epic: resolve the existing epic, reuse its `EPIC-…` verbatim, and fold the delta into it — mint new `STORY-…` rows for the delta's *added* requirements/scenarios, **extend an existing story's** *Forrás-spec hivatkozás* coverage when a *modified* scenario already belongs to one (never mint a duplicate for it), and touch *MVP and Out of Scope* only if the change moves the boundary. Everything the delta does not touch stays byte-for-byte (diff-don't-clobber).
 
 Resolve the mode in step 1: search the epic dir for an epic whose *Forrás-spec hivatkozás* rows trace to the delta's capability. One hit → reconcile it. Several plausible → **AskUserQuestion**. None → mint; but if the change is a single small item not worth an epic, hand off to `pte-openspec-to-stories`'s **epic-less mode** instead of minting a one-story epic.
 
 ## Output language
 
-Shared across the pipeline — see [`../pte-openspec-shared/CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md) for the Hungarian-content + verbatim-identifier rule. The section headings in the anatomy below are already Hungarian; use them as-is.
+Shared across the pipeline — see [`../pte-openspec-shared/CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md) for the Hungarian-content + verbatim-identifier rule. The anatomy's section headings are **English** (the new schema); the content under them stays Hungarian. Only the pipeline-only block's headings (`User story-k`, `Forrás-spec hivatkozás`) stay Hungarian.
 
 ## Source mapping
 
@@ -28,7 +28,7 @@ Shared across the pipeline — see [`../pte-openspec-shared/CONVENTIONS.md`](../
 | capability theme / a coherent group of Requirements | one Epic + its `EPIC-<epic-slug>` |
 | `### Requirement: <name>` (its SHALL text) | one or more user stories, split by value |
 | `#### Scenario: <name>` (`WHEN`/`THEN`) | a story's high-level acceptance criteria |
-| the spec's purpose / overview | the epic's *Háttér és kontextus* + *Probléma / lehetőség* |
+| the spec's purpose / overview | the epic's *Description* + *Problem / Solution* |
 
 ## Trace ID convention (this skill OWNS it)
 
@@ -39,19 +39,32 @@ This skill **MINTS** the pipeline's trace IDs; `pte-openspec-to-stories` and `pt
 
 ## Epic file anatomy
 
-Each epic file carries these sections, in order:
+Section **headings are English** (the new schema — see the golden sample in [`EXAMPLE.md`](EXAMPLE.md)); the **content stays Hungarian** (per `CONVENTIONS.md`). Each epic file carries these sections, in order:
 
-- **Cím** — epic name + `EPIC-<epic-slug>`.
-- **Háttér és kontextus** — narrative from the spec's purpose/overview.
-- **Probléma / lehetőség** — the problem the spec solves.
-- **Hipotézis** — `Ha [X], akkor [Y] a [Z] csoportnak, mérve [W]-vel.`
-- **Hatókör és nem-célok** — in-scope Requirements + explicit non-goals.
-- **Érintettek** — stakeholders / affected roles.
-- **Sikermutatók** — measurable success metrics.
-- **Magas szintű elfogadási kritériumok** — derived from the Requirements' `#### Scenario` blocks.
-- **User story-k** — typically ~3–10 stories. Each starts with its `STORY-…` ID, then `Mint [szerep], szeretnék [cél], hogy [érték]`, with acceptance criteria mapped from the matching `#### Scenario` `WHEN`/`THEN`. Fewer than 3 is fine when the capability is genuinely small — never pad with invented stories.
-- **Függőségek és kockázatok**.
-- **Forrás-spec hivatkozás** — a markdown table, the contract the downstream skills consume: `pte-openspec-to-stories` carries each row into its story card, and `pte-openspec-bdd-tests` reads that row to tag the card's embedded Gherkin. One row per story, titles **verbatim**:
+- **Cím** — the H1: `# <epic name> · EPIC-<epic-slug>`.
+- **`## Description`** — narrative from the spec's purpose/overview: what the capability is and who it serves.
+- **`## Persona`** — a bulleted list of the affected roles/stakeholders, each with a one-line note on what they do in this capability.
+- **`## E2E Scenario`** — the epic's **measurable hypothesis** in prose: `Ha [X], akkor [Y] a [Z] csoportnak, mérve [W]-vel.` This section absorbs the old *Hipotézis* — keep the `mérve …` measurability.
+- **`## Problem / Solution`** — the problem the spec solves and the solution shape, in `P: …` / `S: …` form.
+- **`## Cross-cutting Concerns`** — the concerns that cut **across** the standard, documented behaviour and must not be overlooked: special environment, security, performance, monitoring, logging, auditability, accessibility, localization, data-handling specifics. **Fill it with the real, spec-derived concerns** for this epic (Hungarian) — do **not** emit the rubric text itself. Include a concern only when the spec actually raises it; never pad.
+- **`## MVP and Out of Scope`** — the in-scope MVP bullets and the explicit **Out of Scope** bullets (replaces the old *Hatókör és nem-célok*).
+- **`## Success metrics`** — measurable success metrics.
+- **`## Risks and Dependencies`** — dependencies + risks (replaces *Függőségek és kockázatok*).
+- **`## High Level Acceptance Criteria`** — derived from the Requirements' `#### Scenario` blocks.
+
+Then a **pipeline-only block** — the pipeline's internal contract, **hidden from Jira** (`pte-openspec-jira-sync` strips the whole fenced region before push; see `CONVENTIONS.md`). Wrap it in the fence and keep its Hungarian headings:
+
+````markdown
+<!-- pipeline-only:start -->
+## User story-k
+…
+## Forrás-spec hivatkozás
+…
+<!-- pipeline-only:end -->
+````
+
+- **`## User story-k`** (pipeline-only) — typically ~3–10 stories. Each starts with its `STORY-…` ID, then `Mint [szerep], szeretnék [cél], hogy [érték]`, with acceptance criteria mapped from the matching `#### Scenario` `WHEN`/`THEN`. Fewer than 3 is fine when the capability is genuinely small — never pad with invented stories.
+- **`## Forrás-spec hivatkozás`** (pipeline-only) — the traceability table, the contract the downstream skills consume: `pte-openspec-to-stories` and `pte-openspec-bdd-tests` read **this** table (the story cards no longer carry their own trace row) to learn the requirement→story split and each story's `#### Scenario` coverage. One row per story, titles **verbatim**:
 
   | Story ID | Epic ID | Forrás `### Requirement` | Lefedett `#### Scenario`-k |
   |----------|---------|--------------------------|----------------------------|
@@ -64,7 +77,7 @@ Copy this checklist and tick each item — the verify step is exhaustive, not a 
 - [ ] 1. Source spec file set named
 - [ ] 2. Every Requirement and Scenario enumerated
 - [ ] 3. Requirements grouped into lean Epics; EPIC IDs assigned
-- [ ] 4. Each Epic split into vertical-slice stories; STORY IDs + Scenario coverage assigned
+- [ ] 4. Each Epic split into vertical-slice stories (each INVEST-conform); STORY IDs + Scenario coverage assigned
 - [ ] 5. Epic files authored (full Hungarian anatomy + hypothesis + traceability map)
 - [ ] 6. Files written to the output dir (diffed, not clobbered)
 - [ ] 7. Every Requirement and Scenario verified accounted for; gaps reported
@@ -76,19 +89,19 @@ Copy this checklist and tick each item — the verify step is exhaustive, not a 
 
 3. **Group into lean Epics.** Cluster Requirements into epics by user value (a coherent capability or journey), not by technical phase. Assign each an `EPIC-<epic-slug>`. Apply the size rule: an epic typically holds ~3–10 stories; if a grouping would exceed ~10, treat it as a signal to split into two or more epics. Fewer than 3 is a soft signal only — acceptable for a small capability, never a reason to invent stories. Completion (exhaustive): every Requirement belongs to exactly one Epic, or is explicitly listed out of scope.
 
-4. **Decompose each Epic into vertical-slice stories.** Split by user value/journey; assign each story a requirement-anchored `STORY-…` ID and record which `#### Scenario`s it covers. Completion (exhaustive): every Scenario is covered by exactly one story, or explicitly listed out of scope.
+4. **Decompose each Epic into vertical-slice stories — INVEST-conform.** Split by user value/journey; assign each story a requirement-anchored `STORY-…` ID and record which `#### Scenario`s it covers. Cut the split so **every story satisfies INVEST** (Independent, Negotiable, Valuable, Estimable, Small, Testable) — the epic owns the split, and `pte-openspec-to-stories` enforces INVEST as a hard gate downstream, so a slice that cannot be made INVEST-conform must be re-cut here, not passed on. Completion (exhaustive): every Scenario is covered by exactly one story (or explicitly out of scope), and every story is INVEST-conform.
 
-5. **Author each Epic** with the full anatomy above: Hungarian content, the `Ha … akkor … mérve …` hypothesis, acceptance criteria derived from the Scenarios, and the *Forrás-spec hivatkozás* map table with **verbatim** Requirement and Scenario titles. Completion: every anatomy section is present and the map table covers every story.
+5. **Author each Epic** with the full anatomy above: English headings, Hungarian content, the `Ha … akkor … mérve …` hypothesis in *E2E Scenario*, filled *Cross-cutting Concerns*, acceptance criteria derived from the Scenarios, and — inside the `<!-- pipeline-only -->` fence — the *User story-k* list and the *Forrás-spec hivatkozás* map table with **verbatim** Requirement and Scenario titles. Completion: every anatomy section is present and the map table covers every story.
 
 6. **Write the files** to the output directory (default `openspec/backlog/epics/`, configurable — see *Output location* in `CONVENTIONS.md`), one file per epic, named `EPIC-<epic-slug>.md` (the `EPIC-` prefix gives searchability parity with the `STORY-…` cards; the bare `<epic-slug>` still names the story directory). Diff before overwriting — never clobber hand-edited content. Completion: each epic exists as its own file under the output dir.
 
-7. **Verify exhaustively.** Every source Requirement and Scenario is accounted for (covered by a story or explicitly out of scope); no Epic exceeds ~10 stories (split if it does); every story has a unique `STORY-…` ID and acceptance criteria; every map-table title matches the spec verbatim. Report any Requirement or Scenario you could not place cleanly rather than guessing.
+7. **Verify exhaustively.** Every source Requirement and Scenario is accounted for (covered by a story or explicitly out of scope); no Epic exceeds ~10 stories (split if it does); every story has a unique `STORY-…` ID and acceptance criteria; every map-table title matches the spec verbatim; the *User story-k* list and *Forrás-spec hivatkozás* map sit inside the `<!-- pipeline-only:start -->`/`<!-- pipeline-only:end -->` fence, and every non-pipeline section uses its English heading. Report any Requirement or Scenario you could not place cleanly rather than guessing.
 
 ### Reconcile mode — how the steps deviate
 
 When step 1 fixed **reconcile**, steps 3–7 fold the delta into the resolved epic instead of minting a new one:
 
 - **Step 3–4 (grouping/decomposition):** the epic already exists, so don't re-group. Scope the work to the delta only — for each **added** Requirement/Scenario, mint a new `STORY-…` under the existing `EPIC-…` (verbatim); for each **modified** Scenario, find the story that already covers it and extend that row's coverage rather than minting a duplicate; for a **removed** Scenario, drop it from its story's map row (and the story itself if it empties). If the delta pushes the epic past ~10 stories, flag a split rather than silently overflowing.
-- **Step 5 (author):** edit the existing epic file — extend *User story-k* and the *Forrás-spec hivatkozás* map with the new/changed rows, and adjust *Hatókör és nem-célok* / *Sikermutatók* only where the change actually moves them. Leave every untouched section byte-for-byte.
+- **Step 5 (author):** edit the existing epic file — extend *User story-k* and the *Forrás-spec hivatkozás* map (inside the pipeline-only fence) with the new/changed rows, and adjust *MVP and Out of Scope* / *Success metrics* only where the change actually moves them. Leave every untouched section byte-for-byte.
 - **Step 6 (write):** diff-don't-clobber is load-bearing here — you are editing a hand-groomed epic in place, not rewriting it.
 - **Step 7 (verify):** every delta Requirement/Scenario is covered by a story row (new or extended); the `EPIC-…` is unchanged; no `STORY-…` was duplicated for a modified scenario; sections the delta did not touch are unchanged.

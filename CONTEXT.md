@@ -5,16 +5,20 @@ Ubiquitous language for the `pte-openspec-*` skill family: the pipeline that tur
 ## Language
 
 **Epic**:
-The largest unit of the backlog. A value-oriented strategic container that carries its stories in its own description (*User story-k* section). ~3–10 stories; more than ~10 is a signal it should be two or more epics.
+The largest unit of the backlog. A value-oriented strategic container with English `##` headings and Hungarian body (`Description`, `Persona`, `E2E Scenario`, `Problem / Solution`, `Cross-cutting Concerns`, `MVP and Out of Scope`, `Success metrics`, `Risks and Dependencies`, `High Level Acceptance Criteria`). It carries its stories (*User story-k* section) and the *Forrás-spec hivatkozás* map in a trailing `<!-- pipeline-only -->` block — read by the downstream skills, stripped from Jira on sync. ~3–10 stories; more than ~10 is a signal it should be two or more epics.
 _Avoid_: feature bucket, task list
 
 **Story kártya** (story card):
-The smallest unit of the backlog and the home of its own BDD test(s). One markdown file per `STORY-…`, carrying the `BDD teszt` section that holds its embedded Gherkin.
+The smallest unit of the backlog and the home of its own BDD test(s). One markdown file per `STORY-…`, with a lean schema (`Description`, `Context`, `BDD Test`, `Risks and Dependencies`) whose acceptance criteria **are** the `BDD Test` Gherkin. It carries no trace row of its own (epic-driven: the map lives in the epic; epic-less: self-carried in a `<!-- pipeline-only -->` block).
 _Avoid_: ticket, task, issue
 
-**BDD teszt** (embedded Gherkin):
-The declarative Gherkin inside a story card's `BDD teszt` section. **Living documentation** now — human-readable behaviour, not executable in this pipeline — implemented later as a Playwright E2E test.
+**BDD Test** (embedded Gherkin):
+The declarative Gherkin inside a story card's `BDD Test` section. **Living documentation** now — human-readable behaviour, not executable in this pipeline — implemented later as a Playwright E2E test.
 _Avoid_: executable test, .feature file, acceptance test (in the runnable sense)
+
+**INVEST** (mandatory story rule):
+Every story card **must** satisfy INVEST — Independent, Negotiable, Valuable, Estimable, Small, Testable. The lean schema drops the printed *INVEST-ellenőrzés* section but **not** the rule: conformance is a hard gate enforced silently by `pte-openspec-to-stories` (and honored at split time by `pte-openspec-to-epics`). A slice that cannot be made INVEST-conform is re-split, never shipped.
+_Avoid_: "INVEST was dropped" (only the section was; the rule stands)
 
 **Planning chain**:
 Stages 1–3 (`pte-openspec-to-epics` → `-to-stories` → `-bdd-tests`). Produces the human-facing backlog on shared trace IDs. Distinct from the build stage; the two do not feed each other.
@@ -45,7 +49,7 @@ _Avoid_: implementation phase, apply step
 _Avoid_: ticket number, index
 
 **Forrás-spec hivatkozás** (traceability map):
-The per-epic table (`Story ID | Epic ID | Forrás ### Requirement | Lefedett #### Scenario-k`) that records the requirement→story split. The cross-skill contract downstream skills read instead of re-deriving.
+The per-epic table (`Story ID | Epic ID | Forrás ### Requirement | Lefedett #### Scenario-k`) that records the requirement→story split. Lives in the epic's `<!-- pipeline-only -->` block (hidden from Jira); the cross-skill contract downstream skills read instead of re-deriving. Story cards carry no trace row — they key off this map (epic-less cards self-carry an equivalent row).
 _Avoid_: mapping table, index
 
 **MINTS / CONSUMES**:

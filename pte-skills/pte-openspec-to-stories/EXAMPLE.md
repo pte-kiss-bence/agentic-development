@@ -1,185 +1,154 @@
 # Worked example: Agile Epic story → refinement-ready story card
 
-One end-to-end transformation showing the non-obvious moves: taking a single story out of an epic's *User story-k* list, reusing its `STORY-…`/`EPIC-…` IDs and `Mint …` line verbatim, tracing the map's `#### Scenario`s back to the spec, and expanding their `WHEN`/`THEN` into `Amennyiben`/`Amikor`/`Akkor` acceptance criteria with a supplied precondition.
+Two end-to-end transformations showing the non-obvious moves of the **lean** story-card schema — English `##` headings, Hungarian body. The card has just four visible sections (`## Description` / `## Context` / `## BDD Test` / `## Risks and Dependencies`); the `Mint …` line lives **inside** `## Description` (no separate *User story* heading), and the acceptance criteria are **not** a section here — they are the declarative Gherkin that `pte-openspec-bdd-tests` later fills into the `## BDD Test` placeholder.
 
-## Input — one story from the epic
-
-From `openspec/backlog/epics/EPIC-elofizetes-cikkhozzaferes.md` (produced by `pte-openspec-to-epics`):
-
-```markdown
-## User story-k
-- `STORY-elofizetes-cikkhozzaferes-elofizetesi-szint-szerinti-cikkhozzaferes`
-  Mint olvasó, szeretném a szintemnek megfelelő cikkeket látni, hogy csak a
-  jogosult tartalomhoz férjek hozzá.
-  - Ingyenes előfizető az ingyenes cikket látja, a fizetőset nem.
-  - Fizető előfizető a fizetős cikket is látja.
-```
-
-Its *Forrás-spec hivatkozás* row:
-
-| Story ID | Epic ID | Forrás `### Requirement` | Lefedett `#### Scenario`-k |
-|----------|---------|--------------------------|----------------------------|
-| `STORY-elofizetes-cikkhozzaferes-elofizetesi-szint-szerinti-cikkhozzaferes` | `EPIC-elofizetes-cikkhozzaferes` | Előfizetési szint szerinti cikkhozzáférés | Ingyenes előfizető csak ingyenes cikket lát; Fizető előfizető a fizetős cikket is látja |
-
-The two `#### Scenario`s named in that row, traced to `openspec/specs/cikk-hozzaferes/spec.md`:
-
-```markdown
-#### Scenario: Ingyenes előfizető csak ingyenes cikket lát
-- **WHEN** ingyenes előfizetésű felhasználó bejelentkezik
-- **THEN** a rendszer megjeleníti az ingyenes cikket
-- **THEN** a rendszer elrejti a fizetős cikket
-
-#### Scenario: Fizető előfizető a fizetős cikket is látja
-- **WHEN** fizetős előfizetésű felhasználó bejelentkezik
-- **THEN** a rendszer megjeleníti a fizetős cikket is
-```
-
-## Output — story card file
-
-`openspec/backlog/stories/elofizetes-cikkhozzaferes/STORY-elofizetes-cikkhozzaferes-elofizetesi-szint-szerinti-cikkhozzaferes.md`
-
-```markdown
-# Cím
-Szintnek megfelelő cikkhozzáférés —
-`STORY-elofizetes-cikkhozzaferes-elofizetesi-szint-szerinti-cikkhozzaferes`
-(`EPIC-elofizetes-cikkhozzaferes`)
-
-## User story
-Mint olvasó, szeretném a szintemnek megfelelő cikkeket látni, hogy csak a
-jogosult tartalomhoz férjek hozzá.
-
-## Kontextus
-Az olvasó előfizetési szintje dönti el, mely cikkeket látja. Ez a történet a
-hozzáférés megjelenítését szeleteli ki — az előfizetés indítása és lemondása
-külön történet.
-
-## Elfogadási kritériumok
-- Amennyiben a felhasználónak ingyenes előfizetése van,
-  Amikor bejelentkezik,
-  Akkor a rendszer megjeleníti az ingyenes cikket,
-  És elrejti a fizetős cikket.
-- Amennyiben a felhasználónak fizetős előfizetése van,
-  Amikor bejelentkezik,
-  Akkor a rendszer megjeleníti a fizetős cikket is.
-
-## BDD teszt
-_(kitölti a `pte-openspec-bdd-tests`)_
-
-## INVEST-ellenőrzés
-Independent ✓ · Negotiable ✓ · Valuable ✓ · Estimable ✓ · Small ✓ · Testable ✓
-— önállóan szállítható; a mérhető kimenet a megjelenített cikkek köre.
-
-## Készenléti feltétel (DoR)
-_(csapat tölti ki refinementen)_
-
-## Elkészültségi feltétel (DoD)
-_(csapat tölti ki refinementen)_
-
-## Prioritás
-_(csapat tölti ki)_
-
-## Becslés
-_(story point — refinementen becsülve)_
-
-## Függőségek és kockázatok
-- Függ a hitelesítéstől (bejelentkezett felhasználó, ismert előfizetési szint).
-- Testvér-történetek:
-  `STORY-elofizetes-cikkhozzaferes-elofizetes-kezelese-inditas`,
-  `STORY-elofizetes-cikkhozzaferes-elofizetes-kezelese-lemondas`.
-
-## Forrás-hivatkozás
-| Story ID | Epic ID | Forrás `### Requirement` | Lefedett `#### Scenario`-k |
-|----------|---------|--------------------------|----------------------------|
-| `STORY-elofizetes-cikkhozzaferes-elofizetesi-szint-szerinti-cikkhozzaferes` | `EPIC-elofizetes-cikkhozzaferes` | Előfizetési szint szerinti cikkhozzáférés | Ingyenes előfizető csak ingyenes cikket lát; Fizető előfizető a fizetős cikket is látja |
-```
-
-## Why each move
-
-- **Epic is the input, not the spec** — the story set and IDs already exist; this skill only expands. The `STORY-…`/`EPIC-…` IDs and the `Mint …` line are reused **verbatim** — this skill mints nothing (see `CONVENTIONS.md`).
-- **Acceptance criteria traced 1:1** — each Scenario's `WHEN` becomes `Amikor`, its `THEN` bullets become `Akkor` + `És`. The first Scenario's two `THEN`s (megjeleníti / elrejti) map to `Akkor` + `És` — no outcome dropped, none added.
-- **Supplied `Amennyiben`** — the spec states the trigger (`bejelentkezik`) and outcome but not the precondition (which subscription level), so the card supplies it as `Amennyiben` — the same gap `pte-openspec-bdd-tests` fills for `Given`.
-- **`BDD teszt` left as a placeholder** — this skill writes no Gherkin; it authors the empty `BDD teszt` section that `pte-openspec-bdd-tests` fills in place from the same Scenarios. The story card is the smallest unit and the home of its own BDD test.
-- **Placeholders, not guesses** — priority, estimate, DoR and DoD are refinement inputs; the skill leaves them for the team rather than inventing values.
-- **Trace row reprinted verbatim** — the card carries the epic's map row unchanged, so the epic, this card, and the Gherkin embedded in the card all key off the same `STORY-…` ID.
+The two demos cover both modes:
+- **Demo 1 (epic-driven)** — expand one story from an epic's *User story-k* list, reusing its `STORY-…`/`EPIC-…` IDs and `Mint …` line verbatim. The card carries **no** trace row: the map lives in the epic.
+- **Demo 2 (epic-less)** — author a standalone card straight from a small change's delta, minting a capability-namespaced `STORY-…`, leaving the parent `EPIC-…` empty, and **self-carrying** the map inside a pipeline-only fence.
 
 ---
 
-## Epic-less example: small change delta → standalone story card
+## Demo 1 (epic-driven): epic story → story card
 
-A small change request warrants a story but no epic, so it **skips `pte-openspec-to-epics`** and runs this skill in **epic-less** mode: the card is authored straight from the delta, the `STORY-…` is minted here (capability-namespaced), and the parent `EPIC-…` line is left empty.
+### Input — one story from the epic
+
+From `openspec/backlog/epics/EPIC-belso-hozzaferes.md` (produced by `pte-openspec-to-epics`), the `## User story-k` entry for this story:
+
+```markdown
+## User story-k
+- `STORY-belso-hozzaferes-m365-szerepkorok`
+  Mint belső felhasználó, szeretném M365-tel belépni és a szerepkörömnek
+  megfelelő jogot kapni, hogy csak az admin szerkeszthessen, a reader pedig
+  biztonságosan csak olvasson.
+```
+
+Its *Forrás-spec hivatkozás* row — held in the **epic's** pipeline-only fence, not in the card:
+
+| Story ID | Epic ID | Forrás `### Requirement` | Lefedett `#### Scenario`-k |
+|----------|---------|--------------------------|----------------------------|
+| STORY-belso-hozzaferes-m365-szerepkorok | EPIC-belso-hozzaferes | M365 alapú belső hozzáférés és szerepkörök | Admin szerkeszthet; Reader csak olvas |
+
+The card reads the requirement→story→scenario split from **this epic row** (there is no card trace row in epic-driven mode). The two `#### Scenario`s named in the row, traced to `openspec/specs/belso-hozzaferes/spec.md`, are the behavioural source the future BDD test keys off:
+
+```markdown
+#### Scenario: Admin szerkeszthet
+- **WHEN** `admin` szerepkörű felhasználó szerkesztő műveletet indít
+- **THEN** a rendszer engedélyezi a műveletet
+
+#### Scenario: Reader csak olvas
+- **WHEN** `reader` szerepkörű felhasználó szerkesztő műveletet indít
+- **THEN** a rendszer elutasítja a műveletet
+- **THEN** a rendszer csak olvasási hozzáférést enged
+```
+
+### Output — story card file
+
+`openspec/backlog/stories/belso-hozzaferes/STORY-belso-hozzaferes-m365-szerepkorok.md`
+
+```markdown
+# M365 belépés és szerepkörök · STORY-belso-hozzaferes-m365-szerepkorok
+
+Parent epic: `EPIC-belso-hozzaferes`
+
+## Description
+Mint **belső felhasználó**, szeretném **M365-tel belépni és a szerepkörömnek megfelelő jogot kapni**, hogy **csak az admin szerkeszthessen, a reader pedig biztonságosan csak olvasson**.
+
+Ez a story a belső hozzáférés alapja: Entra ID (M365 / OIDC) hitelesítés, két szerepkörrel — `admin` (szerkeszt) és `reader` (csak olvas).
+
+## Context
+A szerepkör-szeparáció védi a szerkesztő műveleteket (feltöltés, override, lezárás).
+
+## BDD Test
+_(kitölti a `pte-openspec-bdd-tests`)_
+
+## Risks and Dependencies
+- Függőség: Entra ID (M365/OIDC) tenant és szerepkör-hozzárendelés.
+- Kapcsolódás: a szerkesztő műveletek (`EPIC-excel-ingest`, admin override, lezárás) erre a szerepkör-ellenőrzésre épülnek.
+- Kockázat: téves szerepkör-hozzárendelés → jogosulatlan szerkesztés.
+```
+
+### Why each move
+
+- **Epic is the input, not the spec** — the story set and IDs already exist; this skill only expands. The `STORY-…`/`EPIC-…` IDs and the `Mint …` line are reused **verbatim** — nothing minted here (see `CONVENTIONS.md`).
+- **The `Mint …` line opens `## Description`** — there is no separate *User story* heading; the user-value statement leads the description, then one narrative sentence.
+- **No trace row on the card** — the requirement→story→scenario map lives in the epic's pipeline-only fence; the card keys off the epic row. This skill reads that row to trace the `Admin szerkeszthet` / `Reader csak olvas` `WHEN`/`THEN` back to `openspec/specs/belso-hozzaferes/spec.md`, so `pte-openspec-bdd-tests` can turn those scenarios into the card's BDD test — the story's acceptance criteria.
+- **`## BDD Test` left as a placeholder** — this skill writes no Gherkin; it authors the empty placeholder that `pte-openspec-bdd-tests` fills in place from the same scenarios.
+
+---
+
+## Demo 2 (epic-less): small change delta → standalone story card
+
+A small change request warrants a story but no epic, so it **skips `pte-openspec-to-epics`** and runs this skill in **epic-less** mode: the card is authored straight from the delta, the `STORY-…` is minted here (capability-namespaced on `ertesites-sablon`), the parent `EPIC-…` line is left empty, and the card **self-carries** its map inside a pipeline-only fence.
 
 ### Input — the change delta
 
-`openspec/changes/hirlevel-leiratkozas/specs/hirlevel/spec.md`
+`openspec/changes/ertesites-sablon-szerkesztes/specs/ertesites-sablon/spec.md`
 
 ```markdown
 ## ADDED Requirements
 
-### Requirement: Egykattintásos leiratkozás
-A rendszer SHALL a hírlevél láblécében egykattintásos leiratkozást kínáljon.
+### Requirement: Sablon szerkesztése
+A rendszer SHALL engedje az adminnak az értesítő e-mail sablon szövegét
+szerkeszteni és menteni, és SHALL utasítsa el az érvénytelen sablont.
 
-#### Scenario: Feliratkozott felhasználó leiratkozik
-- **WHEN** a felhasználó a hírlevél leiratkozó linkjére kattint
-- **THEN** a rendszer azonnal leiratkoztatja
-- **THEN** a rendszer megerősítő oldalt mutat
+#### Scenario: Sablon mentése
+- **WHEN** admin érvényes sablonszöveget ment
+- **THEN** a rendszer elmenti a sablont
+- **THEN** a rendszer a kiküldött üzenetekben az új szöveget használja
+
+#### Scenario: Érvénytelen sablon elutasítása
+- **WHEN** admin érvénytelen sablont ment (pl. hibás helyőrző)
+- **THEN** a rendszer elutasítja a mentést
+- **THEN** a rendszer hibaüzenetet mutat
 ```
 
-No epic exists for the `hirlevel` capability, and the change is a single small item → **epic-less mode**. (Had `hirlevel` already had an epic, this would instead be `pte-openspec-to-epics` in **reconcile** mode — never an orphaned story alongside an existing epic.)
+No epic exists for the `ertesites-sablon` capability, and the change is a single small item → **epic-less mode**. (Had `ertesites-sablon` already had an epic, this would instead be `pte-openspec-to-epics` in **reconcile** mode — never an orphaned story alongside an existing epic.)
 
 ### Output — story card file
 
-`openspec/backlog/stories/hirlevel/STORY-hirlevel-egykattintasos-leiratkozas.md`
+`openspec/backlog/stories/ertesites-sablon/STORY-ertesites-sablon-sablon-szerkesztes.md`
 
 ```markdown
-# Cím
-Egykattintásos leiratkozás — `STORY-hirlevel-egykattintasos-leiratkozas`
-(epic nélküli — `EPIC-` üres)
+# Értesítő e-mail sablon karbantartása · STORY-ertesites-sablon-sablon-szerkesztes
 
-## User story
-Mint hírlevél-feliratkozó, szeretnék egy kattintással leiratkozni, hogy
-gyorsan megszüntethessem a feliratkozásom.
+Parent epic: _(nincs — epic nélküli story)_
 
-## Kontextus
-Kis, önálló változtatás a hírlevél-kézbesítésen; nincs hozzá epic.
+## Description
+Mint **admin**, szeretném **az értesítő e-mail sablon szövegét szerkeszteni**, hogy **a kiküldött üzenetek naprakészek legyenek**.
 
-## Elfogadási kritériumok
-- Amennyiben a felhasználó feliratkozott a hírlevélre,
-  Amikor a leiratkozó linkre kattint,
-  Akkor a rendszer azonnal leiratkoztatja,
-  És megerősítő oldalt mutat.
+A sablon mentése azonnal hat a következő kiküldött üzenetekre; az érvénytelen sablont a rendszer elutasítja.
 
-## BDD teszt
+## Context
+Kis, önálló változtatás az értesítő e-mail kézbesítésen; nincs hozzá epic.
+
+## BDD Test
 _(kitölti a `pte-openspec-bdd-tests`)_
 
-## INVEST-ellenőrzés
-Independent ✓ · Negotiable ✓ · Valuable ✓ · Estimable ✓ · Small ✓ · Testable ✓
-— önállóan szállítható, egyetlen viselkedés.
+## Risks and Dependencies
+- Függőség: az értesítő e-mail kiküldő pipeline, amely a sablonszöveget használja.
+- Kockázat: érvénytelen helyőrző a sablonban → hibás vagy nem kézbesített e-mail.
 
-## Készenléti feltétel (DoR)
-_(csapat tölti ki refinementen)_
-
-## Elkészültségi feltétel (DoD)
-_(csapat tölti ki refinementen)_
-
-## Prioritás
-_(csapat tölti ki)_
-
-## Becslés
-_(story point — refinementen becsülve)_
-
-## Függőségek és kockázatok
-- Nincs testvér-történet (önálló change).
-
+<!-- pipeline-only:start -->
 ## Forrás-hivatkozás
 | Story ID | Epic ID | Forrás `### Requirement` | Lefedett `#### Scenario`-k |
 |----------|---------|--------------------------|----------------------------|
-| `STORY-hirlevel-egykattintasos-leiratkozas` | _(nincs)_ | Egykattintásos leiratkozás | Feliratkozott felhasználó leiratkozik |
+| STORY-ertesites-sablon-sablon-szerkesztes | (üres) | Sablon szerkesztése | Sablon mentése; Érvénytelen sablon elutasítása |
+<!-- pipeline-only:end -->
 ```
 
 ### Why each move
 
 - **Delta is the input, not an epic** — with no epic map to consume, the skill reads the delta's Requirement/Scenario directly and cuts the story itself (the split judgement `to-epics` normally owns, scoped to this one small change).
-- **Capability-namespaced ID, minted here** — `STORY-hirlevel-egykattintasos-leiratkozas` uses the capability slug, not an epic slug. It is **stable, not provisional** (see `CONVENTIONS.md`) — this is a first-class mode, not a degraded fallback.
-- **Empty parent `EPIC-…`** — the marker that this is an epic-less story; `pte-openspec-jira-sync` parents it under the standalone collector epic (`trace:EPIC-standalone`).
-- **Everything else identical** — anatomy, the 1:1 Scenario→AC trace, the supplied `Amennyiben`, the `BDD teszt` placeholder and diff-don't-clobber all match epic-driven mode exactly.
-- **When to escalate** — if this had grown to several stories or wanted strategic framing, that's the signal to stop and run `to-epics` (mint or reconcile) instead of minting many epic-less cards.
+- **Capability-namespaced ID, minted here** — `STORY-ertesites-sablon-sablon-szerkesztes` uses the capability slug, not an epic slug. It is **stable, not provisional** (see `CONVENTIONS.md`) — this is a first-class mode, not a degraded fallback.
+- **Empty parent `EPIC-…`** — the marker that this is an epic-less story; `pte-openspec-jira-sync` parents it under the standalone collector epic.
+- **Self-carried map inside a pipeline-only fence** — with no epic to hold the *Forrás-hivatkozás* row, the card carries its own row (hidden from Jira by the fence) so `pte-openspec-bdd-tests` knows which `#### Scenario`s to turn into the card's BDD test.
+
+---
+
+## Why these moves
+
+- **Lean schema, four visible sections** — a card shows only `## Description`, `## Context`, `## BDD Test`, and `## Risks and Dependencies`. English headings, Hungarian body (per `CONVENTIONS.md`).
+- **The `Mint …` line lives inside `## Description`** — there is no separate *User story* heading; the user-value statement opens the description, then one or two narrative sentences.
+- **`## BDD Test` is a placeholder, filled later, and IS the acceptance criteria** — this skill writes no Gherkin; `pte-openspec-bdd-tests` fills the placeholder from the mapped `#### Scenario`s, and that Gherkin **is** the story's acceptance criteria. The old *sections* are dropped: *Elfogadási kritériumok* (now the Gherkin), *INVEST-ellenőrzés*, *Készenléti feltétel (DoR)*, *Elkészültségi feltétel (DoD)*, *Prioritás*, *Becslés*.
+- **INVEST stays as a rule, not a section** — both cards above satisfy INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable) even though no `INVEST-ellenőrzés` section is printed. Conformance is a hard gate: a story that can't be made INVEST-conform is re-split, not shipped.
+- **Trace lives where the map lives** — an epic-driven card carries **no** trace row (the *Forrás-spec hivatkozás* map stays in the epic); an epic-less card **self-carries** its *Forrás-hivatkozás* row inside a `pipeline-only` fence, since there is no epic to hold it.
