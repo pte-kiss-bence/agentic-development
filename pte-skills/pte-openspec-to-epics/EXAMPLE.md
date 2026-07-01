@@ -96,7 +96,7 @@ Olvasó, szerkesztőség, számlázás.
 
 ## Why each move
 
-- **One lean epic, two Requirements** — both Requirements serve a single user value (subscription-based access), so they group into one epic rather than one-epic-per-Requirement. Well under the ~15-story ceiling.
+- **One lean epic, two Requirements** — both Requirements serve a single user value (subscription-based access), so they group into one epic rather than one-epic-per-Requirement. Well under the ~10-story ceiling.
 - **Hypothesis** — `Ha … akkor … mérve …` ties the epic to a measurable outcome, not a task list.
 - **Vertical-slice split** — "Előfizetés kezelése" cuts into *indítás* and *lemondás*: two slices by user value, each independently shippable — not a "backend" / "frontend" layer split.
 - **Requirement-anchored IDs** — `STORY-<epic-slug>-<requirement-slug>` stays stable if stories are reordered. Where one Requirement splits, the `-<aspect-slug>` (`inditas` / `lemondas`) disambiguates without a positional number.

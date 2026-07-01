@@ -15,7 +15,7 @@ Shared across the pipeline — see [`../pte-openspec-shared/CONVENTIONS.md`](../
 
 | OpenSpec | Agile Epic |
 |----------|------------|
-| `openspec/specs/<capability>/spec.md` (or a change delta spec) | one or more Epic `.md` files (split when >~15 stories) |
+| `openspec/specs/<capability>/spec.md` (or a change delta spec) | one or more Epic `.md` files (split when >~10 stories) |
 | capability theme / a coherent group of Requirements | one Epic + its `EPIC-<epic-slug>` |
 | `### Requirement: <name>` (its SHALL text) | one or more user stories, split by value |
 | `#### Scenario: <name>` (`WHEN`/`THEN`) | a story's high-level acceptance criteria |
@@ -40,7 +40,7 @@ Each epic file carries these sections, in order:
 - **Érintettek** — stakeholders / affected roles.
 - **Sikermutatók** — measurable success metrics.
 - **Magas szintű elfogadási kritériumok** — derived from the Requirements' `#### Scenario` blocks.
-- **User story-k** — 5–15 stories. Each starts with its `STORY-…` ID, then `Mint [szerep], szeretnék [cél], hogy [érték]`, with acceptance criteria mapped from the matching `#### Scenario` `WHEN`/`THEN`.
+- **User story-k** — typically ~3–10 stories. Each starts with its `STORY-…` ID, then `Mint [szerep], szeretnék [cél], hogy [érték]`, with acceptance criteria mapped from the matching `#### Scenario` `WHEN`/`THEN`. Fewer than 3 is fine when the capability is genuinely small — never pad with invented stories.
 - **Függőségek és kockázatok**.
 - **Forrás-spec hivatkozás** — a markdown table, the contract the downstream skills consume: `pte-openspec-to-stories` carries each row into its story card, and `pte-openspec-bdd-tests` reads that row to tag the card's embedded Gherkin. One row per story, titles **verbatim**:
 
@@ -65,7 +65,7 @@ Copy this checklist and tick each item — the verify step is exhaustive, not a 
 
 2. **Enumerate every Requirement and Scenario** in those files — name, SHALL text, and each `WHEN`/`THEN` bullet. Completion (exhaustive): every `### Requirement` and every `#### Scenario` in the source is on the list; none invented, none dropped.
 
-3. **Group into lean Epics.** Cluster Requirements into epics by user value (a coherent capability or journey), not by technical phase. Assign each an `EPIC-<epic-slug>`. Apply the size rule: an epic holds 5–15 stories; if a grouping would exceed ~15, split it into multiple epics. Completion (exhaustive): every Requirement belongs to exactly one Epic, or is explicitly listed out of scope.
+3. **Group into lean Epics.** Cluster Requirements into epics by user value (a coherent capability or journey), not by technical phase. Assign each an `EPIC-<epic-slug>`. Apply the size rule: an epic typically holds ~3–10 stories; if a grouping would exceed ~10, treat it as a signal to split into two or more epics. Fewer than 3 is a soft signal only — acceptable for a small capability, never a reason to invent stories. Completion (exhaustive): every Requirement belongs to exactly one Epic, or is explicitly listed out of scope.
 
 4. **Decompose each Epic into vertical-slice stories.** Split by user value/journey; assign each story a requirement-anchored `STORY-…` ID and record which `#### Scenario`s it covers. Completion (exhaustive): every Scenario is covered by exactly one story, or explicitly listed out of scope.
 
@@ -73,4 +73,4 @@ Copy this checklist and tick each item — the verify step is exhaustive, not a 
 
 6. **Write the files** to the output directory (default `epics/`, configurable), one file per epic, filename slugged from the epic title. Diff before overwriting — never clobber hand-edited content. Completion: each epic exists as its own file under the output dir.
 
-7. **Verify exhaustively.** Every source Requirement and Scenario is accounted for (covered by a story or explicitly out of scope); no Epic exceeds ~15 stories; every story has a unique `STORY-…` ID and acceptance criteria; every map-table title matches the spec verbatim. Report any Requirement or Scenario you could not place cleanly rather than guessing.
+7. **Verify exhaustively.** Every source Requirement and Scenario is accounted for (covered by a story or explicitly out of scope); no Epic exceeds ~10 stories (split if it does); every story has a unique `STORY-…` ID and acceptance criteria; every map-table title matches the spec verbatim. Report any Requirement or Scenario you could not place cleanly rather than guessing.

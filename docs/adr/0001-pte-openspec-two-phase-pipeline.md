@@ -1,0 +1,7 @@
+# pte-openspec: planning chain and build stage are decoupled
+
+The `pte-openspec-*` pipeline has two phases that do **not** feed each other. The **planning chain** (`pte-openspec-to-epics` → `pte-openspec-to-stories` → `pte-openspec-bdd-tests`) produces a groomed, human-facing backlog: epics, story cards, and the declarative Gherkin embedded in each card, all lined up on the same `EPIC-…`/`STORY-…` trace IDs. The **build stage** (`pte-openspec-tdd-apply`) implements the change test-first from the OpenSpec **change tasks** via a red-green TDD loop — it does **not** read the epics/stories/Gherkin and does **not** key on the trace IDs.
+
+The single shared anchor is the **OpenSpec spec** (`### Requirement` / `#### Scenario`): both phases trace back to it, never to each other. This is deliberate — the planning artifacts are living documentation for refinement, and the build stage is unit-level TDD driven by the task list. The cost is that the two can drift (a story card and the code that satisfies the same requirement are verified independently); the spec being the sole source of truth is what keeps them reconcilable.
+
+Earlier `README.md` wording ("stage 4 consumes stage 3, which consumes stage 2"; "every stage after step 2 keys on the same trace ID") described a single linear chain and was wrong for the build stage — corrected to this two-phase model. The router skill (`pte-openspec/SKILL.md`) already framed it correctly.

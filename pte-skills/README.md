@@ -1,6 +1,6 @@
 # pte-skills — OpenSpec → groomed backlog pipeline
 
-Ez a mappa a `pte-openspec-*` skillcsaládot tartalmazza: egy **lineáris láncot** (pipeline), amely az [OpenSpec](https://github.com/fission-ai/openspec) specifikációkat egy csiszolt, tesztelhető Agile backlogra fordítja le — majd a change taskjait **teszt-first** kóddá implementálja. Nem alkalmazáskód — Claude Code skillek, amelyek egymásra épülnek, szigorúan sorrendben.
+Ez a mappa a `pte-openspec-*` skillcsaládot tartalmazza: egy **két fázisú** pipeline-t, amely az [OpenSpec](https://github.com/fission-ai/openspec) specifikációkat egy csiszolt, tesztelhető Agile backlogra fordítja le (**planning-lánc**), majd a change taskjait **teszt-first** kóddá implementálja (**build stage**). Nem alkalmazáskód — Claude Code skillek. A két fázis **nem táplálja egymást**: a planning-lánc lépései szigorú sorrendben egymásra épülnek, a build stage viszont az OpenSpec change taskjaiból dolgozik, függetlenül a planning-artefaktumoktól. A közös horgony mindkettőnél a **spec** — oda vezetnek vissza, nem egymáshoz.
 
 A lánc **két artefaktum-fajtát** termel:
 
@@ -14,49 +14,51 @@ A skillek prózája (`SKILL.md`) angol, de **minden generált artefaktum tartalm
 ## A workflow áttekintése
 
 ```
-                 openspec explore / propose
+                 openspec explore / propose            (előfeltétel)
                             │
                             ▼
-              openspec/specs/**/spec.md
-              (### Requirement → #### Scenario → WHEN/THEN)
-                            │
-                            ▼
-             ┌──────────────────────────────┐
-             │     pte-openspec-to-epics     │  MINTS: EPIC-… / STORY-… ID-k
-             │            → epics/           │         + Forrás-spec hivatkozás map
-             │  (epic tartalmazza story-kat) │
-             └──────────────────────────────┘
-                            │  CONSUMES: epic map + ID-k
-                            ▼
-             ┌──────────────────────────────┐
-             │    pte-openspec-to-stories    │  egy kártya / STORY-…
-             │           → stories/          │  BDD teszt szakasz = placeholder
-             └──────────────────────────────┘
-                            │  CONSUMES: story kártyák
-                            ▼
-             ┌──────────────────────────────┐
-             │     pte-openspec-bdd-tests    │  a kártya BDD teszt szakaszát
-             │  (Gherkin a story kártyába,   │  helyben tölti ki (nincs új fájl)
-             │   helyben — nincs features/)  │
-             └──────────────────────────────┘
-                            ╎  a backlog kész; a change buildelhető
-                            ▼
-             ┌──────────────────────────────┐
-             │    pte-openspec-tdd-apply     │  build stage: a change taskjait
-             │   (red-green tdd taskonként,  │  teszt-first implementálja
-             │    openspec-apply-change-en)  │  (nem a trace ID-kra kulcsol)
-             └──────────────────────────────┘
+              openspec/specs/**/spec.md  ◀── közös horgony ──┐
+              (### Requirement → #### Scenario → WHEN/THEN)   │
+                            │                                 │
+        ┌─── PLANNING ──────┘                                 │
+        ▼                                                     │
+   ┌──────────────────────────────┐                          │
+   │  1. pte-openspec-to-epics     │  MINTS: EPIC-… / STORY-… │
+   │            → epics/           │        + Forrás-spec map │
+   └──────────────────────────────┘                          │
+                  │  CONSUMES: epic map + ID-k                │
+                  ▼                                           │
+   ┌──────────────────────────────┐                          │
+   │  2. pte-openspec-to-stories   │  egy kártya / STORY-…    │
+   │           → stories/          │  BDD teszt = placeholder │
+   └──────────────────────────────┘                          │
+                  │  CONSUMES: story kártyák                  │
+                  ▼                                           │
+   ┌──────────────────────────────┐                          │
+   │  3. pte-openspec-bdd-tests    │  Gherkin a kártyába,     │
+   │  (helyben — nincs features/)  │  helyben (nincs új fájl) │
+   └──────────────────────────────┘                          │
+                  ╎ living doc                                │
+                  ⇢ (tervezett) Playwright E2E — még nincs skill
+                                                              │
+        ┌─── BUILD (külön ág, planning-től független) ────────┘
+        ▼   CONSUMES: change tasks (nem a trace ID-k, nem epics/stories)
+   ┌──────────────────────────────┐
+   │  4. pte-openspec-tdd-apply    │  build stage: a change taskjait
+   │   (red-green tdd taskonként,  │  teszt-first implementálja
+   │    openspec-apply-change-en)  │  (user-invoked)
+   └──────────────────────────────┘
 ```
 
 A `pte-openspec` skill a lánc **routere**: megmondja, melyik skill mit csinál és milyen sorrendben.
 
 ## A lánc lépései
 
-A lépések **szigorúan sorrendben** futnak — mindegyik az előző által termelt artefaktumot fogyasztja. A 4. függ a 3.-tól, az a 2.-tól.
+A **planning-lánc** (1–3) lépései **szigorúan sorrendben** futnak — mindegyik az előző által termelt artefaktumot fogyasztja: a 3. a 2.-at, az a 1.-et. A **build stage** (4) ettől független ág — a change taskjaiból dolgozik, nem a planning-artefaktumokból.
 
-### 0. Explore / propose (OpenSpec)
+### Előfeltétel — Explore / propose (OpenSpec)
 
-Az `openspec-explore` / `openspec-propose` (vagy az `opsx:*` parancsok) egy ötletből specifikációt vagy change deltát készítenek az `openspec/` alá. Minden `### Requirement` `#### Scenario` blokkokat tartalmaz, ezek pedig `WHEN`/`THEN` felsorolásokat — ez a viselkedés forrása az egész lánc számára.
+Az `openspec-explore` / `openspec-propose` (vagy az `opsx:*` parancsok) egy ötletből specifikációt vagy change deltát készítenek az `openspec/` alá. Minden `### Requirement` `#### Scenario` blokkokat tartalmaz, ezek pedig `WHEN`/`THEN` felsorolásokat — ez a viselkedés forrása az egész pipeline számára. Ez **nem** `pte-openspec-*` skill, hanem a forrás, amit a pipeline olvas.
 
 ### 1. `pte-openspec-to-epics` → `epics/`
 
@@ -84,11 +86,13 @@ A kártya egy **`BDD teszt`** szakaszt is kap — **placeholderként**. Ez a ski
 
 ### 3. `pte-openspec-bdd-tests` → beágyazva a story kártyába
 
-A lánc **utolsó lépése**. Bemenete a **story kártyák** (`stories/`), nem a nyers spec. Minden kártya *Forrás-hivatkozás* sora megmondja, mely `#### Scenario`-kat fedi le és mely trace ID-kkal kell taggelni. A skill ezekből a scenariókból **deklaratív Gherkint** ír, és a kártya `BDD teszt` szakaszát **helyben** tölti ki — **nem hoz létre külön fájlt**, és a kártya többi szakaszához nem nyúl.
+A **planning-lánc utolsó lépése**. Bemenete a **story kártyák** (`stories/`), nem a nyers spec. Minden kártya *Forrás-hivatkozás* sora megmondja, mely `#### Scenario`-kat fedi le és mely trace ID-kkal kell taggelni. A skill ezekből a scenariókból **deklaratív Gherkint** ír, és a kártya `BDD teszt` szakaszát **helyben** tölti ki — **nem hoz létre külön fájlt**, és a kártya többi szakaszához nem nyúl.
 
 A vezérszó a `declarative`: minden lépés azt írja le, *mit* csinál a rendszer, nem azt, *hogyan* kattint a felhasználó (nincs UI-, route- vagy mezőszintű részlet). Leképezés majdnem 1:1: `### Requirement` → `Szabály:`, `#### Scenario` → `Forgatókönyv:` (vagy `Forgatókönyv vázlat:` ha csak adat változik), `WHEN` → `Amikor`, `THEN` → `Akkor`. Az egyetlen rés a `Given`/`Adott`: a spec az előfeltételt ritkán mondja ki, ezt a skill pótolja. Magyar spec esetén a beágyazott blokk első sora `# language: hu`.
 
 A beágyazott Gherkin a kártya saját `@EPIC-…` / `@STORY-…` tagjeit viseli (a *Forrás-hivatkozás* sorból, szó szerint) — így epic, story kártya és a benne lévő Gherkin egy-az-egyben illeszkedik. A lépések szövege mindig a specből származik, soha nem a kártya prózájából.
+
+A Gherkin **living documentation** — ember-olvasható viselkedésleírás, ebben a pipeline-ban **nem futtatható**. Egy **későbbi, külön fázis** implementálja **Playwright E2E** tesztként (erre még nincs skill). A deklaratív szabály ezért marad: a Gherkin UI-mentes; a Playwright/UI-részlet abba a jövőbeli E2E rétegbe kerül, sosem a Gherkinbe. Step-definition stubot ez a skill **nem** generál — a célfutó Playwright, nem Cucumber.
 
 ### 4. `pte-openspec-tdd-apply` → tesztelt kód
 
@@ -98,7 +102,7 @@ Ez a stage **nem a trace ID-kra kulcsol** és nem nyúl az `epics/` / `stories/`
 
 ## Trace ID-k és a szerződés
 
-Minden 2. lépés utáni stage ugyanarra a trace ID-ra kulcsol, ezért egy epic, a story kártyái és a kártyákba ágyazott Gherkin egy-az-egyben összeérnek. A lánc lineáris: a 4. a 3.-at fogyasztja, az a 2.-at.
+A **planning-lánc** minden lépése (1–3) ugyanarra a trace ID-ra kulcsol, ezért egy epic, a story kártyái és a kártyákba ágyazott Gherkin egy-az-egyben összeérnek. A build stage (4) **nem** kulcsol a trace ID-kra: az a change taskjaiból dolgozik, a planning-artefaktumokat nem olvassa. A két fázis csak a **specnél** találkozik.
 
 **Ownership:** `pte-openspec-to-epics` **MINTS**; `pte-openspec-to-stories` és `pte-openspec-bdd-tests` **CONSUME** (szó szerint hivatkoznak, soha nem mintáznak újra).
 

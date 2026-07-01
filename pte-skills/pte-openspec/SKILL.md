@@ -8,12 +8,19 @@ The `pte-openspec-*` skills form one pipeline from OpenSpec specs to a groomed, 
 
 ## Pipeline
 
-The stages run **strictly in order** — each consumes the artifact the previous one produced. The **epic** is the largest unit: it contains its stories in its description. The **story card** is the smallest unit: it contains its own BDD test(s) in its description. Nothing is written outside these two artifact kinds — there is no separate `features/` tree.
+The pipeline has **two phases** that share one anchor — the OpenSpec spec — but do **not** feed each other. The **planning chain** (steps 1–3) runs strictly in order, each consuming the artifact the previous one produced. The **build stage** (step 4) implements the change from its OpenSpec tasks, independently of the planning artifacts. The **epic** is the largest unit: it contains its stories in its description. The **story card** is the smallest unit: it contains its own BDD test(s) in its description. Nothing is written outside these two artifact kinds — there is no separate `features/` tree.
 
-1. **Explore / propose** — `openspec-explore`, `openspec-propose` (or the `opsx:*` commands) turn an idea into a spec / change delta under `openspec/`.
-2. **`pte-openspec-to-epics`** → `epics/` — rolls Requirements up into lean Agile epics; each epic lists its stories in its *User story-k* section. **MINTS** the `EPIC-…`/`STORY-…` trace IDs and the *Forrás-spec hivatkozás* map.
-3. **`pte-openspec-to-stories`** → `stories/` — expands each epic story into a refinement-ready Agile story card, one per `STORY-…`. **CONSUMES** the epic's IDs. Leaves a **`BDD teszt`** section as a placeholder for stage 4.
-4. **`pte-openspec-bdd-tests`** — fills each story card's **`BDD teszt`** section with declarative Gherkin, sourced from the spec scenarios the card's map row assigns. **CONSUMES** the story cards; edits them in place, writes no separate files.
-5. **`pte-openspec-tdd-apply`** — implements the change's tasks test-first: per task a red-green loop (via `tdd`) before the checkbox flips. **CONSUMES** the OpenSpec change's `tasks` (through `openspec-apply-change`), not the trace IDs. The **build stage**, downstream of planning. **User-invoked** — it does not fire autonomously; run it by name once the change is ready to build.
+**Prerequisite — Explore / propose.** `openspec-explore`, `openspec-propose` (or the `opsx:*` commands) turn an idea into a spec / change delta under `openspec/`. Not a `pte-openspec-*` skill; it is the source the whole pipeline reads.
 
-Stages 2–4 are the planning chain: each is model-invoked and keys off the same trace IDs, so an epic, its story cards, and the Gherkin embedded in each card line up one-to-one. Stage 5 is the build stage — user-invoked, turns the change's tasks into tested code, and does not touch the epics/stories artifacts.
+Planning chain (model-invoked; keys off the shared trace IDs):
+
+1. **`pte-openspec-to-epics`** → `epics/` — rolls Requirements up into lean Agile epics; each epic lists its stories in its *User story-k* section. **MINTS** the `EPIC-…`/`STORY-…` trace IDs and the *Forrás-spec hivatkozás* map.
+2. **`pte-openspec-to-stories`** → `stories/` — expands each epic story into a refinement-ready Agile story card, one per `STORY-…`. **CONSUMES** the epic's IDs. Leaves a **`BDD teszt`** section as a placeholder for step 3.
+3. **`pte-openspec-bdd-tests`** — fills each story card's **`BDD teszt`** section with declarative Gherkin, sourced from the spec scenarios the card's map row assigns. **CONSUMES** the story cards; edits them in place, writes no separate files. The Gherkin is **living documentation**, implemented later as a Playwright E2E test.
+   - ⇢ **(planned) Playwright E2E** — a future, separate phase implements the embedded Gherkin as Playwright E2E tests. No skill for it yet.
+
+Build stage (user-invoked; independent of the planning artifacts):
+
+4. **`pte-openspec-tdd-apply`** — implements the change's tasks test-first: per task a red-green loop (via `tdd`) before the checkbox flips. **CONSUMES** the OpenSpec change's `tasks` (through `openspec-apply-change`), **not** the trace IDs and **not** the epics/stories/Gherkin. **User-invoked** — it does not fire autonomously; run it by name once the change is ready to build.
+
+The planning chain's steps key off the same trace IDs, so an epic, its story cards, and the Gherkin embedded in each card line up one-to-one. The build stage turns the change's tasks into tested code and does not touch the planning artifacts — the two phases meet only at the spec.
