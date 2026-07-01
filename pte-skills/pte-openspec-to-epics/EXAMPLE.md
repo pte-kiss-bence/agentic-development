@@ -1,6 +1,6 @@
 # Worked example: OpenSpec spec → Agile Epic
 
-One end-to-end transformation showing the non-obvious moves under the **new epic schema**: grouping a capability's Requirements into a single lean epic, writing the measurable hypothesis into `## E2E Scenario`, filling `## Cross-cutting Concerns` with real spec-derived concerns (not the rubric), assigning requirement-anchored trace IDs, and parking the *User story-k* list plus the traceability map inside the pipeline-only fence so `pte-openspec-jira-sync` hides them from Jira while the downstream skills still read them.
+One end-to-end transformation showing the non-obvious moves under the **new epic schema**: grouping a capability's Requirements into a single lean epic, writing the measurable hypothesis into `## E2E Scenario`, filling `## Cross-cutting Concerns` with real spec-derived concerns (not the rubric), assigning requirement-anchored trace IDs, and parking the *User Stories* list plus the traceability map inside the pipeline-only fence so `pte-openspec-jira-sync` hides them from Jira while the downstream skills still read them.
 
 The pedagogical shape is unchanged: a short `## Input` spec excerpt, the `## Output` epic file, then a `## Why these moves` notes section. Section **headings inside the epic are English** (new schema); the **body stays Hungarian** (per `CONVENTIONS.md`); the pipeline-only headings and every `### Requirement` / `#### Scenario` title stay **verbatim**.
 
@@ -53,7 +53,7 @@ A rendszer SHALL minden lényegi műveletet naplózzon (ki, mi, mikor), és az a
 ```markdown
 # Belső hozzáférés — M365 auth, táblázat, audit · EPIC-belso-hozzaferes
 
-## Description
+## Epic
 A belső kör (admin és HR/vezetők) M365-tel (Entra ID / OIDC) lép be. Két
 szerepkör van: `admin` (szerkeszt: feltöltés, override, lezárás) és `reader`
 (csak olvas). A belső felhasználók táblázatként látják az időszak adatait,
@@ -73,9 +73,10 @@ adminisztrációja számára, mérve az auditált műveletek lefedettségével �
 szűréssel megválaszolt lekérdezések arányával.
 
 ## Problem / Solution
-P: A mai folyamat nem visszakövethető, és a szűrhető, aggregálható adat helyett
+**Probléma:** A mai folyamat nem visszakövethető, és a szűrhető, aggregálható adat helyett
 papírlista áll rendelkezésre.
-S: Egy M365-alapú, szerepkörös belépés + táblázat-nézet + teljes audit napló
+
+**Megoldás:** Egy M365-alapú, szerepkörös belépés + táblázat-nézet + teljes audit napló
 átláthatóvá és elszámoltathatóvá teszi a folyamatot: a vezetők szűrve látják az
 adatot, minden státuszváltás pedig visszakereshető — a token-alapú elfogadás
 korlátját (gyenge azonosítás) a napló egyértelműen jelöli.
@@ -94,13 +95,13 @@ korlátját (gyenge azonosítás) a napló egyértelműen jelöli.
 - Lokalizáció: a felület és a táblázat-nézet magyar nyelvű.
 
 ## MVP and Out of Scope
-MVP:
+**MVP:**
 - Entra ID (M365 / OIDC) hitelesítés a belső körnek.
 - `admin` és `reader` szerepkör; a `reader` nem végezhet szerkesztő műveletet.
 - Táblázat-nézet szűréssel és aggregációval, nyers adóazonosító nélkül.
 - Teljes audit napló minden lényegi műveletről, korlátlan megőrzéssel.
 
-Out of Scope:
+**Out of Scope:**
 - Oktatók / tárgyfelelősök M365-belépése.
 - Elosztott szerkesztés.
 - Dashboard / statisztikák.
@@ -125,13 +126,13 @@ Out of Scope:
 - Minden státuszváltás naplóbejegyzést kap forrással / időponttal / entitással.
 - Token-elfogadás a naplóban token-azonosítóhoz kötött és jelölt.
 
+<!-- pipeline-only:start -->
 ## Estimation
 _(rollup — a story-k esztimálása után összegezve; hiányzó story-becslésnél: `⚠ nem minden story esztimált`)_
-- **Σ ideális fejlesztői óra (Eβ):** 46 ó (≈ 7,7 ideális nap; 6 ó = 1 nap)
-- **Σ story point:** 26
+- **Becsült munkaóra:** 46 ó (≈ 7,7 ideális nap)
+- **Story Point:** 26
 
-<!-- pipeline-only:start -->
-## User story-k
+## User Stories
 - `STORY-belso-hozzaferes-m365-szerepkorok`
   Mint belső felhasználó, szeretném M365-tel belépni és a szerepkörömnek
   megfelelő jogot kapni, hogy csak az admin szerkeszthessen, a reader pedig
@@ -151,9 +152,9 @@ _(rollup — a story-k esztimálása után összegezve; hiányzó story-becslés
   - Státuszváltás naplóbejegyzést kap forrással, időponttal és entitással.
   - Token-elfogadás a token-azonosítóhoz kötve, gyenge azonosításúként jelölve.
 
-## Forrás-spec hivatkozás
+## Source Spec Reference
 
-| Story ID | Epic ID | Forrás `### Requirement` | Lefedett `#### Scenario`-k |
+| Story ID | Epic ID | Source `### Requirement` | Covered `#### Scenario`s |
 |----------|---------|--------------------------|----------------------------|
 | STORY-belso-hozzaferes-m365-szerepkorok | EPIC-belso-hozzaferes | M365 alapú belső hozzáférés és szerepkörök | Admin szerkeszthet; Reader csak olvas |
 | STORY-belso-hozzaferes-tablazat-nezet | EPIC-belso-hozzaferes | Szűrhető, aggregálható táblázat-nézet | Szűrés átcsúszott tételekre; Nyers adóazonosító elrejtése |
@@ -163,10 +164,10 @@ _(rollup — a story-k esztimálása után összegezve; hiányzó story-becslés
 
 ## Why these moves
 
-- **English headings, Hungarian body** — every `##` section above the fence uses the new schema's English heading (`Description`, `Persona`, `E2E Scenario`, `Problem / Solution`, `Cross-cutting Concerns`, `MVP and Out of Scope`, `Success metrics`, `Risks and Dependencies`, `High Level Acceptance Criteria`), while the prose under each stays Hungarian. The only Hungarian headings are the pipeline-only ones (`User story-k`, `Forrás-spec hivatkozás`), which never reach Jira.
+- **English headings, Hungarian body** — every `##` section above the fence uses the new schema's English heading (`Epic`, `Persona`, `E2E Scenario`, `Problem / Solution`, `Cross-cutting Concerns`, `MVP and Out of Scope`, `Success metrics`, `Risks and Dependencies`, `High Level Acceptance Criteria`), while the prose under each stays Hungarian. Even the pipeline-only headings (`User Stories`, `Source Spec Reference`) are English; they never reach Jira, but every heading in the file is English.
 - **`## E2E Scenario` absorbs the old Hipotézis** — it carries the measurable hypothesis in the `Ha [X], akkor [Y] a [Z] csoportnak, mérve [W]-vel` shape and keeps the `mérve …` clause, so the epic still ties to a measurable outcome rather than a task list.
 - **`## Cross-cutting Concerns` is filled, not rubric text** — the bullets are the real, spec-derived concerns for *this* epic (server-side role separation, unlimited audit retention, adóazonosító exclusion, per-entry provenance, weak-identity token flagging, Hungarian UI). The rubric's menu of possible concern categories is never pasted in; a concern appears only because the spec actually raises it.
 - **One lean epic, three Requirements** — all three Requirements serve a single user value (transparent, accountable internal access), so they group into one epic. Three vertical-slice stories, well under the ~10-story ceiling.
 - **Requirement-anchored trace IDs** — each `STORY-<epic-slug>-<requirement-slug>` is anchored on its primary Requirement, so the ID stays stable when stories are reordered. No positional numbers.
-- **`## Estimation` is a rollup, not an epic-level guess** — the total is the Σ of the child stories' `Eβ` hours and SP (per `ESTIMATION.md`), so it is filled by the estimation-rollup pass *after* `pte-openspec-to-stories` estimates the cards, not at mint. Until every child is estimated it stays a placeholder / `⚠ nem minden story esztimált` — the epic never invents a number its stories don't support.
-- **User story-k + Forrás-spec map inside the pipeline-only fence** — both sit between `<!-- pipeline-only:start -->` and `<!-- pipeline-only:end -->`, so `pte-openspec-jira-sync` strips the whole region before pushing the Description to Jira, while `pte-openspec-to-stories` and `pte-openspec-bdd-tests` still read the map on disk. The map keeps every `### Requirement` / `#### Scenario` title **verbatim** — that is the cross-skill contract: downstream skills match rows by exact title and source the `WHEN`/`THEN` step text from the spec, never from epic prose.
+- **`## Estimation` is a rollup, not an epic-level guess** — the total is the Σ of the child stories' `Eβ` hours and SP (per `ESTIMATION.md`), rendered in the **same two-line shape** as a story card (`Becsült munkaóra:` = `Σ Eβ` ó + ideal days; `Story Point:` = `Σ SP` (bare integer) — no `Σ` prefix, no story-count suffix). It is filled by the estimation-rollup pass *after* `pte-openspec-to-stories` estimates the cards, not at mint. Until every child is estimated it stays a placeholder / `⚠ nem minden story esztimált` — the epic never invents a number its stories don't support.
+- **User Stories + Forrás-spec map inside the pipeline-only fence** — both sit between `<!-- pipeline-only:start -->` and `<!-- pipeline-only:end -->`, so `pte-openspec-jira-sync` strips the whole region before pushing the Description to Jira, while `pte-openspec-to-stories` and `pte-openspec-bdd-tests` still read the map on disk. The map keeps every `### Requirement` / `#### Scenario` title **verbatim** — that is the cross-skill contract: downstream skills match rows by exact title and source the `WHEN`/`THEN` step text from the spec, never from epic prose.

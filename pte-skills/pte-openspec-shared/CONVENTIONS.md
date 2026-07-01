@@ -8,11 +8,11 @@ The chain is **right-sized to the change**, not always run whole: a full feature
 
 Every generated **artifact's content is written in Hungarian**, matching `openspec/config.yaml`'s artifact convention. Keep verbatim — do **not** translate: code, identifiers, API names, CLI commands, file paths, `### Requirement` names, `#### Scenario` titles, `EPIC-…`/`STORY-…` trace IDs/slugs, and commit-type keywords (`feat`/`fix`/...). The skills themselves (`SKILL.md` prose) stay in English — only the files they emit are Hungarian.
 
-**Section headings are English; body is Hungarian.** The epic and story-card anatomies use **English `##` headings** (epic: `Description`, `Persona`, `E2E Scenario`, `Problem / Solution`, `Cross-cutting Concerns`, `MVP and Out of Scope`, `Success metrics`, `Risks and Dependencies`, `High Level Acceptance Criteria`; story: `Description`, `Context`, `BDD Test`, `Risks and Dependencies`) — use them verbatim. The only **Hungarian** headings left are the pipeline-internal ones that never reach Jira: everything inside a **pipeline-only** block (`User story-k`, `Forrás-spec hivatkozás`, `Forrás-hivatkozás`) and the `pte-openspec-jira-sync`-owned `Jira szinkron` block.
+**Section headings are English; body is Hungarian.** The epic and story-card anatomies use **English `##` headings** (epic: `Epic`, `Persona`, `E2E Scenario`, `Problem / Solution`, `Cross-cutting Concerns`, `MVP and Out of Scope`, `Success metrics`, `Risks and Dependencies`, `High Level Acceptance Criteria`; story: `User Story`, `Context`, `BDD Test`, `Risks and Dependencies`) — use them verbatim. **All `##` headings are English — no exceptions.** This now includes the pipeline-only headings (`User Stories`, `Source Spec Reference`, `Source Reference`) and the `pte-openspec-jira-sync`-owned `Jira Sync` block; only the prose *under* each heading stays Hungarian. The epic's main narrative section is **`## Epic`** and the story's is **`## User Story`** (never `## Description`). Inside the epic's `## Problem / Solution`, the two labels are spelled out **and bold** — `**Probléma:**` and `**Megoldás:**` — on separate stacked paragraphs, never the `P:`/`S:` shorthand. Likewise the epic's `## MVP and Out of Scope` labels its two lists with bold `**MVP:**` and `**Out of Scope:**`.
 
 ## Pipeline-only (hidden-from-Jira) blocks
 
-Some content the pipeline needs — the epic's *Forrás-spec hivatkozás* map and *User story-k* list, an epic-less card's self-carried *Forrás-hivatkozás* row — must **not** reach Jira. Wrap it in a single fenced region so `pte-openspec-jira-sync` can strip it by one boundary:
+Some content the pipeline needs — the epic's *Source Spec Reference* map and *User Stories* list, an epic-less card's self-carried *Source Reference* row, and every artifact's **`## Estimation`** section — must **not** reach Jira **as Description text**. Wrap it in a single fenced region so `pte-openspec-jira-sync` can strip it by one boundary:
 
 ```markdown
 <!-- pipeline-only:start -->
@@ -21,6 +21,8 @@ Some content the pipeline needs — the epic's *Forrás-spec hivatkozás* map an
 ```
 
 The fence lives at the **end of the file** (after the last Jira-visible section). `pte-openspec-jira-sync` removes the whole region — markers inclusive — from the body it pushes as the Jira Description; the block stays on disk for the downstream skills. Everything outside the fence is Jira-visible.
+
+**`## Estimation` is pipeline-only but still drives Jira's structured fields.** The estimate is deliberately kept **out of the Jira Description** (it lives inside the fence), yet `pte-openspec-jira-sync` **always reads it from the fenced block** and pushes its numbers to Jira's **structured** fields — the SP to *Story points* and the `Becsült munkaóra` (`Eβ`) to *Original estimate* — for **both** epics (rollup sums) and stories. So the estimate never clutters the Description prose, but the board's structured fields are always populated. This is the one pipeline-only section whose content maps to a Jira field; the *Source Spec Reference* / *User Stories* / *Source Reference* parts stay purely internal.
 
 ## Trace-ID grammar and ownership
 
@@ -32,11 +34,11 @@ The fence lives at the **end of the file** (after the last Jira-visible section)
 
 **Ownership:** `pte-openspec-to-epics` **MINTS** `EPIC-…` and their child `STORY-…`. In **reconcile** mode it reuses an existing epic's `EPIC-…` verbatim and mints only the new `STORY-…` a delta adds — it never re-mints an epic ID. `pte-openspec-to-stories` **CONSUMES** these IDs, except in **epic-less mode**, where it mints the `STORY-<capability-slug>-…` above. `pte-openspec-bdd-tests` only **CONSUMES** — reference verbatim, never re-mint.
 
-## The *Forrás-spec hivatkozás* map — cross-skill contract
+## The *Source Spec Reference* map — cross-skill contract
 
 `pte-openspec-to-epics` emits, per epic, a traceability table — the contract downstream skills read instead of re-deriving the requirement→story split:
 
-| Story ID | Epic ID | Forrás `### Requirement` | Lefedett `#### Scenario`-k |
+| Story ID | Epic ID | Source `### Requirement` | Covered `#### Scenario`s |
 |----------|---------|--------------------------|----------------------------|
 
 Downstream skills match rows by **verbatim** `### Requirement` / `#### Scenario` title. They take only the IDs and the split from the map; the behavioural text (`WHEN`/`THEN`) is always sourced from the spec itself, never from epic prose.
@@ -45,7 +47,7 @@ Downstream skills match rows by **verbatim** `### Requirement` / `#### Scenario`
 
 Every story card carries an **`## Estimation`** section, and each epic a rolled-up one — an **AI-authored reference base** the managers' downstream internal/client multipliers ride on (that multiplier step is out of pipeline scope; these skills emit the raw base only). The full model — PERT three-point in ideal engineer-hours, the weighted complexity rubric (M-drivers/modifiers, σ-drivers), the tuning constants (`k`, spread coefficients), the Eβ→SP table, the split-warning threshold, and the epic rollup rule — is the single source of truth in [`ESTIMATION.md`](ESTIMATION.md); `pte-openspec-to-stories` and `pte-openspec-to-epics` author against it. Only the **ownership** of the resulting numbers lives here, next to the pipeline's other ownership rules:
 
-**Ownership.** The SP is **local-owned** and pushed to Jira's structured *Story points* field (Local → Jira) — this **supersedes** any earlier "estimate is Jira-owned" framing. The PERT base (`O`/`M`/`P`, `Eβ`, `σ`) lives in the visible `## Estimation` section (so it also reaches the Jira Description), but only the SP maps to the structured field.
+**Ownership.** The SP is **local-owned** and pushed to Jira's structured *Story points* field (Local → Jira) — this **supersedes** any earlier "estimate is Jira-owned" framing. A **story** card's visible `## Estimation` renders the inline **`3-Points becslés`** (`O`/`M`/`P`/`Eβ`/`σ` on one line), then **`Becsült munkaóra`** (`Eβ` + ideal days), then **`Story Point`** (`<SP>`, a bare integer); an **epic** rollup renders only `Becsült munkaóra` + `Story Point` (no `3-Points` block — `O`/`M`/`P` don't sum). All these lines reach the Jira Description, but only the SP maps to the structured field. The exact rendered format (story + epic-rollup) lives in [`ESTIMATION.md`](ESTIMATION.md).
 
 ## INVEST — the story gate
 
@@ -71,11 +73,11 @@ The generated backlog lives **under the OpenSpec tree**, co-located with the spe
 Both artifact kinds are filed under their own trace ID, so the filename **is** the ID and a single `grep`/glob finds an `EPIC-…`/`STORY-…` by name across the tree:
 
 - **Epics** → `openspec/backlog/epics/EPIC-<epic-slug>.md` — the filename carries the full `EPIC-<epic-slug>` trace ID. The `<epic-slug>` used to pair the story directory is the filename **minus** its `EPIC-` prefix.
-- **Story cards** → `openspec/backlog/stories/<epic-slug>/STORY-<epic-slug>-<requirement-slug>.md` — the filename carries the full `STORY-…` trace ID (the same one in the card's *Cím* and *Forrás-hivatkozás* row), giving searchability parity with the `EPIC-…` files. The parent `<epic-slug>` directory repeats inside the filename by construction, since the `STORY-…` ID is epic-namespaced.
+- **Story cards** → `openspec/backlog/stories/<epic-slug>/STORY-<epic-slug>-<requirement-slug>.md` — the filename carries the full `STORY-…` trace ID (the same one in the card's *Cím* and *Source Reference* row), giving searchability parity with the `EPIC-…` files. The parent `<epic-slug>` directory repeats inside the filename by construction, since the `STORY-…` ID is epic-namespaced.
 - **Epic-less story cards** (no parent epic) → `openspec/backlog/stories/<capability-slug>/STORY-<capability-slug>-<requirement-slug>.md` (the `STORY-…` ID is capability-namespaced instead of epic-namespaced; the filename is still the full trace ID).
 
 `openspec/backlog/` is **not** OpenSpec-CLI-managed (unlike `openspec/specs/` and `openspec/changes/`) — `openspec update`/`archive` never touch it — but it is deliberately kept inside `openspec/` so the backlog and its source specs travel together. Every skill's default output path resolves under here; when a skill says "default `openspec/backlog/epics/`, configurable", this is the definition. Nothing is written outside `openspec/backlog/**` — there is no separate root-level `epics/`/`stories/` or `features/` tree.
 
 ## Writing output files
 
-Diff before overwriting — never clobber hand-edited content. `pte-openspec-to-epics` and `pte-openspec-to-stories` write one artifact per file under `openspec/backlog/` (see *Output location*). `pte-openspec-bdd-tests` writes nothing new — it edits the existing story cards in place, filling only their `BDD Test` section and leaving every other section untouched. `pte-openspec-jira-sync` likewise edits epics and cards in place, writing only their `## Jira szinkron` block (Jira-owned fields pulled back from the board), and additionally mirrors the artifacts to Jira.
+Diff before overwriting — never clobber hand-edited content. `pte-openspec-to-epics` and `pte-openspec-to-stories` write one artifact per file under `openspec/backlog/` (see *Output location*). `pte-openspec-bdd-tests` writes nothing new — it edits the existing story cards in place, filling only their `BDD Test` section and leaving every other section untouched. `pte-openspec-jira-sync` likewise edits epics and cards in place, writing only their `## Jira Sync` block (Jira-owned fields pulled back from the board), and additionally mirrors the artifacts to Jira.

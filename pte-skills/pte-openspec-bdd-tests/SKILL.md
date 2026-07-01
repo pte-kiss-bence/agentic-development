@@ -9,13 +9,13 @@ This is the **last step of the planning chain** (`epics` → `stories` → **bdd
 
 `declarative` is the governing word: every generated step describes _what_ the system does, not _how_ a user clicks it. The full rule set and anti-patterns live in [`BDD-RULES.md`](BDD-RULES.md) — load it before writing any step. A complete worked transformation is in [`EXAMPLE.md`](EXAMPLE.md).
 
-Shared pipeline conventions — output language, trace-ID grammar, the *Forrás-spec hivatkozás* map contract, source-spec resolution, and diff-don't-clobber — live in [`../pte-openspec-shared/CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md).
+Shared pipeline conventions — output language, trace-ID grammar, the *Source Spec Reference* map contract, source-spec resolution, and diff-don't-clobber — live in [`../pte-openspec-shared/CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md).
 
 ## Role in the pipeline
 
-The **primary input is the story card set** produced by `pte-openspec-to-stories`, not the raw spec. In the new lean schema the story card carries **no** trace row of its own — the requirement→story→scenario split lives in the **epic's** pipeline-only *Forrás-spec hivatkozás* map. So the per-card scenario assignment and trace IDs come from **the map, matched to the card by its `STORY-…`** (from the card's *Cím* / filename):
+The **primary input is the story card set** produced by `pte-openspec-to-stories`, not the raw spec. In the new lean schema the story card carries **no** trace row of its own — the requirement→story→scenario split lives in the **epic's** pipeline-only *Source Spec Reference* map. So the per-card scenario assignment and trace IDs come from **the map, matched to the card by its `STORY-…`** (from the card's *Cím* / filename):
 
-- **Epic-driven card** → read the parent epic's (pipeline-only) *Forrás-spec hivatkozás* map; find the row whose `Story ID` matches this card. That row gives the `EPIC-…`/`STORY-…` tags, the source `### Requirement`, and the covered `#### Scenario`s.
+- **Epic-driven card** → read the parent epic's (pipeline-only) *Source Spec Reference* map; find the row whose `Story ID` matches this card. That row gives the `EPIC-…`/`STORY-…` tags, the source `### Requirement`, and the covered `#### Scenario`s.
 - **Epic-less card** (empty parent `EPIC-…`) → the card **self-carries** its row inside its own pipeline-only fence; read it there.
 
 This skill then:
@@ -74,7 +74,7 @@ Copy this checklist and tick each item as you go — the verify step is exhausti
 
 1. **Resolve the source story cards.** Locate the cards (default `openspec/backlog/stories/`, configurable — see *Output location* in `CONVENTIONS.md`). If several epics' cards exist and it is unclear which to cover, list them with **AskUserQuestion**. **When no cards exist:** stop and offer to run `pte-openspec-to-stories` first — that is the pipeline's correct entry into this stage. There is no standalone `.feature` path: this skill only fills the `BDD Test` section of existing cards and writes no new files. Completion: the exact card set is named (or the skill has stopped and offered `pte-openspec-to-stories`).
 
-2. **Enumerate per card — from the map, not the card.** For each card, find its map row: **epic-driven** → match the card's `STORY-…` against the parent epic's pipeline-only *Forrás-spec hivatkozás* table; **epic-less** → read the card's own pipeline-only *Forrás-hivatkozás* row. List the `STORY-…`/`EPIC-…` IDs, source `### Requirement`, and covered `#### Scenario`s. Completion (exhaustive): every card is matched to exactly one map row; every Scenario that row assigns is on the list; none invented, none dropped.
+2. **Enumerate per card — from the map, not the card.** For each card, find its map row: **epic-driven** → match the card's `STORY-…` against the parent epic's pipeline-only *Source Spec Reference* table; **epic-less** → read the card's own pipeline-only *Source Reference* row. List the `STORY-…`/`EPIC-…` IDs, source `### Requirement`, and covered `#### Scenario`s. Completion (exhaustive): every card is matched to exactly one map row; every Scenario that row assigns is on the list; none invented, none dropped.
 
 3. **Trace to the spec.** For each covered `#### Scenario`, open its `### Requirement` in the spec (resolve per `CONVENTIONS.md`) and read the `WHEN`/`THEN` bullets — the behavioural source. Completion: every mapped Scenario's `WHEN`/`THEN` is in hand.
 
