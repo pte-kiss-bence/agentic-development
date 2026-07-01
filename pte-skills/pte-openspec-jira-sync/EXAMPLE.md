@@ -164,8 +164,9 @@ Jellemző: M365 alapú belső hozzáférés és szerepkörök
 ```
 
 ## Estimation
-- **PERT (ideális fejlesztői óra):** O 4 / M 8 / P 16 → **Eβ ≈ 9 ó**, σ ≈ 2 ó
-- **Story point:** 5
+- **3-Points becslés (ideális óra):** O 4 / M 8 / P 16 | **Eβ 9**, σ 2
+- **Becsült munkaóra:** 9 ó (≈ 1,5 ideális nap)
+- **Story Point:** 5
 
 ## Risks and Dependencies
 - Függőség: Entra ID (M365/OIDC) tenant és szerepkör-hozzárendelés. …

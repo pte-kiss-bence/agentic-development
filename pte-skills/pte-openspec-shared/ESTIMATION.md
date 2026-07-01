@@ -44,6 +44,37 @@ Then `S = Σ(M-driver score × weight) + Σ(modifier scores)`, and **`M = round(
 | ≤ 60 | 13 | ~2 hét |
 | > 60 | 20 | — |
 
-**Split-warning (advisory, flag-only — not a hard gate).** When `SP ≥ 13` **OR** `σ / Eβ > 0.5` (too big / too uncertain), the card still ships, but its `## Estimation` carries a visible `⚠` note that the story is a split candidate. This does **not** block emission — INVEST stays the qualitative gate (the estimate only surfaces an objective signal for the human to act on).
+**Split-warning (advisory, flag-only — not a hard gate).** When `SP ≥ 13` **OR** `σ / Eβ > 0.5` (too big / too uncertain), the card still ships, but its `## Estimation` carries a visible `⚠` note (an extra line) that the story is a split candidate. This does **not** block emission — INVEST stays the qualitative gate (the estimate only surfaces an objective signal for the human to act on).
+
+## Rendered `## Estimation` format — what the card and epic actually print
+
+The story card and the epic render **different** shapes: the **story** prints the three-point (`3-Points`) estimate stacked, the **epic** prints only the summed rollup (a per-story `O`/`M`/`P` cannot be summed, so it collapses to the total `Becsült munkaóra`).
+
+Story card — three stacked top-level bullets: the `3-Points` estimate **inline on one line** (`O`/`M`/`P`/`σ` side by side), then `Becsült munkaóra` (`Eβ` + ideal days), then `Story Point`:
+
+```markdown
+## Estimation
+- **3-Points becslés (ideális óra):** O <O> / M <M> / P <P> | **Eβ <Eβ>**, σ <σ, 1 tizedes>
+- **Becsült munkaóra:** <Eβ> ó (≈ <Eβ/6, 1 tizedes> ideális nap)
+- **Story Point:** <SP>
+```
+
+Epic (rollup — summed over the child stories; **no** `3-Points` block, since `O`/`M`/`P` don't sum):
+
+```markdown
+## Estimation
+- **Becsült munkaóra:** <Σ Eβ> ó (≈ <Σ Eβ/6, 1 tizedes> ideális nap)
+- **Story Point:** <Σ SP>
+```
+
+Rules:
+- **`3-Points becslés`** (story only) — the **canonical, final form** is one inline line, with exact separators:
+
+  `- **3-Points becslés (ideális óra):** O <O> / M <M> / P <P> | **Eβ <Eβ>**, σ <σ>`
+
+  In order: `O`, `M`, `P` joined by ` / `; then a ` | ` pipe before `Eβ`; **`Eβ` is bolded** (`**Eβ <Eβ>**`) because it is the value to rely on; then a `, ` comma before `σ`. All on **one** line side by side — never sub-bullets, and never without the `|` / bold-`Eβ` / comma. `σ` keeps its Hungarian decimal comma (e.g. `1,8`). `Eβ` also repeats as the `Becsült munkaóra` value (there with the ideal-day equivalent). The three top-level bullets (`3-Points becslés`, `Becsült munkaóra`, `Story Point`) stay stacked.
+- **`Becsült munkaóra`** = the `Eβ` ideal engineer-hours (story) or `Σ Eβ` (epic), with the ideal-day equivalent in parentheses (anchor `6 ó = 1 ideális nap`; round the day figure to 1 decimal with a Hungarian comma, and drop a trailing `,0` so `1,0` → `1`).
+- **`Story Point`** = the derived SP as a **bare integer** (e.g. `3`) — no ` Points` suffix, no `Σ` prefix, and no story-count suffix.
+- The `⚠` split-warning (when `SP ≥ 13` or `σ/Eβ > 0.5`) is still appended as an extra line when it trips.
 
 **Epic rollup.** An epic's `## Estimation` is the **sum of its child stories'** `Eβ` hours and SP, filled by `pte-openspec-to-epics` **only once every child story is estimated**. If any child card lacks an estimate, mark the rollup incomplete (`⚠ nem minden story esztimált`) rather than guessing a total.

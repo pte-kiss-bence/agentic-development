@@ -62,8 +62,9 @@ A szerepkör-szeparáció védi a szerkesztő műveleteket (feltöltés, overrid
 _(kitölti a `pte-openspec-bdd-tests`)_
 
 ## Estimation
-- **PERT (ideális fejlesztői óra):** O 4 / M 8 / P 16 → **Eβ ≈ 9 ó**, σ ≈ 2 ó
-- **Story point:** 5
+- **3-Points becslés (ideális óra):** O 4 / M 8 / P 16 | **Eβ 9**, σ 2
+- **Becsült munkaóra:** 9 ó (≈ 1,5 ideális nap)
+- **Story Point:** 5
 
 ## Risks and Dependencies
 - Függőség: Entra ID (M365/OIDC) tenant és szerepkör-hozzárendelés.
@@ -129,8 +130,9 @@ Kis, önálló változtatás az értesítő e-mail kézbesítésen; nincs hozzá
 _(kitölti a `pte-openspec-bdd-tests`)_
 
 ## Estimation
-- **PERT (ideális fejlesztői óra):** O 2 / M 4 / P 8 → **Eβ ≈ 4 ó**, σ ≈ 1 ó
-- **Story point:** 2
+- **3-Points becslés (ideális óra):** O 2 / M 4 / P 8 | **Eβ 4**, σ 1
+- **Becsült munkaóra:** 4 ó (≈ 0,7 ideális nap)
+- **Story Point:** 2
 
 ## Risks and Dependencies
 - Függőség: az értesítő e-mail kiküldő pipeline, amely a sablonszöveget használja.
@@ -156,7 +158,7 @@ _(kitölti a `pte-openspec-bdd-tests`)_
 ## Why these moves
 
 - **Lean schema, five visible sections** — a card shows `## Description`, `## Context`, `## BDD Test`, `## Estimation`, and `## Risks and Dependencies`. English headings, Hungarian body (per `CONVENTIONS.md`).
-- **`## Estimation` is the reference base** — a PERT three-point in ideal engineer-hours (`Eβ`, `σ`) plus the Story Points derived from `Eβ` by the fixed table in `ESTIMATION.md`. It is AI-authored and authoritative in the pipeline; managers layer their internal/client multipliers on it downstream (out of scope here). A story that trips `SP ≥ 13` or `σ/Eβ > 0.5` gets a `⚠` split-warning but still ships — Demo 1's 5 SP / low σ is well clear of it.
+- **`## Estimation` is the reference base** — three stacked top-level bullets: the **`3-Points becslés`** (`O`/`M`/`P`/`Eβ`/`σ` inline on one line, side by side), then **`Becsült munkaóra`** (`Eβ` hours + ideal-day equivalent), then **`Story Point`** (`<SP>`, a bare integer derived from `Eβ` by the fixed table in `ESTIMATION.md`). It is AI-authored and authoritative in the pipeline; managers layer their internal/client multipliers on it downstream (out of scope here). A story that trips `SP ≥ 13` or `σ/Eβ > 0.5` gets a `⚠` split-warning line but still ships — Demo 1's 5 SP / low σ is well clear of it. The epic rollup drops the `3-Points` bullet (O/M/P don't sum) and shows only `Becsült munkaóra` + `Story Point`; the exact rendered format lives in `ESTIMATION.md`.
 - **The `Mint …` line lives inside `## Description`** — there is no separate *User story* heading; the user-value statement opens the description, then one or two narrative sentences.
 - **`## BDD Test` is a placeholder, filled later, and IS the acceptance criteria** — this skill writes no Gherkin; `pte-openspec-bdd-tests` fills the placeholder from the mapped `#### Scenario`s, and that Gherkin **is** the story's acceptance criteria. The old *sections* are dropped: *Elfogadási kritériumok* (now the Gherkin), *INVEST-ellenőrzés*, *Készenléti feltétel (DoR)*, *Elkészültségi feltétel (DoD)*, *Prioritás*. (*Becslés* is **not** dropped — it returns as `## Estimation`, reshaped into the PERT + Story-Points reference base.)
 - **INVEST stays as a rule, not a section** — both cards above satisfy INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable) even though no `INVEST-ellenőrzés` section is printed. Conformance is a hard gate: a story that can't be made INVEST-conform is re-split, not shipped.

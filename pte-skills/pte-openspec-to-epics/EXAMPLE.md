@@ -75,6 +75,7 @@ szűréssel megválaszolt lekérdezések arányával.
 ## Problem / Solution
 P: A mai folyamat nem visszakövethető, és a szűrhető, aggregálható adat helyett
 papírlista áll rendelkezésre.
+
 S: Egy M365-alapú, szerepkörös belépés + táblázat-nézet + teljes audit napló
 átláthatóvá és elszámoltathatóvá teszi a folyamatot: a vezetők szűrve látják az
 adatot, minden státuszváltás pedig visszakereshető — a token-alapú elfogadás
@@ -127,8 +128,8 @@ Out of Scope:
 
 ## Estimation
 _(rollup — a story-k esztimálása után összegezve; hiányzó story-becslésnél: `⚠ nem minden story esztimált`)_
-- **Σ ideális fejlesztői óra (Eβ):** 46 ó (≈ 7,7 ideális nap; 6 ó = 1 nap)
-- **Σ story point:** 26
+- **Becsült munkaóra:** 46 ó (≈ 7,7 ideális nap)
+- **Story Point:** 26
 
 <!-- pipeline-only:start -->
 ## User story-k
@@ -168,5 +169,5 @@ _(rollup — a story-k esztimálása után összegezve; hiányzó story-becslés
 - **`## Cross-cutting Concerns` is filled, not rubric text** — the bullets are the real, spec-derived concerns for *this* epic (server-side role separation, unlimited audit retention, adóazonosító exclusion, per-entry provenance, weak-identity token flagging, Hungarian UI). The rubric's menu of possible concern categories is never pasted in; a concern appears only because the spec actually raises it.
 - **One lean epic, three Requirements** — all three Requirements serve a single user value (transparent, accountable internal access), so they group into one epic. Three vertical-slice stories, well under the ~10-story ceiling.
 - **Requirement-anchored trace IDs** — each `STORY-<epic-slug>-<requirement-slug>` is anchored on its primary Requirement, so the ID stays stable when stories are reordered. No positional numbers.
-- **`## Estimation` is a rollup, not an epic-level guess** — the total is the Σ of the child stories' `Eβ` hours and SP (per `ESTIMATION.md`), so it is filled by the estimation-rollup pass *after* `pte-openspec-to-stories` estimates the cards, not at mint. Until every child is estimated it stays a placeholder / `⚠ nem minden story esztimált` — the epic never invents a number its stories don't support.
+- **`## Estimation` is a rollup, not an epic-level guess** — the total is the Σ of the child stories' `Eβ` hours and SP (per `ESTIMATION.md`), rendered in the **same two-line shape** as a story card (`Becsült munkaóra:` = `Σ Eβ` ó + ideal days; `Story Point:` = `Σ SP` (bare integer) — no `Σ` prefix, no story-count suffix). It is filled by the estimation-rollup pass *after* `pte-openspec-to-stories` estimates the cards, not at mint. Until every child is estimated it stays a placeholder / `⚠ nem minden story esztimált` — the epic never invents a number its stories don't support.
 - **User story-k + Forrás-spec map inside the pipeline-only fence** — both sit between `<!-- pipeline-only:start -->` and `<!-- pipeline-only:end -->`, so `pte-openspec-jira-sync` strips the whole region before pushing the Description to Jira, while `pte-openspec-to-stories` and `pte-openspec-bdd-tests` still read the map on disk. The map keeps every `### Requirement` / `#### Scenario` title **verbatim** — that is the cross-skill contract: downstream skills match rows by exact title and source the `WHEN`/`THEN` step text from the spec, never from epic prose.

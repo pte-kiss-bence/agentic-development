@@ -26,7 +26,7 @@ One owner per field. Push what local owns; pull what Jira owns. Never cross a fi
 
 The consequence that matters: **never** overwrite a locally-owned field from Jira, and **never** overwrite a Jira-owned workflow field from local. Status especially — the team's board owns it; this skill reads it, it does not set it.
 
-**Story points is now local-owned** — a deliberate flip from the old "estimate is Jira-owned" model. The pipeline's `## Estimation` (see *Estimation* in `CONVENTIONS.md`) is the AI-authored **reference base** the team relies on, so the SP flows **Local → Jira** into the structured *Story points* field; it is not pulled back. (The PERT base — `Eβ`/`σ` — rides along inside the Description as part of the card body; only the SP maps to the structured field. The downstream manager multipliers are applied off-Jira and never sync.)
+**Story points is now local-owned** — a deliberate flip from the old "estimate is Jira-owned" model. The pipeline's `## Estimation` (see *Estimation* in `CONVENTIONS.md`) is the AI-authored **reference base** the team relies on, so the SP flows **Local → Jira** into the structured *Story points* field; it is not pulled back. (A story card's visible `## Estimation` renders three stacked bullets — the inline `3-Points becslés` (`O`/`M`/`P`/`Eβ`/`σ`), `Becsült munkaóra:` (`Eβ` ó + ideal days), and `Story Point:` (`<N>`, bare integer); an epic drops the `3-Points` bullet. All ride along inside the Description as part of the card body. Only the SP maps to the structured field. The downstream manager multipliers are applied off-Jira and never sync.)
 
 ## Jira mapping
 
@@ -37,7 +37,7 @@ The consequence that matters: **never** overwrite a locally-owned field from Jir
 | `EPIC-…` / `STORY-…` trace ID | label `trace:EPIC-…` / `trace:STORY-…` |
 | card **Cím** (H1 title, minus its ` · TRACE-ID` suffix) | Summary |
 | the **Jira-visible card body below the H1**, minus the `## Jira szinkron` block and the `<!-- pipeline-only -->` block | Description |
-| story card `## Estimation` Story points (the bare SP integer) | the issue's structured **Story points** field |
+| story card `## Estimation` SP — the integer on the `- **Story Point:** <N>` line | the issue's structured **Story points** field |
 
 The Story-points field is a **custom field** whose id varies per project (e.g. `customfield_10016`) and whose name is often localized. Resolve it once via the project's field metadata (`getJiraProjectIssueTypesMetadata` / field list) rather than hardcoding an id; if the project has no Story-points field, skip the structured push and say so (the SP still travels inside the Description as part of `## Estimation`). Only the **story** SP is pushed to the field; an epic's `## Estimation` is a rollup that rides along in its Description only.
 
