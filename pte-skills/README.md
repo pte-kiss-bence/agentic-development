@@ -76,6 +76,8 @@ Mind a három planning-variáns ugyanabba a **`to-stories → bdd-tests → (tdd
 
 A **planning-lánc** (1–3) lépései **szigorúan sorrendben** futnak — mindegyik az előző által termelt artefaktumot fogyasztja: a 3. a 2.-at, az a 1.-et. A **build stage** (4) ettől független ág — a change taskjaiból dolgozik, nem a planning-artefaktumokból.
 
+> **Egyetlen visszaél (back-edge):** az epic `## Estimation`-je a gyerek story-k összege, amik csak a 2. lépésben jönnek létre — ezért az 1. lépés placeholderként emittálja, és egy **halasztott `pte-openspec-to-epics` újrafuttatás** tölti ki, miután minden kártya esztimált (diff-don't-clobber, csak a `## Estimation`-t érinti). A 2. lépés után tervezz be egy második `to-epics` menetet.
+
 ### Előfeltétel — Explore / propose (OpenSpec)
 
 Az `openspec-explore` / `openspec-propose` (vagy az `opsx:*` parancsok) egy ötletből specifikációt vagy change deltát készítenek az `openspec/` alá. Minden `### Requirement` `#### Scenario` blokkokat tartalmaz, ezek pedig `WHEN`/`THEN` felsorolásokat — ez a viselkedés forrása az egész pipeline számára. Ez **nem** `pte-openspec-*` skill, hanem a forrás, amit a pipeline olvas.
@@ -108,7 +110,7 @@ Az epic minden story-ját teljes, **refinement-ready** Agile story kártyává b
 
 **Epic-nélküli mód** (egyenrangú út, nem degradált fallback): kis, önálló change-nél, ami story-t érdemel de epicet nem, a kártyá(ka)t közvetlenül a delta specből írja, a `to-epics`-et kihagyva. Itt a skill **MINTS**: az ID capability-névterű (`STORY-<capability-slug>-…`), **stabil, nem provizórikus**, és a kártya szülő `EPIC-…` sora üres marad (ez a marker, hogy epic-nélküli). Ha az érintett capabilityhez **van** epic, ez a rossz mód — helyette `to-epics` reconcile.
 
-A kártya a **3 C**-t testesíti meg (Card, Conversation, Confirmation). A séma szándékosan **lean** — angol `##` fejlécek, magyar tartalom: `## Description` (a `Mint … szeretném … hogy …` sorral kezdve), `## Context`, `## BDD Test`, `## Estimation`, `## Risks and Dependencies`. Az **elfogadási kritérium maga a `## BDD Test` Gherkinje** — nincs külön `Elfogadási kritériumok` szekció, és a régi séma `INVEST-ellenőrzés` / `DoR` / `DoD` / `Prioritás` **szekciói** elmaradnak. A régi `Becslés` viszont **visszatér** `## Estimation` néven, átszabva: PERT három-pont (ideális fejlesztői óra → `Eβ`, `σ`) + az `Eβ`-ből származtatott story point, `⚠` split-jelöléssel — a **referencia-alap**, amire a menedzser-szorzók downstream ráülnek (a szorzó a pipeline-on kívül, a skill csak a nyers alapot adja). A képlet és az `Eβ→SP` tábla egy helyen, a `CONVENTIONS.md`-ben. **Az INVEST viszont nem szűnik meg: szabállyá vált** — minden story kártyának meg kell felelnie az INVEST-nek (Independent, Negotiable, Valuable, Estimable, Small, Testable), szekció nélkül is, kemény kapuként; ami nem tehető INVEST-konformmá, azt újra kell szeletelni (epic-vezérelt esetben a `to-epics`-nél), nem pedig kiadni.
+A kártya a **3 C**-t testesíti meg (Card, Conversation, Confirmation). A séma szándékosan **lean** — angol `##` fejlécek, magyar tartalom: `## Description` (a `Mint … szeretném … hogy …` sorral kezdve), `## Context`, `## BDD Test`, `## Estimation`, `## Risks and Dependencies`. Az **elfogadási kritérium maga a `## BDD Test` Gherkinje** — nincs külön `Elfogadási kritériumok` szekció, és a régi séma `INVEST-ellenőrzés` / `DoR` / `DoD` / `Prioritás` **szekciói** elmaradnak. A régi `Becslés` viszont **visszatér** `## Estimation` néven, átszabva: PERT három-pont (ideális fejlesztői óra → `Eβ`, `σ`) + az `Eβ`-ből származtatott story point, `⚠` split-jelöléssel — a **referencia-alap**, amire a menedzser-szorzók downstream ráülnek (a szorzó a pipeline-on kívül, a skill csak a nyers alapot adja). A képlet, a súlyozott rubrik és az `Eβ→SP` tábla egy helyen, a [`pte-openspec-shared/ESTIMATION.md`](pte-openspec-shared/ESTIMATION.md)-ben. **Az INVEST viszont nem szűnik meg: szabállyá vált** — minden story kártyának meg kell felelnie az INVEST-nek (Independent, Negotiable, Valuable, Estimable, Small, Testable), szekció nélkül is, kemény kapuként; ami nem tehető INVEST-konformmá, azt újra kell szeletelni (epic-vezérelt esetben a `to-epics`-nél), nem pedig kiadni.
 
 A kártya egy **`## BDD Test`** szakaszt kap — **placeholderként**. Ez a skill ide nem ír Gherkint; a szakaszt a következő lépés tölti ki, és az a Gherkin lesz a story elfogadási kritériuma. **Trace a kártyán nincs** (epic-vezérelt esetben): a requirement→story→scenario felosztást az epic *Forrás-spec hivatkozás* map-je hordozza, amit a downstream skillek onnan olvasnak; epic-nélküli kártya a saját map-sorát egy `<!-- pipeline-only -->` blokkban viszi (Jira elől rejtve).
 
@@ -157,7 +159,8 @@ pte-skills/
 ├─ README.md                       ← ez a fájl
 ├─ pte-openspec/SKILL.md           ← router (a lánc térképe)
 ├─ pte-openspec-shared/
-│  └─ CONVENTIONS.md               ← közös szabályok (egy hely)
+│  ├─ CONVENTIONS.md               ← közös szabályok (egy hely)
+│  └─ ESTIMATION.md                ← PERT + Story-Points becslési modell (rubrik, képlet, tábla)
 ├─ pte-openspec-to-epics/
 │  ├─ SKILL.md
 │  └─ EXAMPLE.md                   ← teljes kidolgozott transzformáció
