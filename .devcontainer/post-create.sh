@@ -133,6 +133,11 @@ fi
 # system-wide (/etc/gitconfig) so every user gets it; idempotent on rebuild.
 sudo git config --system core.editor "nano"
 
+# Auto-create the upstream on first push of a new branch, so `git push` alone
+# works instead of erroring with "has no upstream branch" and demanding
+# `--set-upstream`. System-wide; setting a single-value key is idempotent.
+sudo git config --system push.autoSetupRemote "true"
+
 # Use the PAT for GitHub HTTPS auth so `git push`/`pull` work without prompting.
 # The helper reads GITHUB_PERSONAL_ACCESS_TOKEN from the env (injected via
 # --env-file) at call time, so the token is never written to disk and it works
