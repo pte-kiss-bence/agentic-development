@@ -12,16 +12,24 @@ The pipeline has **two phases** that share one anchor — the OpenSpec spec — 
 
 **Prerequisite — Explore / propose.** `openspec-explore`, `openspec-propose` (or the `opsx:*` commands) turn an idea into a spec / change delta under `openspec/`. Not a `pte-openspec-*` skill; it is the source the whole pipeline reads.
 
+**Right-sizing — enter the chain at the depth the change warrants.** The planning chain is not always run whole. A change request usually modifies existing behaviour, so it rarely needs a fresh epic and sometimes no epic at all:
+- **Full feature** → step 1 in **mint** mode, then the whole chain.
+- **Change into an existing epic** (the common change-request case) → step 1 in **reconcile** mode (fold the new story under the affected epic), then steps 2–3.
+- **Small standalone change** (a story, no epic) → **skip step 1**, enter at step 2 in **epic-less** mode, then step 3.
+- **Tweak / bug** → skip planning entirely, go straight to the build stage (step 4; run `diagnosing-bugs` first if a bug's root cause isn't obvious).
+
+All planning variants converge on the same step 2 → 3 (→ 4 → publish) tail.
+
 Planning chain (model-invoked; keys off the shared trace IDs):
 
-1. **`pte-openspec-to-epics`** → `epics/` — rolls Requirements up into lean Agile epics; each epic lists its stories in its *User story-k* section. **MINTS** the `EPIC-…`/`STORY-…` trace IDs and the *Forrás-spec hivatkozás* map.
-2. **`pte-openspec-to-stories`** → `stories/` — expands each epic story into a refinement-ready Agile story card, one per `STORY-…`. **CONSUMES** the epic's IDs. Leaves a **`BDD teszt`** section as a placeholder for step 3.
+1. **`pte-openspec-to-epics`** → `openspec/backlog/epics/` — rolls Requirements up into lean Agile epics; each epic lists its stories in its *User story-k* section. **MINTS** the `EPIC-…`/`STORY-…` trace IDs and the *Forrás-spec hivatkozás* map. Runs in **mint** (greenfield) or **reconcile** (fold a change delta into the existing epic, reusing its `EPIC-…`) mode.
+2. **`pte-openspec-to-stories`** → `openspec/backlog/stories/` — expands each epic story into a refinement-ready Agile story card, one per `STORY-…`. **CONSUMES** the epic's IDs. In **epic-less** mode (small standalone change, no epic) it instead mints its own `STORY-<capability-slug>-…` straight from the delta. Leaves a **`BDD teszt`** section as a placeholder for step 3.
 3. **`pte-openspec-bdd-tests`** — fills each story card's **`BDD teszt`** section with declarative Gherkin, sourced from the spec scenarios the card's map row assigns. **CONSUMES** the story cards; edits them in place, writes no separate files. The Gherkin is **living documentation**, implemented later as a Playwright E2E test.
    - ⇢ **(planned) Playwright E2E** — a future, separate phase implements the embedded Gherkin as Playwright E2E tests. No skill for it yet.
 
 Publishing (optional; runs after the planning chain, before or alongside build):
 
-- **`pte-openspec-jira-sync`** — mirrors `epics/` and `stories/` into a Jira project through the Atlassian MCP. **CONSUMES** the artifacts and their trace IDs (as `trace:…` labels); mints nothing. Runs on a **field-ownership** model — local owns content, Jira owns workflow state — so re-runs are idempotent and never clobber either side. Writes back a `## Jira szinkron` block into each card. Requires the Atlassian MCP to be wired and authenticated.
+- **`pte-openspec-jira-sync`** — mirrors `openspec/backlog/epics/` and `openspec/backlog/stories/` into a Jira project through the Atlassian MCP. **CONSUMES** the artifacts and their trace IDs (as `trace:…` labels); mints nothing. Runs on a **field-ownership** model — local owns content, Jira owns workflow state — so re-runs are idempotent and never clobber either side. Epic-less stories are parented under a reserved **standalone collector epic** (`trace:EPIC-standalone`) so they are never orphaned. Writes back a `## Jira szinkron` block into each card. Requires the Atlassian MCP to be wired and authenticated.
 
 Build stage (user-invoked; independent of the planning artifacts):
 

@@ -1,6 +1,6 @@
 ---
 name: pte-openspec-to-stories
-description: Expand an OpenSpec epic's stories into detailed, refinement-ready Agile story cards. Use when the user wants story cards or a groomed/refined backlog from an epic produced by pte-openspec-to-epics, wants epic user stories fleshed out with acceptance criteria and INVEST checks, or mentions turning OpenSpec stories into ready-for-sprint cards.
+description: Expand an OpenSpec epic's stories into detailed, refinement-ready Agile story cards — or author standalone cards straight from a small change's delta spec (epic-less mode). Use when the user wants story cards or a groomed/refined backlog from an epic produced by pte-openspec-to-epics, wants epic user stories fleshed out with acceptance criteria and INVEST checks, mentions turning OpenSpec stories into ready-for-sprint cards, or wants a small change turned into one or a few story cards without creating an epic.
 ---
 
 An Agile epic from `pte-openspec-to-epics` already lists its stories — each a `STORY-…` ID, a `Mint … szeretnék … hogy …` line, and high-level acceptance criteria in its *User story-k* section. This skill expands **each** of those stories into a full, **refinement-ready** Agile story card — one markdown file per story.
@@ -50,16 +50,27 @@ Each card carries these sections, in order (Hungarian headings — use as-is):
 
 ## Trace IDs
 
-Per [`../pte-openspec-shared/CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md), this skill **CONSUMES** the IDs `pte-openspec-to-epics` minted — it reuses each `STORY-…` and its parent `EPIC-…` verbatim and **never mints**. Produce **exactly one card per `STORY-…` row** in the epic map — no more, no fewer.
+Per [`../pte-openspec-shared/CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md), in its normal (epic-driven) mode this skill **CONSUMES** the IDs `pte-openspec-to-epics` minted — it reuses each `STORY-…` and its parent `EPIC-…` verbatim and **never mints**. Produce **exactly one card per `STORY-…` row** in the epic map — no more, no fewer.
 
-**Fallback only when no epic exists:** if the target spec has no epic yet, say so and offer to run `pte-openspec-to-epics` first (preferred). Only if the user insists, derive provisional `STORY-<capability>-<requirement-slug>` IDs straight from the spec, clearly flagged as provisional until an epic reconciles them. This is a degraded path, not a co-equal mode.
+## Epic-less mode — a co-equal path for small standalone changes
+
+Not every change deserves an epic. When a **change request warrants a story but not an epic** (a small, single-capability change with no strategic decomposition to do), run **epic-less**: author the story card(s) straight from the change's delta spec, no epic in between.
+
+This is a **first-class mode, not a degraded fallback** — use it deliberately for right-sized small changes; the only thing that differs from epic-driven mode is where the IDs and the requirement→story split come from:
+
+- **Mint the IDs here.** Per `CONVENTIONS.md`, use `STORY-<capability-slug>-<requirement-slug>`, namespaced on the capability (from `openspec/specs/<capability>/`). These are **stable, not provisional** — the card leaves the **parent `EPIC-…` line empty** (a marker the story is epic-less), and `pte-openspec-jira-sync` parents it under the standalone collector epic.
+- **Do the split yourself.** With no epic map to consume, read the delta's `### Requirement` / `#### Scenario` blocks and cut vertical-slice stories by user value — the same judgement `pte-openspec-to-epics` applies, scoped to this one change. Keep it small: if you find yourself minting many stories or wanting real strategic framing, that's the signal to stop and run `pte-openspec-to-epics` (mint or reconcile) instead.
+
+Everything else — the card anatomy, the 1:1 Scenario→AC trace, the `BDD teszt` placeholder, diff-don't-clobber — is identical to epic-driven mode.
+
+**When the change touches a capability that already has an epic, this is the wrong mode:** don't orphan the story — run `pte-openspec-to-epics` in **reconcile** mode to attach it under the affected epic, then expand it here normally.
 
 ## Steps
 
 Copy this checklist and tick each item — the verify step is exhaustive, not a glance:
 
 ```
-- [ ] 1. Source epic file set named (or no-epic fallback flagged)
+- [ ] 1. Mode fixed: source epic file set named (epic-driven) or epic-less mode declared
 - [ ] 2. Every STORY-… row + its mapped #### Scenario-k enumerated from the epic map
 - [ ] 3. Mapped Scenarios traced to the spec for acceptance-criteria detail
 - [ ] 4. One story card authored per STORY-… row (full anatomy; STORY-…/EPIC-… reused verbatim)
@@ -67,7 +78,7 @@ Copy this checklist and tick each item — the verify step is exhaustive, not a 
 - [ ] 6. Every STORY-… has exactly one card; every mapped Scenario covered by its card's AC; gaps reported
 ```
 
-1. **Resolve the source epics.** Locate the epic files (default `epics/`, configurable). If several epics exist and it is unclear which to expand, list them with **AskUserQuestion**. If no epic exists for the target spec, follow the no-epic fallback above. Completion: the exact epic file set (or the flagged fallback) is named.
+1. **Resolve the source epics — or declare epic-less.** Locate the epic files (default `openspec/backlog/epics/`, configurable — see *Output location* in `CONVENTIONS.md`). If several epics exist and it is unclear which to expand, list them with **AskUserQuestion**. If no epic exists for the target capability **and** the change is small enough not to warrant one, run **epic-less mode** (mint capability-namespaced IDs from the delta, per that section); if the capability *should* have an epic, stop and offer `pte-openspec-to-epics` (mint or reconcile) first. Completion: the mode is fixed — the exact epic file set is named, or epic-less mode is declared with its source delta spec.
 
 2. **Enumerate the stories.** From each epic's *User story-k* + *Forrás-spec hivatkozás* map, list every `STORY-…` ID, its `Mint …` line, and the `#### Scenario`s the map assigns to it. Completion (exhaustive): every `STORY-…` row in every source epic is on the list; none invented, none dropped.
 
@@ -75,6 +86,6 @@ Copy this checklist and tick each item — the verify step is exhaustive, not a 
 
 4. **Author one card per story.** Write the full anatomy above: reuse the `STORY-…`/`EPIC-…` IDs and `Mint …` line verbatim, expand each mapped Scenario's `WHEN`/`THEN` into `Amennyiben`/`Amikor`/`Akkor` acceptance criteria (supplying the precondition), add the INVEST check, the empty `BDD teszt` placeholder, and leave priority/estimate/DoR/DoD as team placeholders. Completion: every anatomy section present (including the `BDD teszt` placeholder); AC trace 1:1 to the mapped Scenarios; no behaviour invented.
 
-5. **Write the files.** Default `stories/<epic-slug>/<story-slug>.md`, one card per file, slugged from the `STORY-…` ID or title. Diff before overwriting — never clobber hand-edited content. Completion: each story exists as its own file under the output dir.
+5. **Write the files.** Default `openspec/backlog/stories/<epic-slug>/<story-slug>.md` (epic-less: `<capability-slug>` in place of `<epic-slug>`), one card per file, slugged from the `STORY-…` ID or title. Diff before overwriting — never clobber hand-edited content. Completion: each story exists as its own file under the output dir.
 
 6. **Verify exhaustively.** Every `STORY-…` in every source epic has exactly one card; every `#### Scenario` the map assigned appears in its card's acceptance criteria; every reused ID matches the epic verbatim. Report any story or Scenario you could not place cleanly rather than guessing.

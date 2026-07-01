@@ -1,9 +1,9 @@
 ---
 name: pte-openspec-jira-sync
-description: Sync the pipeline's epics and story cards to Jira through the Atlassian MCP. Use when the user wants to push epics/stories to Jira, publish the backlog to Jira, or reconcile the local backlog with a Jira project via the Atlassian MCP. Reads epics/ and stories/ produced by the planning chain.
+description: Sync the pipeline's epics and story cards to Jira through the Atlassian MCP. Use when the user wants to push epics/stories to Jira, publish the backlog to Jira, or reconcile the local backlog with a Jira project via the Atlassian MCP. Reads openspec/backlog/epics/ and openspec/backlog/stories/ produced by the planning chain.
 ---
 
-The planning chain leaves a backlog on disk — `epics/` and `stories/` — that a team executes in Jira. This skill reconciles the two. It is the pipeline's **publishing step**: it runs after `pte-openspec-bdd-tests`, reads the epics and story cards, and mirrors them into a Jira project through the Atlassian MCP.
+The planning chain leaves a backlog on disk — `openspec/backlog/epics/` and `openspec/backlog/stories/` — that a team executes in Jira. This skill reconciles the two. It is the pipeline's **publishing step**: it runs after `pte-openspec-bdd-tests`, reads the epics and story cards, and mirrors them into a Jira project through the Atlassian MCP.
 
 `ownership` is the governing word. Sync is not a direction — it is a set of fields, each with **exactly one owner**. Local owns the *content* it authored; Jira owns the *workflow* state a team adds. Every field flows from its owner to the other side and never the reverse, so a re-run is idempotent and never clobbers either side's work. Get the owner right and the rest is bookkeeping.
 
@@ -11,7 +11,7 @@ Shared pipeline conventions — output language, trace-ID grammar, the *Forrás-
 
 ## Role in the pipeline
 
-Input is the **artifact set** the planning chain produced: `epics/<epic-slug>.md` and `stories/<epic-slug>/<story-slug>.md`. This skill writes to **two places**: to Jira (create/update issues) and back into the local cards (a `## Jira szinkron` block — see below). It authors no epics or stories itself; if either is missing it stops and offers the chain step that produces them.
+Input is the **artifact set** the planning chain produced: `openspec/backlog/epics/<epic-slug>.md` and `openspec/backlog/stories/<epic-slug>/<story-slug>.md`. This skill writes to **two places**: to Jira (create/update issues) and back into the local cards (a `## Jira szinkron` block — see below). It authors no epics or stories itself; if either is missing it stops and offers the chain step that produces them.
 
 The Atlassian MCP must be connected first. It is provided by the `atlassian@claude-plugins-official` plugin (enabled in `.claude/settings.json`), authenticated once by the user via `/mcp` OAuth. If its tools are absent, stop and say so — this skill does not configure or authenticate it.
 
@@ -30,8 +30,8 @@ The consequence that matters: **never** overwrite a locally-owned field from Jir
 
 | Local artifact | Jira |
 |----------------|------|
-| `epics/<epic-slug>.md` | issue type **Epic** |
-| `stories/<epic-slug>/<story-slug>.md` | issue type **Story**, `parent` = the epic's Jira key |
+| `openspec/backlog/epics/<epic-slug>.md` | issue type **Epic** |
+| `openspec/backlog/stories/<epic-slug>/<story-slug>.md` | issue type **Story**, `parent` = the epic's Jira key |
 | `EPIC-…` / `STORY-…` trace ID | label `trace:EPIC-…` / `trace:STORY-…` |
 | card **Cím** title | Summary |
 | card **User story** + **Kontextus** (+ **Elfogadási kritériumok**, **BDD teszt**) | Description |
@@ -39,6 +39,8 @@ The consequence that matters: **never** overwrite a locally-owned field from Jir
 The Description push carries **only** those content sections. It **excludes the `## Jira szinkron` block** — that block is a local-only record of Jira-owned state; pushing it back into the issue's own Description would be circular (writing Jira's key/status into Jira). The block lives on disk in the card, never in the ticket.
 
 Because a story's `parent` needs its epic's Jira key, **process epics before stories**: resolve/create every epic first, record its key, then create stories against it.
+
+**Epic-less stories** (a card whose parent `EPIC-…` line is empty — minted by `pte-openspec-to-stories`'s epic-less mode) have no epic on disk to parent them. Give them a single **standalone collector epic** as their Jira parent so they are never orphaned: resolve it by the reserved trace label `trace:EPIC-standalone` (create it once if absent — a plain Epic titled e.g. *Önálló változtatások / Standalone changes*), then set every epic-less story's `parent` to that collector's key. All the normal ownership and matching rules still apply — only the parent resolution differs.
 
 ## Matching — how a card finds its issue (idempotency)
 
@@ -95,13 +97,13 @@ Copy this checklist and tick each item — the verify step is exhaustive, not a 
 
 1. **Reach Jira, resolve context.** Confirm the Atlassian MCP tools exist (if not, stop — the server is not wired/authenticated). `getAccessibleAtlassianResources` → `cloudId`; resolve the project key (recorded block or AskUserQuestion); `getJiraProjectIssueTypesMetadata` → the project's Epic/Story issue-type ids. Completion: cloudId, project, and issue-type ids in hand.
 
-2. **Enumerate artifacts.** List every `epics/<epic-slug>.md` and `stories/<epic-slug>/<story-slug>.md`, each with its trace ID from the card. If epics or stories are missing, stop and offer the producing step (`pte-openspec-to-epics` / `pte-openspec-to-stories` / `pte-openspec-bdd-tests`) rather than syncing a partial backlog. Completion: the full artifact set (or the flagged fallback) is named.
+2. **Enumerate artifacts.** List every `openspec/backlog/epics/<epic-slug>.md` and `openspec/backlog/stories/<epic-slug>/<story-slug>.md`, each with its trace ID from the card. If epics or stories are missing, stop and offer the producing step (`pte-openspec-to-epics` / `pte-openspec-to-stories` / `pte-openspec-bdd-tests`) rather than syncing a partial backlog. Completion: the full artifact set (or the flagged fallback) is named.
 
 3. **Resolve + plan (dry-run).** For each artifact, find its issue by recorded key → trace label → (would-create). Print the plan as trace ID → Jira key (or "NEW") with the action per field owner. Completion: every artifact has a resolved action; the plan is printed and nothing is written yet.
 
 4. **Confirm writes.** AskUserQuestion before the first write. Completion: the user has approved (or scoped down) the write set.
 
-5. **Push local-owned fields.** Epics first: create/update each Epic, record its key. Then stories: create/update each Story with `parent` = its epic's Jira key, `trace:…` label, and Summary/Description from the card's owned sections. Never touch Jira-owned fields (status/assignee/sprint). Completion: every artifact has a live issue; every story's parent is set.
+5. **Push local-owned fields.** Epics first: create/update each Epic, record its key; if any epic-less story is in the set, resolve/create the standalone collector epic (`trace:EPIC-standalone`) too. Then stories: create/update each Story with `parent` = its epic's Jira key (or the collector's key for epic-less stories), `trace:…` label, and Summary/Description from the card's owned sections. Never touch Jira-owned fields (status/assignee/sprint). Completion: every artifact has a live issue; every story's parent is set.
 
 6. **Pull Jira-owned fields.** For each issue, read status/assignee/sprint/key/URL and write the `## Jira szinkron` block into its card — replace only that section, diff before overwriting. Completion: every card's block reflects the issue's current Jira-owned state.
 

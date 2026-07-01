@@ -57,7 +57,20 @@ A skillek prózája (`SKILL.md`) angol, de **minden generált artefaktum tartalm
    └──────────────────────────────┘
 ```
 
+> A diagramban az `epics/` és `stories/` a lemezes hely rövidítése: a valódi kimenet az **`openspec/backlog/epics/`** és **`openspec/backlog/stories/`** — a spec-ek mellett, az OpenSpec fán belül (de nem az OpenSpec CLI kezeli). Lásd *Output location* a [`CONVENTIONS.md`](pte-openspec-shared/CONVENTIONS.md)-ben.
+
 A `pte-openspec` skill a lánc **routere**: megmondja, melyik skill mit csinál és milyen sorrendben.
+
+## A change súlyához méretezve (right-sizing)
+
+A planning-láncot **nem mindig futtatjuk végig** — azon a mélységen lépünk be, amit a change megkövetel. Egy change request tipikusan **létező viselkedést módosít**, ezért nem mindig kell új epic, sőt gyakran epic sem:
+
+- **Teljes feature** → `pte-openspec-to-epics` **mint** módban (új capability, új epic), majd a teljes lánc.
+- **Change egy létező epicbe** (change request default esete) → `pte-openspec-to-epics` **reconcile** módban: az érintett epic `EPIC-…`-ját szó szerint újrahasználja, és beleszövi a deltát (az új `STORY-…`-t minti, módosult scenariónál a meglévő story lefedettségét bővíti), diff-don't-clobber. Onnan `to-stories` → `bdd-tests` → `tdd-apply`.
+- **Kis, önálló change** (story kell, epic nem) → `pte-openspec-to-stories` **epic-nélküli** módban: a kártyá(ka)t közvetlenül a deltából írja, a `to-epics`-et teljesen kihagyva. Az ID capability-névterű (`STORY-<capability-slug>-…`), stabil (nem provizórikus), a szülő `EPIC-…` sor üres.
+- **Tweak / bugfix** → a planning-láncot teljesen kihagyva, egyből a build stage (`pte-openspec-tdd-apply`; bugnál előbb `diagnosing-bugs`, ha a gyökér-ok nem nyilvánvaló).
+
+Mind a három planning-variáns ugyanabba a **`to-stories → bdd-tests → (tdd-apply) → jira-sync`** farokba fut össze. A mód-választás gépies: van-e már epic az érintett capabilityhez? Van → reconcile; nincs, de kell → mint; nincs és nem is kell → epic-nélküli story.
 
 ## A lánc lépései
 
@@ -67,14 +80,20 @@ A **planning-lánc** (1–3) lépései **szigorúan sorrendben** futnak — mind
 
 Az `openspec-explore` / `openspec-propose` (vagy az `opsx:*` parancsok) egy ötletből specifikációt vagy change deltát készítenek az `openspec/` alá. Minden `### Requirement` `#### Scenario` blokkokat tartalmaz, ezek pedig `WHEN`/`THEN` felsorolásokat — ez a viselkedés forrása az egész pipeline számára. Ez **nem** `pte-openspec-*` skill, hanem a forrás, amit a pipeline olvas.
 
-### 1. `pte-openspec-to-epics` → `epics/`
+### 1. `pte-openspec-to-epics` → `openspec/backlog/epics/`
 
 A specifikáció részletes viselkedését **lean Agile epikekre** göngyöli fel — epikenként egy markdown fájl. Az epic érték-orientált stratégiai konténer: hipotézist fogalmaz meg, kijelöli a hatókört és a nem-célokat, és **vertikális szeletekre** (user value / journey mentén, nem technikai réteg szerint) vágott user story-kra bomlik. Az epic *User story-k* szakasza **tartalmazza a hozzá tartozó story-kat**.
+
+**Két mód** (a mód-választásról lásd a *right-sizing* szakaszt fentebb):
+- **mint** — greenfield: új capability, nincs még epic → új epic(ek)et mint a nulláról (ez az eredeti viselkedés).
+- **reconcile** — change delta, aminek a capabilityjéhez **már van** epic → nem mint új epicet: feloldja a meglévőt, az `EPIC-…`-ot szó szerint újrahasználja, és beleszövi a deltát (új `STORY-…` a hozzáadott requirementekhez, a meglévő story sorának bővítése módosult scenariónál), a nem érintett szakaszokat érintetlenül hagyva.
 
 Ez a skill **MINTS** — vagyis ő hozza létre — a lánc trace ID-jait:
 
 - `EPIC-<epic-slug>` — epikenként egy.
 - `STORY-<epic-slug>-<requirement-slug>` — story-nként egy; ha több story osztozik egy requirementen, stabil `-<aspect-slug>` toldalék kerül rá (soha nem sorszám).
+
+Reconcile módban az `EPIC-…`-ot **nem** mint újra, csak a delta új `STORY-…`-jait.
 
 És emittálja a **Forrás-spec hivatkozás** táblát — ez a lefelé irányuló skillek szerződése:
 
@@ -83,9 +102,11 @@ Ez a skill **MINTS** — vagyis ő hozza létre — a lánc trace ID-jait:
 
 A requirement→story felosztás **ítéleti döntés**, nem vezethető le pusztán a specből — ezért létezik a map, és ezért olvassák a downstream skillek, nem pedig újraszármaztatják.
 
-### 2. `pte-openspec-to-stories` → `stories/`
+### 2. `pte-openspec-to-stories` → `openspec/backlog/stories/`
 
 Az epic minden story-ját teljes, **refinement-ready** Agile story kártyává bővíti — story-nként egy fájl. Elsődleges bemenete **az epic fájl**, nem a nyers spec. A skill **CONSUMES** — az epic által mintázott `STORY-…` / `EPIC-…` ID-kat szó szerint újrahasználja, soha nem mint újat. Story-nként pontosan egy kártya.
+
+**Epic-nélküli mód** (egyenrangú út, nem degradált fallback): kis, önálló change-nél, ami story-t érdemel de epicet nem, a kártyá(ka)t közvetlenül a delta specből írja, a `to-epics`-et kihagyva. Itt a skill **MINTS**: az ID capability-névterű (`STORY-<capability-slug>-…`), **stabil, nem provizórikus**, és a kártya szülő `EPIC-…` sora üres marad (ez a marker, hogy epic-nélküli). Ha az érintett capabilityhez **van** epic, ez a rossz mód — helyette `to-epics` reconcile.
 
 A kártya a **3 C**-t testesíti meg (Card, Conversation, Confirmation). Elfogadási kritériumai 1:1-ben a map által a story-hoz rendelt `#### Scenario`-k `WHEN`/`THEN` bulletjeiből bővülnek (`Amennyiben`/`Amikor`/`Akkor`), a hiányzó előfeltételt (`Amennyiben`) a skill pótolja. Tartalmaz INVEST-ellenőrzést, valamint DoR/DoD/prioritás/becslés placeholdereket a csapatnak.
 
@@ -93,7 +114,7 @@ A kártya egy **`BDD teszt`** szakaszt is kap — **placeholderként**. Ez a ski
 
 ### 3. `pte-openspec-bdd-tests` → beágyazva a story kártyába
 
-A **planning-lánc utolsó lépése**. Bemenete a **story kártyák** (`stories/`), nem a nyers spec. Minden kártya *Forrás-hivatkozás* sora megmondja, mely `#### Scenario`-kat fedi le és mely trace ID-kkal kell taggelni. A skill ezekből a scenariókból **deklaratív Gherkint** ír, és a kártya `BDD teszt` szakaszát **helyben** tölti ki — **nem hoz létre külön fájlt**, és a kártya többi szakaszához nem nyúl.
+A **planning-lánc utolsó lépése**. Bemenete a **story kártyák** (`openspec/backlog/stories/`), nem a nyers spec. Minden kártya *Forrás-hivatkozás* sora megmondja, mely `#### Scenario`-kat fedi le és mely trace ID-kkal kell taggelni. A skill ezekből a scenariókból **deklaratív Gherkint** ír, és a kártya `BDD teszt` szakaszát **helyben** tölti ki — **nem hoz létre külön fájlt**, és a kártya többi szakaszához nem nyúl.
 
 A vezérszó a `declarative`: minden lépés azt írja le, *mit* csinál a rendszer, nem azt, *hogyan* kattint a felhasználó (nincs UI-, route- vagy mezőszintű részlet). Leképezés majdnem 1:1: `### Requirement` → `Szabály:`, `#### Scenario` → `Forgatókönyv:` (vagy `Forgatókönyv vázlat:` ha csak adat változik), `WHEN` → `Amikor`, `THEN` → `Akkor`. Az egyetlen rés a `Given`/`Adott`: a spec az előfeltételt ritkán mondja ki, ezt a skill pótolja. Magyar spec esetén a beágyazott blokk első sora `# language: hu`.
 
@@ -103,23 +124,23 @@ A Gherkin **living documentation** — ember-olvasható viselkedésleírás, ebb
 
 ### ✳ `pte-openspec-jira-sync` → Jira-ra tükrözve (opcionális publish lépés)
 
-A planning-lánc után futó **publish lépés**: a kész `epics/` és `stories/` artefaktumokat egy Jira projektbe tükrözi az **Atlassian MCP**-n keresztül. Bemenete az artefaktum-készlet és a trace ID-k (`trace:EPIC-…` / `trace:STORY-…` labelekként); nem mintáz újat, **CONSUME**-ol.
+A planning-lánc után futó **publish lépés**: a kész `openspec/backlog/epics/` és `openspec/backlog/stories/` artefaktumokat egy Jira projektbe tükrözi az **Atlassian MCP**-n keresztül. Bemenete az artefaktum-készlet és a trace ID-k (`trace:EPIC-…` / `trace:STORY-…` labelekként); nem mintáz újat, **CONSUME**-ol.
 
 A vezérszó a **field-ownership**: a szinkron nem irány, hanem mezőnkénti **egy tulajdonos**. A *tartalmat* (Summary, Description, elfogadási kritériumok, beágyazott BDD, trace-label, epic↔story `parent`) a **local** birtokolja → Local → Jira (push). A *workflow-állapotot* (státusz, felelős, sprint, becslés, komment, Jira kulcs) a **Jira** birtokolja → Jira → Local, a kártya `## Jira szinkron` blokkjába pull-olva. Így az újrafuttatás idempotens, és egyik oldal munkáját sem írja felül.
 
-Párosítás (idempotencia): rögzített `Jira kulcs` → `trace:…` label JQL-keresés → `createJiraIssue`. Epic előbb, story utána (a story `parent`-jéhez kell az epic kulcsa). Alapból **dry-run** + megerősítés az első írás előtt; a státuszt sosem állítja (Jira-tulajdon). Előfeltétel: az Atlassian MCP bekötve és authentikálva.
+Párosítás (idempotencia): rögzített `Jira kulcs` → `trace:…` label JQL-keresés → `createJiraIssue`. Epic előbb, story utána (a story `parent`-jéhez kell az epic kulcsa). Az **epic-nélküli story-k** (üres szülő `EPIC-…` sor) egy fenntartott **gyűjtő-epic** (`trace:EPIC-standalone`, pl. *Önálló változtatások*) alá kerülnek Jirában, hogy soha ne legyenek árvák. Alapból **dry-run** + megerősítés az első írás előtt; a státuszt sosem állítja (Jira-tulajdon). Előfeltétel: az Atlassian MCP bekötve és authentikálva.
 
 ### 4. `pte-openspec-tdd-apply` → tesztelt kód
 
 A **build stage** — a tervezői lánc után fut, amikor a change implementálható. Bemenete nem a story kártyák, hanem az OpenSpec **change taskjai** (`tasks`), amelyeket az `openspec-apply-change` skillen keresztül olvas. Taskonként egy **red-green** hurkot futtat a `tdd` skillel: egy bukó teszt (**red**) → minimál kód, ami átmegy (**green**) → viselkedésenként ismételve; az első teszt a **tracer bullet**. Tiltott a horizontális rövidítés (összes teszt előre). A task csak akkor kap pipát (`- [ ]` → `- [x]`), ha minden viselkedésére van zöld teszt.
 
-Ez a stage **nem a trace ID-kra kulcsol** és nem nyúl az `epics/` / `stories/` artefaktumokhoz — a change taskjait fordítja tesztelt kóddá. **User-invoked** (`disable-model-invocation: true`): magától nem indul el, csak akkor, ha kézzel, névvel hívod — mert a build fázist szándékosan ember indítja, nem az agent autonóm módon.
+Ez a stage **nem a trace ID-kra kulcsol** és nem nyúl az `openspec/backlog/` artefaktumokhoz — a change taskjait fordítja tesztelt kóddá. **User-invoked** (`disable-model-invocation: true`): magától nem indul el, csak akkor, ha kézzel, névvel hívod — mert a build fázist szándékosan ember indítja, nem az agent autonóm módon.
 
 ## Trace ID-k és a szerződés
 
 A **planning-lánc** minden lépése (1–3) ugyanarra a trace ID-ra kulcsol, ezért egy epic, a story kártyái és a kártyákba ágyazott Gherkin egy-az-egyben összeérnek. A build stage (4) **nem** kulcsol a trace ID-kra: az a change taskjaiból dolgozik, a planning-artefaktumokat nem olvassa. A két fázis csak a **specnél** találkozik.
 
-**Ownership:** `pte-openspec-to-epics` **MINTS**; `pte-openspec-to-stories` és `pte-openspec-bdd-tests` **CONSUME** (szó szerint hivatkoznak, soha nem mintáznak újra).
+**Ownership:** `pte-openspec-to-epics` **MINTS** az `EPIC-…`-ot és a gyerek `STORY-…`-kat (reconcile módban az `EPIC-…`-ot újrahasználja, csak az új `STORY-…`-t minti). `pte-openspec-to-stories` **CONSUME**-ol — kivéve **epic-nélküli módban**, ahol a saját `STORY-<capability-slug>-…`-ját minti. `pte-openspec-bdd-tests` csak **CONSUME**-ol (szó szerint hivatkozik, sosem mintáz újra).
 
 ## Közös konvenciók
 
@@ -148,12 +169,23 @@ pte-skills/
 │  ├─ BDD-RULES.md                 ← Gherkin szabályok + anti-pattern-ek
 │  └─ EXAMPLE.md
 ├─ pte-openspec-jira-sync/
-│  ├─ SKILL.md                     ← epics/ + stories/ Jira-ra tükrözve (Atlassian MCP, field-ownership)
+│  ├─ SKILL.md                     ← openspec/backlog/ Jira-ra tükrözve (Atlassian MCP, field-ownership)
 │  └─ EXAMPLE.md
 └─ pte-openspec-tdd-apply/
    └─ SKILL.md                     ← build stage: change taskjait teszt-first implementálja
 ```
 
-Generált artefaktumok (nem ebben a mappában — a projekt gyökeréből): `epics/` az epikek, `stories/` a story kártyák (a beágyazott BDD tesztekkel együtt). Külön `features/` fa **nincs**.
+Generált artefaktumok (nem ebben a mappában — az OpenSpec fán belül, a spec-ek mellett):
+
+```
+openspec/
+├─ specs/            ← OpenSpec spec-ek (a lánc forrása)
+├─ changes/          ← OpenSpec change-ek (delta spec + tasks)
+└─ backlog/          ← a generált backlog (nem OpenSpec-CLI-kezelt)
+   ├─ epics/         ← <epic-slug>.md
+   └─ stories/       ← <epic-slug>/<story-slug>.md (a beágyazott BDD tesztekkel)
+```
+
+Külön `features/` fa **nincs**, és nincs gyökér-szintű `epics/`/`stories/` sem — minden az `openspec/backlog/**` alá kerül.
 
 Minden **artefaktum-termelő** skillhez tartozik egy `EXAMPLE.md` a teljes kidolgozott átalakítással (be → ki, ID-kkal és map-pel); a `pte-openspec-tdd-apply` build stage kódot termel, nem artefaktumot, ezért nincs `EXAMPLE.md`-je. A `pte-openspec-bdd-tests` `BDD-RULES.md`-je a deklaratív Gherkin szabálykészletét és anti-pattern-jeit tartalmazza — a skill lépéslépés előtt betölti.

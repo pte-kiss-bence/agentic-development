@@ -4,7 +4,7 @@ One end-to-end transformation showing the non-obvious moves: taking a single sto
 
 ## Input — one story from the epic
 
-From `epics/elofizetes-cikkhozzaferes.md` (produced by `pte-openspec-to-epics`):
+From `openspec/backlog/epics/elofizetes-cikkhozzaferes.md` (produced by `pte-openspec-to-epics`):
 
 ```markdown
 ## User story-k
@@ -36,7 +36,7 @@ The two `#### Scenario`s named in that row, traced to `openspec/specs/cikk-hozza
 
 ## Output — story card file
 
-`stories/elofizetes-cikkhozzaferes/elofizetesi-szint-szerinti-cikkhozzaferes.md`
+`openspec/backlog/stories/elofizetes-cikkhozzaferes/elofizetesi-szint-szerinti-cikkhozzaferes.md`
 
 ```markdown
 # Cím
@@ -101,3 +101,85 @@ _(story point — refinementen becsülve)_
 - **`BDD teszt` left as a placeholder** — this skill writes no Gherkin; it authors the empty `BDD teszt` section that `pte-openspec-bdd-tests` fills in place from the same Scenarios. The story card is the smallest unit and the home of its own BDD test.
 - **Placeholders, not guesses** — priority, estimate, DoR and DoD are refinement inputs; the skill leaves them for the team rather than inventing values.
 - **Trace row reprinted verbatim** — the card carries the epic's map row unchanged, so the epic, this card, and the Gherkin embedded in the card all key off the same `STORY-…` ID.
+
+---
+
+## Epic-less example: small change delta → standalone story card
+
+A small change request warrants a story but no epic, so it **skips `pte-openspec-to-epics`** and runs this skill in **epic-less** mode: the card is authored straight from the delta, the `STORY-…` is minted here (capability-namespaced), and the parent `EPIC-…` line is left empty.
+
+### Input — the change delta
+
+`openspec/changes/hirlevel-leiratkozas/specs/hirlevel/spec.md`
+
+```markdown
+## ADDED Requirements
+
+### Requirement: Egykattintásos leiratkozás
+A rendszer SHALL a hírlevél láblécében egykattintásos leiratkozást kínáljon.
+
+#### Scenario: Feliratkozott felhasználó leiratkozik
+- **WHEN** a felhasználó a hírlevél leiratkozó linkjére kattint
+- **THEN** a rendszer azonnal leiratkoztatja
+- **THEN** a rendszer megerősítő oldalt mutat
+```
+
+No epic exists for the `hirlevel` capability, and the change is a single small item → **epic-less mode**. (Had `hirlevel` already had an epic, this would instead be `pte-openspec-to-epics` in **reconcile** mode — never an orphaned story alongside an existing epic.)
+
+### Output — story card file
+
+`openspec/backlog/stories/hirlevel/egykattintasos-leiratkozas.md`
+
+```markdown
+# Cím
+Egykattintásos leiratkozás — `STORY-hirlevel-egykattintasos-leiratkozas`
+(epic nélküli — `EPIC-` üres)
+
+## User story
+Mint hírlevél-feliratkozó, szeretnék egy kattintással leiratkozni, hogy
+gyorsan megszüntethessem a feliratkozásom.
+
+## Kontextus
+Kis, önálló változtatás a hírlevél-kézbesítésen; nincs hozzá epic.
+
+## Elfogadási kritériumok
+- Amennyiben a felhasználó feliratkozott a hírlevélre,
+  Amikor a leiratkozó linkre kattint,
+  Akkor a rendszer azonnal leiratkoztatja,
+  És megerősítő oldalt mutat.
+
+## BDD teszt
+_(kitölti a `pte-openspec-bdd-tests`)_
+
+## INVEST-ellenőrzés
+Independent ✓ · Negotiable ✓ · Valuable ✓ · Estimable ✓ · Small ✓ · Testable ✓
+— önállóan szállítható, egyetlen viselkedés.
+
+## Készenléti feltétel (DoR)
+_(csapat tölti ki refinementen)_
+
+## Elkészültségi feltétel (DoD)
+_(csapat tölti ki refinementen)_
+
+## Prioritás
+_(csapat tölti ki)_
+
+## Becslés
+_(story point — refinementen becsülve)_
+
+## Függőségek és kockázatok
+- Nincs testvér-történet (önálló change).
+
+## Forrás-hivatkozás
+| Story ID | Epic ID | Forrás `### Requirement` | Lefedett `#### Scenario`-k |
+|----------|---------|--------------------------|----------------------------|
+| `STORY-hirlevel-egykattintasos-leiratkozas` | _(nincs)_ | Egykattintásos leiratkozás | Feliratkozott felhasználó leiratkozik |
+```
+
+### Why each move
+
+- **Delta is the input, not an epic** — with no epic map to consume, the skill reads the delta's Requirement/Scenario directly and cuts the story itself (the split judgement `to-epics` normally owns, scoped to this one small change).
+- **Capability-namespaced ID, minted here** — `STORY-hirlevel-egykattintasos-leiratkozas` uses the capability slug, not an epic slug. It is **stable, not provisional** (see `CONVENTIONS.md`) — this is a first-class mode, not a degraded fallback.
+- **Empty parent `EPIC-…`** — the marker that this is an epic-less story; `pte-openspec-jira-sync` parents it under the standalone collector epic (`trace:EPIC-standalone`).
+- **Everything else identical** — anatomy, the 1:1 Scenario→AC trace, the supplied `Amennyiben`, the `BDD teszt` placeholder and diff-don't-clobber all match epic-driven mode exactly.
+- **When to escalate** — if this had grown to several stories or wanted strategic framing, that's the signal to stop and run `to-epics` (mint or reconcile) instead of minting many epic-less cards.

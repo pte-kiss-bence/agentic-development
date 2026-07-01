@@ -67,7 +67,7 @@ Copy this checklist and tick each item as you go — the verify step is exhausti
 - [ ] 7. Every card has Gherkin; every mapped Scenario present; unmappable bullets reported
 ```
 
-1. **Resolve the source story cards.** Locate the cards (default `stories/`, configurable). If several epics' cards exist and it is unclear which to cover, list them with **AskUserQuestion**. **When no cards exist:** stop and offer to run `pte-openspec-to-stories` first — that is the pipeline's correct entry into this stage. There is no standalone `.feature` path: this skill only fills the `BDD teszt` section of existing cards and writes no new files. Completion: the exact card set is named (or the skill has stopped and offered `pte-openspec-to-stories`).
+1. **Resolve the source story cards.** Locate the cards (default `openspec/backlog/stories/`, configurable — see *Output location* in `CONVENTIONS.md`). If several epics' cards exist and it is unclear which to cover, list them with **AskUserQuestion**. **When no cards exist:** stop and offer to run `pte-openspec-to-stories` first — that is the pipeline's correct entry into this stage. There is no standalone `.feature` path: this skill only fills the `BDD teszt` section of existing cards and writes no new files. Completion: the exact card set is named (or the skill has stopped and offered `pte-openspec-to-stories`).
 
 2. **Enumerate per card.** From each card's *Forrás-hivatkozás* row, list its `STORY-…`/`EPIC-…` IDs, its source `### Requirement`, and the `#### Scenario`s it covers. Completion (exhaustive): every card and every Scenario its row assigns is on the list; none invented, none dropped.
 
