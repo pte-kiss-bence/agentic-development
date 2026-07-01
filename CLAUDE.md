@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Communication language
+
+**Converse in Hungarian.** All conversational chat with the user — questions, progress, status, summaries, `AskUserQuestion` prompts — is in Hungarian by default. This is the chat channel only; it does not change what gets written into files. Existing carve-outs still hold and win where they apply: **artifact/product content stays Hungarian** anyway (epics, stories, docs, code, commit messages), but **`prompt-master` output stays English** (see the prompt-master rule below — English is the deliberate instruction-following channel for AI tools), and any content a rule already pins to a specific language keeps that language.
+
 ## What this repository is
 
 `@pte/agentic-development` is a **template/scaffold for a shared agentic development process** reused across PTE projects — not an application. There is no app source code yet; the substance of the repo is the **devcontainer** (`.devcontainer/`) and the **Claude Code configuration** (`.claude/`). The active work (branch `feature/create-agentic-development-workflow`) is building out that workflow.
