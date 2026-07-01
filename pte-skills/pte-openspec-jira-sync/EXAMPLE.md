@@ -8,7 +8,7 @@ Project resolved earlier in the run: `cloudId = 11111111-2222-3333-4444-55555555
 
 `openspec/backlog/epics/EPIC-elofizetes-cikkhozzaferes.md` (trace `EPIC-elofizetes-cikkhozzaferes`) and one story under it:
 
-`openspec/backlog/stories/elofizetes-cikkhozzaferes/elofizetesi-szint-szerinti-cikkhozzaferes.md`
+`openspec/backlog/stories/elofizetes-cikkhozzaferes/STORY-elofizetes-cikkhozzaferes-elofizetesi-szint-szerinti-cikkhozzaferes.md`
 
 ```markdown
 # Cím
@@ -72,7 +72,7 @@ A week later the team moved `PTE-101` to `In Progress` and the card's **Kontextu
 
 ## Variant — an epic-less story in the set
 
-Say the sync set also contains `openspec/backlog/stories/hirlevel/egykattintasos-leiratkozas.md` (trace `STORY-hirlevel-egykattintasos-leiratkozas`), a card whose parent `EPIC-…` line is **empty** (authored by `pte-openspec-to-stories` in epic-less mode). It has no epic file to parent it, so:
+Say the sync set also contains `openspec/backlog/stories/hirlevel/STORY-hirlevel-egykattintasos-leiratkozas.md` (trace `STORY-hirlevel-egykattintasos-leiratkozas`), a card whose parent `EPIC-…` line is **empty** (authored by `pte-openspec-to-stories` in epic-less mode). It has no epic file to parent it, so:
 
 - **Resolve the collector once:** `searchJiraIssuesUsingJql` `labels = "trace:EPIC-standalone"` → no hit → create one Epic (Summary *Önálló változtatások*, label `trace:EPIC-standalone`) → returns e.g. `PTE-90`. On later runs the label re-binds to `PTE-90` — never a second collector.
 - **Parent the story to it:** `createJiraIssue` Story with `parent = PTE-90`, everything else (Summary, Description, `trace:STORY-…` label, pulled `## Jira szinkron` block) exactly as for an epic-backed story.

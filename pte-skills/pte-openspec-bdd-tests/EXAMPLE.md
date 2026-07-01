@@ -4,7 +4,7 @@ One end-to-end transformation showing the non-obvious moves: reading a story car
 
 ## Input — the story card (from `pte-openspec-to-stories`)
 
-`openspec/backlog/stories/elofizetes-cikkhozzaferes/elofizetesi-szint-szerinti-cikkhozzaferes.md`, with its `BDD teszt` section still a placeholder:
+`openspec/backlog/stories/elofizetes-cikkhozzaferes/STORY-elofizetes-cikkhozzaferes-elofizetesi-szint-szerinti-cikkhozzaferes.md`, with its `BDD teszt` section still a placeholder:
 
 ```markdown
 ## Elfogadási kritériumok

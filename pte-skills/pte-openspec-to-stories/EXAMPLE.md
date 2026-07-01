@@ -36,7 +36,7 @@ The two `#### Scenario`s named in that row, traced to `openspec/specs/cikk-hozza
 
 ## Output — story card file
 
-`openspec/backlog/stories/elofizetes-cikkhozzaferes/elofizetesi-szint-szerinti-cikkhozzaferes.md`
+`openspec/backlog/stories/elofizetes-cikkhozzaferes/STORY-elofizetes-cikkhozzaferes-elofizetesi-szint-szerinti-cikkhozzaferes.md`
 
 ```markdown
 # Cím
@@ -128,7 +128,7 @@ No epic exists for the `hirlevel` capability, and the change is a single small i
 
 ### Output — story card file
 
-`openspec/backlog/stories/hirlevel/egykattintasos-leiratkozas.md`
+`openspec/backlog/stories/hirlevel/STORY-hirlevel-egykattintasos-leiratkozas.md`
 
 ```markdown
 # Cím

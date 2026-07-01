@@ -11,7 +11,7 @@ Shared pipeline conventions — output language, trace-ID grammar, the *Forrás-
 
 ## Role in the pipeline
 
-Input is the **artifact set** the planning chain produced: `openspec/backlog/epics/EPIC-<epic-slug>.md` and `openspec/backlog/stories/<epic-slug>/<story-slug>.md` (the story directory's `<epic-slug>` is the epic filename **minus** its `EPIC-` prefix). This skill writes to **two places**: to Jira (create/update issues) and back into the local cards (a `## Jira szinkron` block — see below). It authors no epics or stories itself; if either is missing it stops and offers the chain step that produces them.
+Input is the **artifact set** the planning chain produced: `openspec/backlog/epics/EPIC-<epic-slug>.md` and `openspec/backlog/stories/<epic-slug>/STORY-<epic-slug>-<requirement-slug>.md` (the story directory's `<epic-slug>` is the epic filename **minus** its `EPIC-` prefix). This skill writes to **two places**: to Jira (create/update issues) and back into the local cards (a `## Jira szinkron` block — see below). It authors no epics or stories itself; if either is missing it stops and offers the chain step that produces them.
 
 The Atlassian MCP must be connected first. It is provided by the `atlassian@claude-plugins-official` plugin (enabled in `.claude/settings.json`), authenticated once by the user via `/mcp` OAuth. If its tools are absent, stop and say so — this skill does not configure or authenticate it.
 
@@ -31,7 +31,7 @@ The consequence that matters: **never** overwrite a locally-owned field from Jir
 | Local artifact | Jira |
 |----------------|------|
 | `openspec/backlog/epics/EPIC-<epic-slug>.md` | issue type **Epic** |
-| `openspec/backlog/stories/<epic-slug>/<story-slug>.md` | issue type **Story**, `parent` = the epic's Jira key |
+| `openspec/backlog/stories/<epic-slug>/STORY-<epic-slug>-<requirement-slug>.md` | issue type **Story**, `parent` = the epic's Jira key |
 | `EPIC-…` / `STORY-…` trace ID | label `trace:EPIC-…` / `trace:STORY-…` |
 | card **Cím** (H1 title, minus its ` · TRACE-ID` suffix) | Summary |
 | the **full card body below the H1**, minus the `## Jira szinkron` block | Description |
@@ -115,7 +115,7 @@ Copy this checklist and tick each item — the verify step is exhaustive, not a 
 
 1. **Reach Jira, resolve context.** Confirm the Atlassian MCP tools exist (if not, stop — the server is not wired/authenticated). `getAccessibleAtlassianResources` → `cloudId`; resolve the project key (recorded block or AskUserQuestion); `getJiraProjectIssueTypesMetadata` → the project's Epic/Story issue-type ids. Completion: cloudId, project, and issue-type ids in hand.
 
-2. **Enumerate artifacts.** List every `openspec/backlog/epics/EPIC-<epic-slug>.md` and `openspec/backlog/stories/<epic-slug>/<story-slug>.md`, each with its trace ID from the card (pair a story directory to its epic by the epic filename minus its `EPIC-` prefix). If epics or stories are missing, stop and offer the producing step (`pte-openspec-to-epics` / `pte-openspec-to-stories` / `pte-openspec-bdd-tests`) rather than syncing a partial backlog. Completion: the full artifact set (or the flagged fallback) is named.
+2. **Enumerate artifacts.** List every `openspec/backlog/epics/EPIC-<epic-slug>.md` and `openspec/backlog/stories/<epic-slug>/STORY-<epic-slug>-<requirement-slug>.md`, each with its trace ID from the card (pair a story directory to its epic by the epic filename minus its `EPIC-` prefix). If epics or stories are missing, stop and offer the producing step (`pte-openspec-to-epics` / `pte-openspec-to-stories` / `pte-openspec-bdd-tests`) rather than syncing a partial backlog. Completion: the full artifact set (or the flagged fallback) is named.
 
 3. **Resolve + plan (dry-run).** For each artifact, find its issue by recorded key → trace label → (would-create). Print the plan as trace ID → Jira key (or "NEW") with the action per field owner. Completion: every artifact has a resolved action; the plan is printed and nothing is written yet.
 

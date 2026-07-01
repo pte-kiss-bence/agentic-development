@@ -182,8 +182,8 @@ openspec/
 ├─ specs/            ← OpenSpec spec-ek (a lánc forrása)
 ├─ changes/          ← OpenSpec change-ek (delta spec + tasks)
 └─ backlog/          ← a generált backlog (nem OpenSpec-CLI-kezelt)
-   ├─ epics/         ← <epic-slug>.md
-   └─ stories/       ← <epic-slug>/<story-slug>.md (a beágyazott BDD tesztekkel)
+   ├─ epics/         ← EPIC-<epic-slug>.md
+   └─ stories/       ← <epic-slug>/STORY-<epic-slug>-<requirement-slug>.md (a beágyazott BDD tesztekkel)
 ```
 
 Külön `features/` fa **nincs**, és nincs gyökér-szintű `epics/`/`stories/` sem — minden az `openspec/backlog/**` alá kerül.

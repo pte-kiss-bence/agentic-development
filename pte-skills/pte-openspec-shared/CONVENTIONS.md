@@ -39,9 +39,11 @@ Resolve which spec to read:
 
 The generated backlog lives **under the OpenSpec tree**, co-located with the specs it traces from — the canonical default (configurable) is:
 
-- **Epics** → `openspec/backlog/epics/EPIC-<epic-slug>.md` — the filename carries the `EPIC-` prefix for searchability parity with the `STORY-…` cards. The `<epic-slug>` used to pair the story directory is the filename **minus** its `EPIC-` prefix.
-- **Story cards** → `openspec/backlog/stories/<epic-slug>/<story-slug>.md`
-- **Epic-less story cards** (no parent epic) → `openspec/backlog/stories/<capability-slug>/<story-slug>.md` (namespaced on the capability instead of an epic).
+Both artifact kinds are filed under their own trace ID, so the filename **is** the ID and a single `grep`/glob finds an `EPIC-…`/`STORY-…` by name across the tree:
+
+- **Epics** → `openspec/backlog/epics/EPIC-<epic-slug>.md` — the filename carries the full `EPIC-<epic-slug>` trace ID. The `<epic-slug>` used to pair the story directory is the filename **minus** its `EPIC-` prefix.
+- **Story cards** → `openspec/backlog/stories/<epic-slug>/STORY-<epic-slug>-<requirement-slug>.md` — the filename carries the full `STORY-…` trace ID (the same one in the card's *Cím* and *Forrás-hivatkozás* row), giving searchability parity with the `EPIC-…` files. The parent `<epic-slug>` directory repeats inside the filename by construction, since the `STORY-…` ID is epic-namespaced.
+- **Epic-less story cards** (no parent epic) → `openspec/backlog/stories/<capability-slug>/STORY-<capability-slug>-<requirement-slug>.md` (the `STORY-…` ID is capability-namespaced instead of epic-namespaced; the filename is still the full trace ID).
 
 `openspec/backlog/` is **not** OpenSpec-CLI-managed (unlike `openspec/specs/` and `openspec/changes/`) — `openspec update`/`archive` never touch it — but it is deliberately kept inside `openspec/` so the backlog and its source specs travel together. Every skill's default output path resolves under here; when a skill says "default `openspec/backlog/epics/`, configurable", this is the definition. Nothing is written outside `openspec/backlog/**` — there is no separate root-level `epics/`/`stories/` or `features/` tree.
 
