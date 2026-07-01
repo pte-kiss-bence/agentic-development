@@ -9,7 +9,7 @@ An OpenSpec spec is detailed behaviour: each `### Requirement` holds `#### Scena
 
 ## Output language
 
-Every epic file's **content is written in Hungarian**, matching `openspec/config.yaml`'s artifact convention. Keep verbatim — do **not** translate: code, identifiers, API names, CLI commands, file paths, `### Requirement` names, `#### Scenario` titles, trace IDs/slugs, and commit-type keywords (`feat`/`fix`/...). The section headings in the anatomy below are already Hungarian; use them as-is.
+Shared across the pipeline — see [`../pte-openspec-shared/CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md) for the Hungarian-content + verbatim-identifier rule. The section headings in the anatomy below are already Hungarian; use them as-is.
 
 ## Source mapping
 
@@ -21,18 +21,12 @@ Every epic file's **content is written in Hungarian**, matching `openspec/config
 | `#### Scenario: <name>` (`WHEN`/`THEN`) | a story's high-level acceptance criteria |
 | the spec's purpose / overview | the epic's *Háttér és kontextus* + *Probléma / lehetőség* |
 
-## Trace ID convention (this skill OWNS it; `pte-openspec-bdd-tests` consumes it)
+## Trace ID convention (this skill OWNS it)
 
-This skill ASSIGNS stable IDs; downstream skills only reference them.
+This skill **MINTS** the pipeline's trace IDs; `pte-openspec-to-stories` and `pte-openspec-bdd-tests` only consume them. The full ID grammar, ownership, and the *Forrás-spec hivatkozás* map contract live in [`../pte-openspec-shared/CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md). This skill's specific job:
 
-- `EPIC-<epic-slug>` — `epic-slug` = kebab-case of the epic title (capability / requirement-group theme).
-- `STORY-<epic-slug>-<requirement-slug>` — `requirement-slug` = kebab-case of the story's primary source `### Requirement` name. Anchored on the requirement, **not** on a running index, so the ID is stable when stories are reordered.
-- When several stories split the same primary requirement, append a stable `-<aspect-slug>` derived from the story's value/journey (e.g. `STORY-checkout-fizetes-utalas`, `STORY-checkout-fizetes-kartya`) — never a positional number; the aspect-slug names the slice, so it survives reordering too.
-
-Rules:
-- The requirement→story split is a judgement call, NOT derivable from the spec alone — that is why this skill emits the traceability map (below) and why BDD reads it rather than re-derives. The ID grammar is stable; the mapping is what BDD needs.
-- IDs and slugs stay verbatim even though surrounding content is Hungarian.
-- Keep each `STORY-…` ID unique within its epic; if two slices collide, the `-<aspect-slug>` disambiguates them.
+- Assign one `EPIC-<epic-slug>` per epic and one `STORY-<epic-slug>-<requirement-slug>` per story; add a stable `-<aspect-slug>` when several stories split one requirement.
+- The requirement→story split is a judgement call, NOT derivable from the spec alone — that is why this skill emits the traceability map (below) and why downstream skills read it rather than re-derive. The ID grammar is stable; the mapping is what they need.
 
 ## Epic file anatomy
 

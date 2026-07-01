@@ -7,6 +7,8 @@ An OpenSpec spec already carries behaviour: each `### Requirement` holds `#### S
 
 `declarative` is the governing word: every generated step describes _what_ the system does, not _how_ a user clicks it. The full rule set and anti-patterns live in [`BDD-RULES.md`](BDD-RULES.md) — load it before writing any step. A complete worked transformation is in [`EXAMPLE.md`](EXAMPLE.md).
 
+Shared pipeline conventions — output language, trace-ID grammar, the *Forrás-spec hivatkozás* map contract, source-spec resolution, and diff-don't-clobber — live in [`../pte-openspec-shared/CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md).
+
 ## Source mapping
 
 OpenSpec and Gherkin line up almost one-to-one. The single gap is `Given`: OpenSpec scenarios state the trigger and outcome but rarely the precondition, so you must supply it.
@@ -50,7 +52,7 @@ Copy this checklist and tick each item as you go — the verify step is exhausti
 
 5. **Add traceability.** Comment each `Feature`/`Rule` with its origin so spec and test stay navigable: `# Spec: <capability> › <Requirement name>` (append the change id when sourced from a delta).
 
-   **Epic trace tags (optional, only when an epic exists).** If `pte-openspec-to-epics` has produced an epic for this capability, read its "Forrás-spec hivatkozás" map and tag the Gherkin from it: `@EPIC-<epic-slug>` on the `Feature`/`Rule`, `@STORY-<epic-slug>-<n>` on each `Scenario`, matching rows by **verbatim Scenario title**. Take only the IDs from the epic — every step's text stays sourced from the spec, never the epic's prose. A Scenario absent from the map gets no story tag; report it. With no epic present, skip this and the skill runs standalone.
+   **Epic trace tags (optional, only when an epic exists).** If `pte-openspec-to-epics` has produced an epic for this capability, read its "Forrás-spec hivatkozás" map and tag the Gherkin from it: `@EPIC-<epic-slug>` on the `Feature`/`Rule`, the story's `@STORY-…` (grammar in [`../pte-openspec-shared/CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md)) on each `Scenario`, matching rows by **verbatim Scenario title**. Take only the IDs from the epic — every step's text stays sourced from the spec, never the epic's prose. A Scenario absent from the map gets no story tag; report it. With no epic present, skip this and the skill runs standalone.
 
 6. **Write the files** to the project's BDD directory (Cucumber default `features/<capability>/<requirement-slug>.feature`, or the configured one). Diff before overwriting — never clobber hand-edited steps.
 
