@@ -1,6 +1,6 @@
 ---
 name: pte-openspec
-description: Router for the pte-openspec-* pipeline — which skill turns OpenSpec specs into epics, story cards, and BDD tests, then implements the change test-first, and in what order.
+description: Router for the pte-openspec-* pipeline — which skill turns OpenSpec specs into epics, story cards, and BDD tests, publishes the backlog to Jira, then implements the change test-first, and in what order.
 disable-model-invocation: true
 ---
 
@@ -18,6 +18,10 @@ Planning chain (model-invoked; keys off the shared trace IDs):
 2. **`pte-openspec-to-stories`** → `stories/` — expands each epic story into a refinement-ready Agile story card, one per `STORY-…`. **CONSUMES** the epic's IDs. Leaves a **`BDD teszt`** section as a placeholder for step 3.
 3. **`pte-openspec-bdd-tests`** — fills each story card's **`BDD teszt`** section with declarative Gherkin, sourced from the spec scenarios the card's map row assigns. **CONSUMES** the story cards; edits them in place, writes no separate files. The Gherkin is **living documentation**, implemented later as a Playwright E2E test.
    - ⇢ **(planned) Playwright E2E** — a future, separate phase implements the embedded Gherkin as Playwright E2E tests. No skill for it yet.
+
+Publishing (optional; runs after the planning chain, before or alongside build):
+
+- **`pte-openspec-jira-sync`** — mirrors `epics/` and `stories/` into a Jira project through the Atlassian MCP. **CONSUMES** the artifacts and their trace IDs (as `trace:…` labels); mints nothing. Runs on a **field-ownership** model — local owns content, Jira owns workflow state — so re-runs are idempotent and never clobber either side. Writes back a `## Jira szinkron` block into each card. Requires the Atlassian MCP to be wired and authenticated.
 
 Build stage (user-invoked; independent of the planning artifacts):
 

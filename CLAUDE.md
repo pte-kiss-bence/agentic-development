@@ -52,6 +52,8 @@ Every prompt produced by the `prompt-master` skill (`/prompt-master`) must be sa
 
 Save the file in addition to showing the prompt in chat; create the `<category>` directory if missing.
 
+**Write the generated prompt in English.** The prompt is a task-planning channel for an AI tool (usually Claude Code), and English gives the highest instruction-following fidelity — even when the chat conversation is in Hungarian. This is not a translation of parity: for precise, multi-constraint agentic prompts English is measurably more reliable than Hungarian (a mid-resource language), so default to English regardless of chat language. Carve-out: any **artifact content** the prompt tells the target tool to produce (skill text, epics/stories, docs, code) stays in the project's language (Hungarian) — instruct that explicitly inside the prompt. Prompt = English; product content it specifies = Hungarian.
+
 ## Secrets
 
 `.devcontainer/.env` is git-ignored and injected into the container via `runArgs: --env-file`. Keys (template in `.env.example`): `GIT_USER_NAME`, `GIT_USER_EMAIL`, `GITHUB_PERSONAL_ACCESS_TOKEN` (GitHub HTTPS auth + GitHub MCP), `CONTEXT7_API_KEY` (optional — context7 also works keyless). Values must be unquoted and use full-line comments only (`docker --env-file` parsing).

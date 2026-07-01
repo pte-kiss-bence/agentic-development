@@ -40,6 +40,13 @@ A skillek prózája (`SKILL.md`) angol, de **minden generált artefaktum tartalm
    └──────────────────────────────┘                          │
                   ╎ living doc                                │
                   ⇢ (tervezett) Playwright E2E — még nincs skill
+                  │  CONSUMES: epics/ + stories/ (trace:… label)
+                  ▼  (opcionális publish lépés)               │
+   ┌──────────────────────────────┐                          │
+   │  ✳ pte-openspec-jira-sync     │  Jira-ra tükröz          │
+   │  (Atlassian MCP,              │  field-ownership,        │
+   │   idempotens re-sync)         │  helyben ## Jira szinkron│
+   └──────────────────────────────┘                          │
                                                               │
         ┌─── BUILD (külön ág, planning-től független) ────────┘
         ▼   CONSUMES: change tasks (nem a trace ID-k, nem epics/stories)
@@ -94,6 +101,14 @@ A beágyazott Gherkin a kártya saját `@EPIC-…` / `@STORY-…` tagjeit viseli
 
 A Gherkin **living documentation** — ember-olvasható viselkedésleírás, ebben a pipeline-ban **nem futtatható**. Egy **későbbi, külön fázis** implementálja **Playwright E2E** tesztként (erre még nincs skill). A deklaratív szabály ezért marad: a Gherkin UI-mentes; a Playwright/UI-részlet abba a jövőbeli E2E rétegbe kerül, sosem a Gherkinbe. Step-definition stubot ez a skill **nem** generál — a célfutó Playwright, nem Cucumber.
 
+### ✳ `pte-openspec-jira-sync` → Jira-ra tükrözve (opcionális publish lépés)
+
+A planning-lánc után futó **publish lépés**: a kész `epics/` és `stories/` artefaktumokat egy Jira projektbe tükrözi az **Atlassian MCP**-n keresztül. Bemenete az artefaktum-készlet és a trace ID-k (`trace:EPIC-…` / `trace:STORY-…` labelekként); nem mintáz újat, **CONSUME**-ol.
+
+A vezérszó a **field-ownership**: a szinkron nem irány, hanem mezőnkénti **egy tulajdonos**. A *tartalmat* (Summary, Description, elfogadási kritériumok, beágyazott BDD, trace-label, epic↔story `parent`) a **local** birtokolja → Local → Jira (push). A *workflow-állapotot* (státusz, felelős, sprint, becslés, komment, Jira kulcs) a **Jira** birtokolja → Jira → Local, a kártya `## Jira szinkron` blokkjába pull-olva. Így az újrafuttatás idempotens, és egyik oldal munkáját sem írja felül.
+
+Párosítás (idempotencia): rögzített `Jira kulcs` → `trace:…` label JQL-keresés → `createJiraIssue`. Epic előbb, story utána (a story `parent`-jéhez kell az epic kulcsa). Alapból **dry-run** + megerősítés az első írás előtt; a státuszt sosem állítja (Jira-tulajdon). Előfeltétel: az Atlassian MCP bekötve és authentikálva.
+
 ### 4. `pte-openspec-tdd-apply` → tesztelt kód
 
 A **build stage** — a tervezői lánc után fut, amikor a change implementálható. Bemenete nem a story kártyák, hanem az OpenSpec **change taskjai** (`tasks`), amelyeket az `openspec-apply-change` skillen keresztül olvas. Taskonként egy **red-green** hurkot futtat a `tdd` skillel: egy bukó teszt (**red**) → minimál kód, ami átmegy (**green**) → viselkedésenként ismételve; az első teszt a **tracer bullet**. Tiltott a horizontális rövidítés (összes teszt előre). A task csak akkor kap pipát (`- [ ]` → `- [x]`), ha minden viselkedésére van zöld teszt.
@@ -131,6 +146,9 @@ pte-skills/
 ├─ pte-openspec-bdd-tests/
 │  ├─ SKILL.md                     ← Gherkint a story kártyába ágyazza (nincs features/)
 │  ├─ BDD-RULES.md                 ← Gherkin szabályok + anti-pattern-ek
+│  └─ EXAMPLE.md
+├─ pte-openspec-jira-sync/
+│  ├─ SKILL.md                     ← epics/ + stories/ Jira-ra tükrözve (Atlassian MCP, field-ownership)
 │  └─ EXAMPLE.md
 └─ pte-openspec-tdd-apply/
    └─ SKILL.md                     ← build stage: change taskjait teszt-first implementálja

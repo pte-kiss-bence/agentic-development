@@ -86,3 +86,7 @@ Copy this checklist and tick each item as you go — the verify step is exhausti
 6. **Fill the card in place.** Replace the `BDD teszt` placeholder in each story card with the fenced `gherkin` block. Diff before overwriting — never clobber hand-edited steps, and change **only** the `BDD teszt` section, leaving every other section of the card untouched. Write no separate files. Completion: every targeted card's `BDD teszt` section holds its Gherkin.
 
 7. **Verify exhaustively.** Every source card has a filled `BDD teszt` section; every `#### Scenario` its map row assigned maps to a Gherkin `Scenario`/`Scenario Outline` in that card; every generated Scenario passes the [`BDD-RULES.md`](BDD-RULES.md) checklist; every `@EPIC-…`/`@STORY-…` tag matches the card's row verbatim; nothing appears that the spec does not state. Report any bullet you could not map cleanly (e.g. a `THEN` whose precondition the spec never gives) rather than guessing.
+
+## Next step
+
+This is the last step of the planning chain — the backlog is now complete on disk. Offer (don't auto-run) `pte-openspec-jira-sync` to mirror the epics and cards into a Jira project through the Atlassian MCP.
