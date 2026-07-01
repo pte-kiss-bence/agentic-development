@@ -1,6 +1,6 @@
 ---
 name: pte-openspec-jira-sync
-description: Sync the pipeline's epics and story cards to Jira through the Atlassian MCP. Use when the user wants to push epics/stories to Jira, publish the backlog to Jira, or reconcile the local backlog with a Jira project via the Atlassian MCP. Reads openspec/backlog/epics/ and openspec/backlog/stories/ produced by the planning chain.
+description: Sync the pipeline's epics and story cards to Jira through the Atlassian MCP. Use when the user wants to publish or reconcile the local backlog (openspec/backlog/epics/ + stories/) with a Jira project via the Atlassian MCP.
 ---
 
 The planning chain leaves a backlog on disk — `openspec/backlog/epics/` and `openspec/backlog/stories/` — that a team executes in Jira. This skill reconciles the two. It is the pipeline's **publishing step**: it runs after `pte-openspec-bdd-tests`, reads the epics and story cards, and mirrors them into a Jira project through the Atlassian MCP.

@@ -4,7 +4,7 @@ description: Router for the pte-openspec-* pipeline — which skill turns OpenSp
 disable-model-invocation: true
 ---
 
-The `pte-openspec-*` skills form one pipeline from OpenSpec specs to a groomed, testable backlog — then on to a test-first implementation of the change. Shared conventions — output language, trace-ID grammar, the *Forrás-spec hivatkozás* map contract, source-spec resolution, diff-don't-clobber — live in [`../pte-openspec-shared/CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md).
+The `pte-openspec-*` skills form one pipeline from OpenSpec specs to a groomed, testable backlog — then on to a test-first implementation of the change. Shared conventions — output language, trace-ID grammar, the *Forrás-spec hivatkozás* map contract, source-spec resolution, INVEST, diff-don't-clobber — live in [`../pte-openspec-shared/CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md); the pipeline's term definitions in [`docs/glossary.md`](../../docs/glossary.md).
 
 ## Pipeline
 

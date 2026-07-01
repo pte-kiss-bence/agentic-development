@@ -1,11 +1,13 @@
 ---
 name: pte-openspec-to-epics
-description: Generate or update Agile Epics (Atlassian/SAFe-style) from OpenSpec specs. Use when the user wants epics or a product backlog from OpenSpec requirements or a change's delta spec, mentions turning specs into epics and user stories, wants spec capabilities decomposed into a strategic backlog, or wants a change request folded into the existing epic it affects (reconcile mode — attach new stories under the epic the delta touches).
+description: Generate or update Agile Epics (Atlassian/SAFe-style) from OpenSpec specs. Use when the user wants epics or a strategic backlog decomposed from OpenSpec requirements or a change's delta spec (mint mode), or wants a change request folded into the epic it already affects (reconcile mode).
 ---
 
 An OpenSpec spec is detailed behaviour: each `### Requirement` holds `#### Scenario` blocks of `WHEN`/`THEN` bullets. This skill rolls that detail up into **Agile Epics** — one markdown file per epic, each a value-oriented strategic container that breaks down into user stories.
 
 `lean` is the governing word: an epic is a guide to *value*, not a task bucket. It states a hypothesis, names its scope and non-goals, and splits into **vertical-slice** stories cut by user value or journey — never by technical layer. Note: "Epic" is not a Scrum Guide artifact (the Scrum Guide defines Product Backlog Items); the format below follows Atlassian / SAFe best practice. A complete worked transformation — spec in, epic out, with IDs and the traceability map — is in [`EXAMPLE.md`](EXAMPLE.md).
+
+Shared pipeline conventions — output language, trace-ID grammar, the *Forrás-spec hivatkozás* map contract, source-spec resolution, INVEST, and diff-don't-clobber — live in [`../pte-openspec-shared/CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md) (terms in [`docs/glossary.md`](../../docs/glossary.md)); read it before writing.
 
 ## Modes — mint vs reconcile
 
@@ -15,10 +17,6 @@ This skill runs in one of two modes; pick by whether the change's capability alr
 - **Reconcile (update)** — a **change's delta spec** whose capability **already has an epic**. Do **not** mint a new epic: resolve the existing epic, reuse its `EPIC-…` verbatim, and fold the delta into it — mint new `STORY-…` rows for the delta's *added* requirements/scenarios, **extend an existing story's** *Forrás-spec hivatkozás* coverage when a *modified* scenario already belongs to one (never mint a duplicate for it), and touch *MVP and Out of Scope* only if the change moves the boundary. Everything the delta does not touch stays byte-for-byte (diff-don't-clobber).
 
 Resolve the mode in step 1: search the epic dir for an epic whose *Forrás-spec hivatkozás* rows trace to the delta's capability. One hit → reconcile it. Several plausible → **AskUserQuestion**. None → mint; but if the change is a single small item not worth an epic, hand off to `pte-openspec-to-stories`'s **epic-less mode** instead of minting a one-story epic.
-
-## Output language
-
-Shared across the pipeline — see [`../pte-openspec-shared/CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md) for the Hungarian-content + verbatim-identifier rule. The anatomy's section headings are **English** (the new schema); the content under them stays Hungarian. Only the pipeline-only block's headings (`User story-k`, `Forrás-spec hivatkozás`) stay Hungarian.
 
 ## Source mapping
 

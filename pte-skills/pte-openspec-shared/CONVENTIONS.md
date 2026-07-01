@@ -1,6 +1,6 @@
 # pte-openspec-* pipeline — shared conventions
 
-Single source of truth for the rules every `pte-openspec-*` skill obeys, so a change to a shared rule is a one-place edit. The **planning chain is linear** (the build stage `pte-openspec-tdd-apply` is a separate phase off the same spec — see the router) — `openspec` explore/propose → **pte-openspec-to-epics** (→ `openspec/backlog/epics/`) → **pte-openspec-to-stories** (→ `openspec/backlog/stories/`) → **pte-openspec-bdd-tests** (embeds Gherkin into the story cards) → optional **pte-openspec-jira-sync** (mirrors the backlog to Jira). Two artifact kinds only: the **epic** carries its stories in its description; the **story card** carries its own BDD test(s) in its description. There is no separate `features/` tree. Each skill links here instead of restating these rules.
+Single source of truth for the rules every `pte-openspec-*` skill obeys, so a change to a shared rule is a one-place edit. The **planning chain is linear** (the build stage `pte-openspec-tdd-apply` is a separate phase off the same spec — see the router) — `openspec` explore/propose → **pte-openspec-to-epics** (→ `openspec/backlog/epics/`) → **pte-openspec-to-stories** (→ `openspec/backlog/stories/`) → **pte-openspec-bdd-tests** (embeds Gherkin into the story cards) → optional **pte-openspec-jira-sync** (mirrors the backlog to Jira). Two artifact kinds only: the **epic** carries its stories in its description; the **story card** carries its own BDD test(s) in its description. There is no separate `features/` tree. Each skill links here instead of restating these rules. Term definitions (the pipeline's ubiquitous language — *epic*, *trace ID*, *MINTS/CONSUMES*, *mint/reconcile/epic-less*, *field-ownership*, *reference base*, …) live in [`docs/glossary.md`](../../docs/glossary.md).
 
 The chain is **right-sized to the change**, not always run whole: a full feature runs `to-epics` in **mint** mode; a change request that lands in an **existing** epic runs `to-epics` in **reconcile** mode (fold the new story into that epic); a small standalone change that warrants a story but no epic **skips `to-epics`** and enters at `to-stories`'s **epic-less mode**. All three converge on the same `to-stories` → `bdd-tests` → (`tdd-apply`) → `jira-sync` tail.
 
@@ -46,6 +46,15 @@ Downstream skills match rows by **verbatim** `### Requirement` / `#### Scenario`
 Every story card carries an **`## Estimation`** section, and each epic a rolled-up one — an **AI-authored reference base** the managers' downstream internal/client multipliers ride on (that multiplier step is out of pipeline scope; these skills emit the raw base only). The full model — PERT three-point in ideal engineer-hours, the weighted complexity rubric (M-drivers/modifiers, σ-drivers), the tuning constants (`k`, spread coefficients), the Eβ→SP table, the split-warning threshold, and the epic rollup rule — is the single source of truth in [`ESTIMATION.md`](ESTIMATION.md); `pte-openspec-to-stories` and `pte-openspec-to-epics` author against it. Only the **ownership** of the resulting numbers lives here, next to the pipeline's other ownership rules:
 
 **Ownership.** The SP is **local-owned** and pushed to Jira's structured *Story points* field (Local → Jira) — this **supersedes** any earlier "estimate is Jira-owned" framing. The PERT base (`O`/`M`/`P`, `Eβ`, `σ`) lives in the visible `## Estimation` section (so it also reaches the Jira Description), but only the SP maps to the structured field.
+
+## INVEST — the story gate
+
+Every story card **must** satisfy INVEST — **I**ndependent, **N**egotiable, **V**aluable, **E**stimable, **S**mall, **T**estable. It is a **rule, not a printed section**: the lean card no longer carries an *INVEST-ellenőrzés* block, but conformance is a hard, silent gate checked while authoring. A slice that cannot be made INVEST-conform is a signal to **re-cut the split**, never to ship a non-conforming card:
+
+- `pte-openspec-to-epics` owns the split, so it cuts every story INVEST-conform up front (step 4).
+- `pte-openspec-to-stories` re-checks all six letters per card. In epic-driven mode a story that only becomes conform by re-splitting is kicked back to `pte-openspec-to-epics` (the epic owns the split); in epic-less mode the reshape happens in place.
+
+INVEST is the **qualitative** gate; the estimation *split-warning* (`ESTIMATION.md`) is only an objective signal that feeds the same judgement, not a second gate.
 
 ## Source-spec resolution
 

@@ -1,6 +1,6 @@
 ---
 name: pte-openspec-bdd-tests
-description: Generate declarative BDD test scenarios (Gherkin) and embed them into the story cards' BDD Test section. Use when the user wants BDD, Gherkin, or Cucumber scenarios for story cards produced by pte-openspec-to-stories, mentions "BDD tests from specs/stories", or wants spec scenarios turned into living documentation inside the story cards (later implemented as Playwright E2E tests).
+description: Generate declarative BDD test scenarios (Gherkin/Cucumber) and embed them into the story cards' BDD Test section as living documentation. Use when the user wants Gherkin/BDD scenarios for the story cards produced by pte-openspec-to-stories (later implemented as Playwright E2E tests).
 ---
 
 An OpenSpec spec already carries behaviour: each `### Requirement` holds `#### Scenario` blocks of `WHEN`/`THEN` bullets. That is BDD in embryo. This skill turns it into **declarative** Gherkin and writes it **into the story cards** — each card owns its own BDD test(s), so the story is a self-contained, testable unit. The Gherkin is **living documentation** — human-readable, not executable in this pipeline; a **later, separate phase implements it as a Playwright E2E test**. It stays stable when the implementation changes, never leaking UI or procedural detail (the UI/Playwright detail lives in that future E2E layer, never in the Gherkin).
