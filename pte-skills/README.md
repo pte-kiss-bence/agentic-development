@@ -1,6 +1,6 @@
 # pte-skills — OpenSpec → groomed backlog pipeline
 
-Ez a mappa a `pte-openspec-*` skillcsaládot tartalmazza: egy **lineáris láncot** (pipeline), amely az [OpenSpec](https://github.com/fission-ai/openspec) specifikációkat egy csiszolt, tesztelhető Agile backlogra fordítja le. Nem alkalmazáskód — Claude Code skillek, amelyek egymásra épülnek, szigorúan sorrendben.
+Ez a mappa a `pte-openspec-*` skillcsaládot tartalmazza: egy **lineáris láncot** (pipeline), amely az [OpenSpec](https://github.com/fission-ai/openspec) specifikációkat egy csiszolt, tesztelhető Agile backlogra fordítja le — majd a change taskjait **teszt-first** kóddá implementálja. Nem alkalmazáskód — Claude Code skillek, amelyek egymásra épülnek, szigorúan sorrendben.
 
 A lánc **két artefaktum-fajtát** termel:
 
@@ -38,6 +38,13 @@ A skillek prózája (`SKILL.md`) angol, de **minden generált artefaktum tartalm
              │     pte-openspec-bdd-tests    │  a kártya BDD teszt szakaszát
              │  (Gherkin a story kártyába,   │  helyben tölti ki (nincs új fájl)
              │   helyben — nincs features/)  │
+             └──────────────────────────────┘
+                            ╎  a backlog kész; a change buildelhető
+                            ▼
+             ┌──────────────────────────────┐
+             │    pte-openspec-tdd-apply     │  build stage: a change taskjait
+             │   (red-green tdd taskonként,  │  teszt-first implementálja
+             │    openspec-apply-change-en)  │  (nem a trace ID-kra kulcsol)
              └──────────────────────────────┘
 ```
 
@@ -83,6 +90,12 @@ A vezérszó a `declarative`: minden lépés azt írja le, *mit* csinál a rends
 
 A beágyazott Gherkin a kártya saját `@EPIC-…` / `@STORY-…` tagjeit viseli (a *Forrás-hivatkozás* sorból, szó szerint) — így epic, story kártya és a benne lévő Gherkin egy-az-egyben illeszkedik. A lépések szövege mindig a specből származik, soha nem a kártya prózájából.
 
+### 4. `pte-openspec-tdd-apply` → tesztelt kód
+
+A **build stage** — a tervezői lánc után fut, amikor a change implementálható. Bemenete nem a story kártyák, hanem az OpenSpec **change taskjai** (`tasks`), amelyeket az `openspec-apply-change` skillen keresztül olvas. Taskonként egy **red-green** hurkot futtat a `tdd` skillel: egy bukó teszt (**red**) → minimál kód, ami átmegy (**green**) → viselkedésenként ismételve; az első teszt a **tracer bullet**. Tiltott a horizontális rövidítés (összes teszt előre). A task csak akkor kap pipát (`- [ ]` → `- [x]`), ha minden viselkedésére van zöld teszt.
+
+Ez a stage **nem a trace ID-kra kulcsol** és nem nyúl az `epics/` / `stories/` artefaktumokhoz — a change taskjait fordítja tesztelt kóddá. **User-invoked** (`disable-model-invocation: true`): magától nem indul el, csak akkor, ha kézzel, névvel hívod — mert a build fázist szándékosan ember indítja, nem az agent autonóm módon.
+
 ## Trace ID-k és a szerződés
 
 Minden 2. lépés utáni stage ugyanarra a trace ID-ra kulcsol, ezért egy epic, a story kártyái és a kártyákba ágyazott Gherkin egy-az-egyben összeérnek. A lánc lineáris: a 4. a 3.-at fogyasztja, az a 2.-at.
@@ -111,12 +124,14 @@ pte-skills/
 ├─ pte-openspec-to-stories/
 │  ├─ SKILL.md                     ← story kártya = legkisebb egység, BDD teszt szakasszal
 │  └─ EXAMPLE.md
-└─ pte-openspec-bdd-tests/
-   ├─ SKILL.md                     ← Gherkint a story kártyába ágyazza (nincs features/)
-   ├─ BDD-RULES.md                 ← Gherkin szabályok + anti-pattern-ek
-   └─ EXAMPLE.md
+├─ pte-openspec-bdd-tests/
+│  ├─ SKILL.md                     ← Gherkint a story kártyába ágyazza (nincs features/)
+│  ├─ BDD-RULES.md                 ← Gherkin szabályok + anti-pattern-ek
+│  └─ EXAMPLE.md
+└─ pte-openspec-tdd-apply/
+   └─ SKILL.md                     ← build stage: change taskjait teszt-first implementálja
 ```
 
 Generált artefaktumok (nem ebben a mappában — a projekt gyökeréből): `epics/` az epikek, `stories/` a story kártyák (a beágyazott BDD tesztekkel együtt). Külön `features/` fa **nincs**.
 
-Minden skillhez tartozik egy `EXAMPLE.md` a teljes kidolgozott átalakítással (be → ki, ID-kkal és map-pel). A `pte-openspec-bdd-tests` `BDD-RULES.md`-je a deklaratív Gherkin szabálykészletét és anti-pattern-jeit tartalmazza — a skill lépéslépés előtt betölti.
+Minden **artefaktum-termelő** skillhez tartozik egy `EXAMPLE.md` a teljes kidolgozott átalakítással (be → ki, ID-kkal és map-pel); a `pte-openspec-tdd-apply` build stage kódot termel, nem artefaktumot, ezért nincs `EXAMPLE.md`-je. A `pte-openspec-bdd-tests` `BDD-RULES.md`-je a deklaratív Gherkin szabálykészletét és anti-pattern-jeit tartalmazza — a skill lépéslépés előtt betölti.
