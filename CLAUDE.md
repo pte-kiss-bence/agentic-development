@@ -40,6 +40,8 @@ When running any OpenSpec workflow — the `/opsx:*` slash commands or the `open
 
 This rule lives here (not in the generated `.claude/commands/opsx/*` or `.claude/skills/openspec-*` files) on purpose: `openspec update` regenerates those and would wipe edits. `CLAUDE.md` is not managed by OpenSpec, so it survives updates. (`openspec/config.yaml` → `context:`/`rules:` also survives update but is artifact-content-scoped, so it's the wrong place for a chat-style rule.)
 
+**After a propose completes, offer the pte-openspec flow.** Once `/opsx:propose` or the `openspec-propose` skill finishes generating a change's artifacts, always offer to continue into the `pte-openspec` pipeline — start it by invoking `pte-openspec-to-epics` (the planning-chain entry point, stages 2–4: epics → story cards → BDD tests), and note that `pte-openspec-tdd-apply` builds the change test-first once planning is ready. Offer, don't auto-run: use an AskUserQuestion prompt (caveman, per the rule above) so the user opts in. This rule lives here for the same wipe-on-`openspec update` reason as the caveman rule.
+
 ## prompt-master output
 
 Every prompt produced by the `prompt-master` skill (`/prompt-master`) must be saved to a file under `docs/prompts/<category>/<YYYY-MM-DD>-<slug>.md`:
