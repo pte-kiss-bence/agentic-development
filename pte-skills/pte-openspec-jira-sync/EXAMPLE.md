@@ -44,6 +44,10 @@ auditált műveletek lefedettségével …
 - M365-tel belépő admin eléri a feltöltés / override / lezárás műveleteket. …
 
 <!-- pipeline-only:start -->
+## Estimation
+- **Becsült munkaóra:** 35 ó (≈ 5,8 ideális nap)
+- **Story Point:** 18
+
 ## Dependency Edges
 - external: Entra ID tenant
 
@@ -81,8 +85,9 @@ A szerepkör-szeparáció védi a szerkesztő műveleteket (feltöltés, overrid
 ```gherkin
 # language: hu
 @EPIC-belso-hozzaferes @STORY-belso-hozzaferes-m365-szerepkorok
-Jellemző: M365 alapú belső hozzáférés és szerepkörök
-  …
+Jellemző: belso-hozzaferes
+  Szabály: M365 alapú belső hozzáférés és szerepkörök
+    …
 ```
 
 ## Risks and Dependencies
@@ -92,7 +97,7 @@ Jellemző: M365 alapú belső hozzáférés és szerepkörök
 Parent epic: `EPIC-belso-hozzaferes`
 
 ## Estimation
-- **3-Points becslés (ideális óra):** O 4 / M 8 / P 16 | **Eβ 9**, σ 2
+- **3-Points becslés (ideális óra):** O 6 / M 8 / P 16 | **Eβ 9**, σ 1,7
 - **Becsült munkaóra:** 9 ó (≈ 1,5 ideális nap)
 - **Story Point:** 5
 
@@ -118,14 +123,14 @@ Terv (dry-run) — cloudId …555555, projekt INYO:
   EPIC-belso-hozzaferes                    INYO-18      update       Eposz  (Epic / hierarchy 1)
   STORY-belso-hozzaferes-m365-szerepkorok  INYO-23      update       Story  (Story / hierarchy 0)
                                            parent → INYO-18
-Ír-e? (editJiraIssue ×2 — Summary + Description; státusz nem íródik)
+Ír-e? (editJiraIssue ×2 — Summary + Description + becslés-mezők (Story points, Original estimate); státusz nem íródik)
 ```
 
 User confirms.
 
 ## Push — the Description slice (H1 + pipeline-only + Jira Sync removed)
 
-Epic first. Summary = the H1 minus its ` · EPIC-…` suffix → `Belső hozzáférés — M365 auth, táblázat, audit`; label `trace:EPIC-belso-hozzaferes`. The **Description** is the file sliced from disk with the three excluded regions dropped — so Jira receives only the English-headed prose, **not** the `## User Stories` list or the `## Source Spec Reference` map:
+Epic first. Summary = the H1 minus its ` · EPIC-…` suffix → `Belső hozzáférés — M365 auth, táblázat, audit`; label `trace:EPIC-belso-hozzaferes`; the **rollup structured fields** pushed from the fenced `## Estimation` — **Story points = 18** (`ΣSP`) and **Original estimate = 35h** (`ΣEβ`). The **Description** is the file sliced from disk with the three excluded regions dropped — so Jira receives only the English-headed prose, **not** the `## Estimation` rollup, the `## User Stories` list or the `## Source Spec Reference` map:
 
 ```markdown
 ## Epic
@@ -157,7 +162,7 @@ auditált műveletek lefedettségével …
 - M365-tel belépő admin eléri a feltöltés / override / lezárás műveleteket. …
 ```
 
-The `# Belső hozzáférés …` H1 became the Summary; the entire `<!-- pipeline-only:start -->…<!-- pipeline-only:end -->` region (the `## User Stories` list + the `## Source Spec Reference` map) is gone; and there is no `## Jira Sync` block yet to drop — but on the re-run there will be, and it too stays out of the Description. Slice from the file, verbatim — do not reconstruct from memory.
+The `# Belső hozzáférés …` H1 became the Summary; the entire `<!-- pipeline-only:start -->…<!-- pipeline-only:end -->` region (the `## Estimation` rollup, the `## Dependency Edges` block, the `## User Stories` list + the `## Source Spec Reference` map) is gone; and there is no `## Jira Sync` block yet to drop — but on the re-run there will be, and it too stays out of the Description. Slice from the file, verbatim — do not reconstruct from memory.
 
 Then the story, with `parent = INYO-18`. Summary = `M365 belépés és szerepkörök`; label `trace:STORY-belso-hozzaferes-m365-szerepkorok`; **Story points = 5** and **Original estimate = 9h**, pushed from `## Estimation` into the structured fields. The story's `## Estimation` sits in its **pipeline-only fence**, so the Description slice drops it along with the H1 and (on re-run) the `## Jira Sync` block — leaving `## User Story` + `## Context` + `## BDD Test` (Gherkin and all) + `## Risks and Dependencies`:
 
@@ -174,14 +179,10 @@ A szerepkör-szeparáció védi a szerkesztő műveleteket (feltöltés, overrid
 ```gherkin
 # language: hu
 @EPIC-belso-hozzaferes @STORY-belso-hozzaferes-m365-szerepkorok
-Jellemző: M365 alapú belső hozzáférés és szerepkörök
-  …
+Jellemző: belso-hozzaferes
+  Szabály: M365 alapú belső hozzáférés és szerepkörök
+    …
 ```
-
-## Estimation
-- **3-Points becslés (ideális óra):** O 4 / M 8 / P 16 | **Eβ 9**, σ 2
-- **Becsült munkaóra:** 9 ó (≈ 1,5 ideális nap)
-- **Story Point:** 5
 
 ## Risks and Dependencies
 - Függőség: Entra ID (M365/OIDC) tenant és szerepkör-hozzárendelés. …

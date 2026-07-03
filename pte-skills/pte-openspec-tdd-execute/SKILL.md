@@ -1,6 +1,6 @@
 ---
 name: pte-openspec-tdd-execute
-description: Build stage — implement an OpenSpec change test-first, each task through a red-green TDD loop, informed by the task's tracing story (BDD acceptance criteria) and epic (cross-cutting constraints) when the backlog carries them. Invoke by name when the change is ready to build.
+description: Build stage — implement an OpenSpec change test-first, each task through a red-green TDD loop, informed by the task's tracing story (BDD acceptance criteria) and epic (cross-cutting constraints) when the backlog carries them. User-invoked only — type it by name when the change is ready to build; the agent never fires it.
 disable-model-invocation: true
 ---
 

@@ -63,7 +63,7 @@ Jellemző: <capability>
 Copy this checklist and tick each item as you go — the verify step is exhaustive, not a glance:
 
 ```
-- [ ] 1. Source story card set named (fallback flagged if no cards exist)
+- [ ] 1. Source story card set named (stopped + pte-openspec-to-stories offered if no cards exist)
 - [ ] 2. Every card's STORY-… + its mapped #### Scenario-k + trace IDs enumerated
 - [ ] 3. Mapped Scenarios traced to the spec for WHEN/THEN
 - [ ] 4. Declarative Gherkin written per card against BDD-RULES.md

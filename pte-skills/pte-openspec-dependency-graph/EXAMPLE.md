@@ -65,14 +65,15 @@ flowchart LR
   S_m365 --> S_audit
   S_ingest --> S_audit
   EXT_entra --> S_m365
-  %% cross-epic él kiemelve
+  EXT_entra --> EPIC_belso
+  %% cross-epic él kiemelve (epic-szintű és story-szintű egyaránt)
   EPIC_excel ==> EPIC_belso
   %% relates-to (nem irányított, pontozott)
   S_audit -.-> EPIC_ido
   EPIC_belso -.-> EPIC_ido
 
   classDef external stroke-dasharray:5 5,stroke:#b26a00,color:#b26a00;
-  linkStyle 4 stroke:#1a73e8,stroke-width:3px;
+  linkStyle 2,5 stroke:#1a73e8,stroke-width:3px;
 
   subgraph Jelmagyarázat
     L1["A"] --> L2["B: A előbb kell"]
@@ -92,7 +93,7 @@ flowchart LR
 
 - **Only the edge block is read** — the `## Risks and Dependencies` prose on these cards may say more, but the graph keys off `## Dependency Edges` alone, so the picture is deterministic.
 - **Inverse pair → one edge** — `m365 blocks tablazat` and `tablazat depends-on m365` collapse to the single `S_m365 --> S_tabla`. The graph never double-draws an edge stated from both ends.
-- **Epics are subgraphs, cross-epic edges are highlighted** — `EPIC-excel-ingest` blocking `EPIC-belso-hozzaferes` is the graph's most load-bearing fact (a whole epic waits on another), so it gets the thick blue `==>` / `linkStyle`. Intra-epic edges stay thin.
+- **Epics are subgraphs, cross-epic edges are highlighted** — `EPIC-excel-ingest` blocking `EPIC-belso-hozzaferes` is the graph's most load-bearing fact (a whole epic waits on another), so it gets the thick blue `==>` / `linkStyle`; the story-level cross-epic edge (`S_ingest --> S_audit`) is highlighted the same way — the rule is *every* cross-epic edge, not just epic-to-epic. Intra-epic edges stay thin.
 - **Direction is blocker → blocked, always** — `EXT_entra --> S_m365` reads "Entra ID must exist before the M365 story", the same rule as every other arrow. The legend states it once.
-- **External is a dashed leaf** — `Entra ID tenant` has no trace ID, so it can never be a Jira link (`pte-openspec-jira-sync` skips it); here it is a dashed blocker node, keeping the picture complete without pretending it is backlog work.
+- **External is a dashed leaf** — `Entra ID tenant` has no trace ID, so it can never be a Jira link (`pte-openspec-jira-sync` skips it); here it is a dashed blocker node, keeping the picture complete without pretending it is backlog work. One node per distinct label: both the epic and the `m365` story declared it, so the single node blocks both (`EXT_entra --> S_m365`, `EXT_entra --> EPIC_belso`).
 - **`## Notes` carries the anomalies** — cycles, skipped dangling targets, and collapsed epics are named there, so a clean graph and a graph-hiding-a-problem never look alike.

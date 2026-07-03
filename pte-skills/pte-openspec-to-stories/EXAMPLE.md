@@ -1,6 +1,6 @@
 # Worked example: Agile Epic story → refinement-ready story card
 
-Two end-to-end transformations showing the non-obvious moves of the **lean** story-card schema — English `##` headings, Hungarian body. The card has five visible sections (`## User Story` / `## Context` / `## BDD Test` / `## Estimation` / `## Risks and Dependencies`); the `Mint …` line lives **inside** `## User Story` (no separate *User story* heading), and the acceptance criteria are **not** a section here — they are the declarative Gherkin that `pte-openspec-bdd-tests` later fills into the `## BDD Test` placeholder.
+Two end-to-end transformations showing the non-obvious moves of the **lean** story-card schema — English `##` headings, Hungarian body. The card has four Jira-visible sections (`## User Story` / `## Context` / `## BDD Test` / `## Risks and Dependencies`) plus a pipeline-only fence at the end (`Parent epic:` line, `## Estimation`, `## Dependency Edges`); the `Mint …` line lives **inside** `## User Story` (no separate *User story* heading), and the acceptance criteria are **not** a section here — they are the declarative Gherkin that `pte-openspec-bdd-tests` later fills into the `## BDD Test` placeholder.
 
 The two demos cover both modes:
 - **Demo 1 (epic-driven)** — expand one story from an epic's *User Stories* list, reusing its `STORY-…`/`EPIC-…` IDs and `Mint …` line verbatim. The card carries **no** trace row: the map lives in the epic.
@@ -28,17 +28,17 @@ Its *Source Spec Reference* row — held in the **epic's** pipeline-only fence, 
 |----------|---------|--------------------------|----------------------------|
 | STORY-belso-hozzaferes-m365-szerepkorok | EPIC-belso-hozzaferes | M365 alapú belső hozzáférés és szerepkörök | Admin szerkeszthet; Reader csak olvas |
 
-The card reads the requirement→story→scenario split from **this epic row** (there is no card trace row in epic-driven mode). The two `#### Scenario`s named in the row, traced to `openspec/specs/belso-hozzaferes/spec.md`, are the behavioural source the future BDD test keys off:
+The card reads the requirement→story→scenario split from **this epic row** (there is no card trace row in epic-driven mode). The two `#### Scenario`s named in the row, traced to `openspec/changes/aok-osszesito-mvp/specs/belso-hozzaferes/spec.md`, are the behavioural source the future BDD test keys off:
 
 ```markdown
 #### Scenario: Admin szerkeszthet
-- **WHEN** `admin` szerepkörű felhasználó szerkesztő műveletet indít
-- **THEN** a rendszer engedélyezi a műveletet
+- **WHEN** `admin` szerepkörű felhasználó M365-tel belép
+- **THEN** a rendszer engedélyezi a feltöltés, override és lezárás műveleteket
 
 #### Scenario: Reader csak olvas
-- **WHEN** `reader` szerepkörű felhasználó szerkesztő műveletet indít
-- **THEN** a rendszer elutasítja a műveletet
-- **THEN** a rendszer csak olvasási hozzáférést enged
+- **WHEN** `reader` szerepkörű felhasználó szerkesztő műveletet kísérel meg
+- **THEN** a rendszer szerver oldalon megtagadja a műveletet
+- **THEN** a rendszer nem módosítja az adatot
 ```
 
 ### Output — story card file
@@ -68,7 +68,7 @@ _(kitölti a `pte-openspec-bdd-tests`)_
 Parent epic: `EPIC-belso-hozzaferes`
 
 ## Estimation
-- **3-Points becslés (ideális óra):** O 4 / M 8 / P 16 | **Eβ 9**, σ 2
+- **3-Points becslés (ideális óra):** O 6 / M 8 / P 16 | **Eβ 9**, σ 1,7
 - **Becsült munkaóra:** 9 ó (≈ 1,5 ideális nap)
 - **Story Point:** 5
 
@@ -83,7 +83,7 @@ Parent epic: `EPIC-belso-hozzaferes`
 
 - **Epic is the input, not the spec** — the story set and IDs already exist; this skill only expands. The `STORY-…`/`EPIC-…` IDs and the `Mint …` line are reused **verbatim** — nothing minted here (see `CONVENTIONS.md`).
 - **The `Mint …` line opens `## User Story`** — there is no separate *User story* heading; the user-value statement leads the description, then one narrative sentence.
-- **No trace row on the card** — the requirement→story→scenario map lives in the epic's pipeline-only fence; the card keys off the epic row. This skill reads that row to trace the `Admin szerkeszthet` / `Reader csak olvas` `WHEN`/`THEN` back to `openspec/specs/belso-hozzaferes/spec.md`, so `pte-openspec-bdd-tests` can turn those scenarios into the card's BDD test — the story's acceptance criteria.
+- **No trace row on the card** — the requirement→story→scenario map lives in the epic's pipeline-only fence; the card keys off the epic row. This skill reads that row to trace the `Admin szerkeszthet` / `Reader csak olvas` `WHEN`/`THEN` back to `openspec/changes/aok-osszesito-mvp/specs/belso-hozzaferes/spec.md`, so `pte-openspec-bdd-tests` can turn those scenarios into the card's BDD test — the story's acceptance criteria.
 - **`## BDD Test` left as a placeholder** — this skill writes no Gherkin; it authors the empty placeholder that `pte-openspec-bdd-tests` fills in place from the same scenarios.
 
 ---
@@ -142,7 +142,7 @@ _(kitölti a `pte-openspec-bdd-tests`)_
 Parent epic: _(nincs — epic nélküli story)_
 
 ## Estimation
-- **3-Points becslés (ideális óra):** O 2 / M 4 / P 8 | **Eβ 4**, σ 1
+- **3-Points becslés (ideális óra):** O 4 / M 4 / P 6 | **Eβ 4**, σ 0,3
 - **Becsült munkaóra:** 4 ó (≈ 0,7 ideális nap)
 - **Story Point:** 2
 
@@ -167,8 +167,8 @@ Parent epic: _(nincs — epic nélküli story)_
 
 ## Why these moves
 
-- **Lean schema, five visible sections** — a card shows `## User Story`, `## Context`, `## BDD Test`, `## Estimation`, and `## Risks and Dependencies`. English headings, Hungarian body (per `CONVENTIONS.md`).
-- **`## Estimation` is the reference base** — three stacked top-level bullets: the **`3-Points becslés`** (`O`/`M`/`P`/`Eβ`/`σ` inline on one line, side by side), then **`Becsült munkaóra`** (`Eβ` hours + ideal-day equivalent), then **`Story Point`** (`<SP>`, a bare integer derived from `Eβ` by the fixed table in `ESTIMATION.md`). It is AI-authored and authoritative in the pipeline; managers layer their internal/client multipliers on it downstream (out of scope here). A story that trips `SP ≥ 13` or `σ/Eβ > 0.5` gets a `⚠` split-warning line but still ships — Demo 1's 5 SP / low σ is well clear of it. The epic rollup drops the `3-Points` bullet (O/M/P don't sum) and shows only `Becsült munkaóra` + `Story Point`; the exact rendered format lives in `ESTIMATION.md`.
+- **Lean schema, four Jira-visible sections + a fence** — a card shows `## User Story`, `## Context`, `## BDD Test`, and `## Risks and Dependencies`; the pipeline-only fence at the end holds the `Parent epic:` line, `## Estimation`, and `## Dependency Edges`. English headings, Hungarian body (per `CONVENTIONS.md`).
+- **`## Estimation` is the reference base** — three stacked top-level bullets: the **`3-Points becslés`** (`O`/`M`/`P`/`Eβ`/`σ` inline on one line, side by side), then **`Becsült munkaóra`** (`Eβ` hours + ideal-day equivalent), then **`Story Point`** (`<SP>`, a bare integer derived from `Eβ` by the fixed table in `ESTIMATION.md`). It is AI-authored and authoritative in the pipeline; managers layer their internal/client multipliers on it downstream (out of scope here). A story that trips `SP ≥ 13` or `σ/Eβ > 0.25` gets a `⚠` split-warning line but still ships — Demo 1's 5 SP / σ/Eβ ≈ 0,19 is clear of it. The epic rollup drops the `3-Points` bullet (O/M/P don't sum) and shows only `Becsült munkaóra` + `Story Point`; the exact rendered format lives in `ESTIMATION.md`.
 - **The `Mint …` line lives inside `## User Story`** — there is no separate *User story* heading; the user-value statement opens the description, then one or two narrative sentences.
 - **`## BDD Test` is a placeholder, filled later, and IS the acceptance criteria** — this skill writes no Gherkin; `pte-openspec-bdd-tests` fills the placeholder from the mapped `#### Scenario`s, and that Gherkin **is** the story's acceptance criteria. The old *sections* are dropped: *Elfogadási kritériumok* (now the Gherkin), *INVEST-ellenőrzés*, *Készenléti feltétel (DoR)*, *Elkészültségi feltétel (DoD)*, *Prioritás*. (*Becslés* is **not** dropped — it returns as `## Estimation`, reshaped into the PERT + Story-Points reference base.)
 - **INVEST stays as a rule, not a section** — both cards above satisfy INVEST (Independent, Negotiable, Valuable, Estimable, Small, Testable) even though no `INVEST-ellenőrzés` section is printed. Conformance is a hard gate: a story that can't be made INVEST-conform is re-split, not shipped.

@@ -7,7 +7,7 @@ An OpenSpec spec is detailed behaviour: each `### Requirement` holds `#### Scena
 
 `lean` is the governing word: an epic is a guide to *value*, not a task bucket. It states a hypothesis, names its scope and non-goals, and splits into **vertical-slice** stories cut by user value or journey — never by technical layer. Note: "Epic" is not a Scrum Guide artifact (the Scrum Guide defines Product Backlog Items); the format below follows Atlassian / SAFe best practice. A complete worked transformation — spec in, epic out, with IDs and the traceability map — is in [`EXAMPLE.md`](EXAMPLE.md).
 
-Shared pipeline conventions — output language, trace-ID grammar, the *Source Spec Reference* map contract, source-spec resolution, INVEST, and diff-don't-clobber — live in [`../pte-openspec-shared/CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md) (terms in [`docs/glossary.md`](../../docs/glossary.md)); read it before writing.
+Shared pipeline conventions — output language, trace-ID grammar, the *Source Spec Reference* map contract, source-spec resolution, INVEST, and diff-don't-clobber — live in [`../pte-openspec-shared/CONVENTIONS.md`](../pte-openspec-shared/CONVENTIONS.md) (terms in [`../CONTEXT.md`](../CONTEXT.md)); read it before writing.
 
 ## Modes — mint vs reconcile
 

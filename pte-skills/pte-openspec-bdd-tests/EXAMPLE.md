@@ -33,9 +33,14 @@ _(kitölti a `pte-openspec-bdd-tests`)_
 Parent epic: `EPIC-belso-hozzaferes`
 
 ## Estimation
-- **3-Points becslés (ideális óra):** O 4 / M 8 / P 16 | **Eβ 9**, σ 2
+- **3-Points becslés (ideális óra):** O 6 / M 8 / P 16 | **Eβ 9**, σ 1,7
 - **Becsült munkaóra:** 9 ó (≈ 1,5 ideális nap)
 - **Story Point:** 5
+
+## Dependency Edges
+- blocks: `STORY-belso-hozzaferes-tablazat-nezet`
+- blocks: `STORY-belso-hozzaferes-audit-naplo`
+- external: Entra ID (M365/OIDC) tenant
 <!-- pipeline-only:end -->
 ```
 
@@ -91,7 +96,7 @@ Jellemző: belso-hozzaferes
 
 ## Why these moves
 
-- **The map is read from the EPIC, not the card** — under the new lean schema the story card carries no trace row. This skill matches the card's `STORY-belso-hozzaferes-m365-szerepkorok` (from its `## User Story` H1 / filename) against the parent `EPIC-belso-hozzaferes`'s pipeline-only *Source Spec Reference* map, and the matched row gives **which** `#### Scenario`s to cover and **which** trace IDs to tag with. The card itself never names them.
+- **The map is read from the EPIC, not the card** — under the new lean schema the story card carries no trace row. This skill matches the card's `STORY-belso-hozzaferes-m365-szerepkorok` (from its Cím H1 / filename) against the parent `EPIC-belso-hozzaferes`'s pipeline-only *Source Spec Reference* map, and the matched row gives **which** `#### Scenario`s to cover and **which** trace IDs to tag with. The card itself never names them.
 - **Spec is the behavioural source** — the map supplies only the Scenario split and the IDs; the `Amikor`/`Akkor` step text is traced back to the `### Requirement`'s `WHEN`/`THEN` bullets in the spec, never lifted from card prose (see `CONVENTIONS.md`).
 - **`# language: hu` + Hungarian keywords** — the spec is Hungarian, so the Gherkin keywords (`Jellemző`, `Szabály`, `Forgatókönyv`, `Adott`/`Amikor`/`Akkor`/`És`) come from the gherkin i18n set for that language.
 - **Added `Adott` (Given)** — OpenSpec states only the `WHEN` trigger and the `THEN` outcome, never the precondition. Each Scenario's `Adott` is **supplied** here (the authenticated user with a given role) — the one gap between OpenSpec and Gherkin.

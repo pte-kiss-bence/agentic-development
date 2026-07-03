@@ -30,7 +30,7 @@ Every story card carries an **`## Estimation`** section, and each epic carries a
 
 Then `S = Σ(M-driver score × weight) + Σ(modifier scores)`, and **`M = round(S × k)`**, with **`k = 0.6` ideal engineer-hours / point** (default). Calibration intent: a tiny story lands ~1–2 SP, a typical mid story ~5–8 SP, and a story scoring near the ceiling on every dimension reaches ~13 SP — i.e. the rubric itself pushes an oversized story into the `⚠` split zone.
 
-**σ-drivers — uncertainty sets the O↔P spread, not M** (score each **0–3**): követelmény-tisztaság (vague spec / open *Risks* / TBD) · tech-újdonság (first-time framework/service, spike needed) · domain-újdonság (unfamiliar business rules/process) · függőség-stabilitás (external system flaky / unversioned / uncontrolled). Let `u = Σ(σ-driver scores) / 12` (0..1), then `O = round(M · (1 − 0.4·u))` and `P = round(M · (1 + 2.0·u))`. So many unknowns → wide O/P → high σ → the split-warning can trip on uncertainty alone; a clean, well-understood story has `u ≈ 0`, `O ≈ M ≈ P`, `σ ≈ 0`. (The `0.4`/`2.0` spread coefficients and `k` are tunable here alongside the weights.)
+**σ-drivers — uncertainty sets the O↔P spread, not M** (score each **0–3**): követelmény-tisztaság (vague spec / open *Risks* / TBD) · tech-újdonság (first-time framework/service, spike needed) · domain-újdonság (unfamiliar business rules/process) · függőség-stabilitás (external system flaky / unversioned / uncontrolled). Let `u = Σ(σ-driver scores) / 12` (0..1), then `O = round(M · (1 − 0.4·u))` and `P = round(M · (1 + 2.0·u))`. So many unknowns → wide O/P → high σ → the split-warning can trip on uncertainty alone (the `σ/Eβ > 0.25` branch fires at `u > 0.75`, i.e. 10+ of the 12 σ-points); a clean, well-understood story has `u ≈ 0`, `O ≈ M ≈ P`, `σ ≈ 0`. (The `0.4`/`2.0` spread coefficients and `k` are tunable here alongside the weights — note the coefficients cap `σ/Eβ` at ~0.32, which is what calibrates the 0.25 threshold below.)
 
 **Story Points** (modified Fibonacci) are **derived deterministically from Eβ** by this fixed table — never guessed independently, so the two views can't contradict:
 
@@ -44,7 +44,7 @@ Then `S = Σ(M-driver score × weight) + Σ(modifier scores)`, and **`M = round(
 | ≤ 60 | 13 | ~2 hét |
 | > 60 | 20 | — |
 
-**Split-warning (advisory, flag-only — not a hard gate).** When `SP ≥ 13` **OR** `σ / Eβ > 0.5` (too big / too uncertain), the card still ships, but its `## Estimation` carries a visible `⚠` note (an extra line) that the story is a split candidate. This does **not** block emission — INVEST stays the qualitative gate (the estimate only surfaces an objective signal for the human to act on).
+**Split-warning (advisory, flag-only — not a hard gate).** When `SP ≥ 13` **OR** `σ / Eβ > 0.25` (too big / too uncertain — the σ branch is calibrated to the spread coefficients above: their maximum is ~0.32 at `u = 1`, so 0.25 means *extreme* uncertainty, spike territory), the card still ships, but its `## Estimation` carries a visible `⚠` note (an extra line) that the story is a split candidate. This does **not** block emission — INVEST stays the qualitative gate (the estimate only surfaces an objective signal for the human to act on).
 
 ## Placement — pipeline-only, but always synced to Jira's structured fields
 
@@ -79,6 +79,6 @@ Rules:
   In order: `O`, `M`, `P` joined by ` / `; then a ` | ` pipe before `Eβ`; **`Eβ` is bolded** (`**Eβ <Eβ>**`) because it is the value to rely on; then a `, ` comma before `σ`. All on **one** line side by side — never sub-bullets, and never without the `|` / bold-`Eβ` / comma. `σ` keeps its Hungarian decimal comma (e.g. `1,8`). `Eβ` also repeats as the `Becsült munkaóra` value (there with the ideal-day equivalent). The three top-level bullets (`3-Points becslés`, `Becsült munkaóra`, `Story Point`) stay stacked.
 - **`Becsült munkaóra`** = the `Eβ` ideal engineer-hours (story) or `Σ Eβ` (epic), with the ideal-day equivalent in parentheses (anchor `6 ó = 1 ideális nap`; round the day figure to 1 decimal with a Hungarian comma, and drop a trailing `,0` so `1,0` → `1`).
 - **`Story Point`** = the derived SP as a **bare integer** (e.g. `3`) — no ` Points` suffix, no `Σ` prefix, and no story-count suffix.
-- The `⚠` split-warning (when `SP ≥ 13` or `σ/Eβ > 0.5`) is still appended as an extra line when it trips.
+- The `⚠` split-warning (when `SP ≥ 13` or `σ/Eβ > 0.25`) is still appended as an extra line when it trips.
 
 **Epic rollup.** An epic's `## Estimation` is the **sum of its child stories'** `Eβ` hours and SP, filled by `pte-openspec-to-epics` **only once every child story is estimated**. If any child card lacks an estimate, mark the rollup incomplete (`⚠ nem minden story esztimált`) rather than guessing a total.
